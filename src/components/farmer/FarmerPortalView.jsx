@@ -27,28 +27,25 @@ export const FarmerPortalView = () => {
           <div className="flex items-center justify-between border-b border-amber-300 pb-3">
             <div className="flex items-center gap-2">
               <WifiOff className="w-6 h-6 text-amber-700 animate-pulse" />
-              <h2 className="text-xl font-extrabold">{t("lowNetworkMode")}</h2>
+              <h2 className="text-xl font-extrabold">Low-Bandwidth Mode</h2>
             </div>
-            <button
-              onClick={() => setLowNetworkMode(false)}
-              className="text-xs bg-amber-800 text-white font-bold px-3 py-1.5 rounded-xl hover:bg-amber-900"
-            >
-              Exit Low-Net Mode
-            </button>
           </div>
 
-          <p className="text-xs font-semibold">{t("lowNetworkDesc")}</p>
+          <p className="text-xs font-semibold">
+            You are viewing a lightweight, text-first version of the app to save data. 
+            Your booking is saved locally and will sync when connectivity returns.
+          </p>
 
           <div className="bg-white rounded-2xl p-6 border border-amber-300 space-y-3">
             <div className="flex justify-between items-center text-xs">
-              <span className="text-slate-500 font-bold uppercase">{t("lastSynced")}</span>
-              <span className="font-mono text-slate-800">10:42 AM</span>
+              <span className="text-slate-500 font-bold uppercase">Last Synced</span>
+              <span className="font-mono text-slate-800">{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
             </div>
 
             <div className="text-center py-4 bg-slate-900 text-white rounded-2xl">
               <span className="text-xs text-amber-400 font-extrabold uppercase block">{t("myToken")}</span>
               <div className="text-5xl font-mono font-extrabold text-emerald-400 mt-1">
-                {activeBooking?.id || "A124"}
+                {activeBooking?.token || "A124"}
               </div>
               <p className="text-xs text-slate-300 mt-1">
                 {activeBooking?.farmerName} • {activeBooking?.crop} ({activeBooking?.quantity} Qtl)
@@ -57,12 +54,12 @@ export const FarmerPortalView = () => {
 
             <div className="grid grid-cols-2 gap-3 text-xs font-bold pt-2">
               <div className="bg-amber-100 p-3 rounded-xl">
-                <span className="text-[10px] text-amber-800 block">{t("queuePositionition")}</span>
-                <span className="text-xl text-slate-900">{activeBooking?.queuePosition || 6} ahead</span>
+                <span className="text-[10px] text-amber-800 block">Queue Position</span>
+                <span className="text-xl text-slate-900">{activeBooking?.queuePosition || "-"}</span>
               </div>
               <div className="bg-emerald-100 p-3 rounded-xl">
-                <span className="text-[10px] text-emerald-800 block">{t("estimatedWait")}</span>
-                <span className="text-xl text-slate-900">{activeBooking?.estimatedWait || 35} min</span>
+                <span className="text-[10px] text-emerald-800 block">Est. Wait</span>
+                <span className="text-xl text-slate-900">{activeBooking?.estimatedWait || "-"} min</span>
               </div>
             </div>
           </div>

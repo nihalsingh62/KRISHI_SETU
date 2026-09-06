@@ -264,11 +264,12 @@ export const KisanSetuProvider = ({ children }) => {
         history.push({ status: "WEIGHING", time: nowTime, desc: `Vehicle on Weighbridge. Recorded: ${weight} Qtl` });
         notifyMsg = `Token ${updatedObj.token}: Weighbridge weighing completed (${weight} Qtl).`;
       } else if (newStatus === "QUALITY_CHECK") {
-        const moisture = extraData.moisturePercent || 12.0;
-        const grade = extraData.grade || "Grade A";
+        const moisture = extraData.moisturePercent || 11.8;
+        const grade = extraData.grade || "FAQ";
         updatedObj.moisturePercent = moisture;
         updatedObj.grade = grade;
-        history.push({ status: "QUALITY_CHECK", time: nowTime, desc: `Passed Quality Test (${moisture}% Moisture, ${grade})` });
+        updatedObj.remarks = extraData.remarks || "";
+        history.push({ status: "QUALITY_CHECK", time: nowTime, desc: `Quality Check (${moisture}% Moisture, ${grade})${extraData.remarks ? ' - ' + extraData.remarks : ''}` });
         notifyMsg = `Token ${updatedObj.token}: Quality inspection passed (${grade}).`;
       } else if (newStatus === "PROCUREMENT_COMPLETE") {
         updatedObj.paymentStatus = "PROCESSING";

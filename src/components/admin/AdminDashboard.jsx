@@ -18,11 +18,11 @@ import {
 } from "lucide-react";
 
 export const AdminDashboard = () => {
-  const { t, centres, tokens, activeAdminTab, setActiveAdminTab } = useKisanSetu();
+  const { t, centres, bookings, activeAdminTab, setActiveAdminTab } = useKisanSetu();
   const activeTab = activeAdminTab || "map";
   const setActiveTab = setActiveAdminTab;
 
-  const totalBooked = tokens.length * 142; // Scaled demo total
+  const totalBooked = bookings.length * 142; // Scaled demo total
   const totalWaiting = centres.reduce((acc, c) => acc + c.queueDepth, 0) * 105;
   const avgWait = Math.round(centres.reduce((acc, c) => acc + (c.queueDepth * 4 + 10), 0) / centres.length);
   const criticalCentres = centres.filter((c) => c.status === "CRITICAL" || c.status === "HIGH_LOAD").length;

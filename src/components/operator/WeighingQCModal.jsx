@@ -7,6 +7,7 @@ export const WeighingQCModal = ({ token, modalType, onClose }) => {
   const [weight, setWeight] = useState(token.actualWeightQtl || (token.quantity + 0.5));
   const [moisture, setMoisture] = useState(token.moisturePercent || 12.0);
   const [grade, setGrade] = useState(token.grade || "Grade A");
+  const [remarks, setRemarks] = useState(token.remarks || "");
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -92,6 +93,18 @@ export const WeighingQCModal = ({ token, modalType, onClose }) => {
                   <option value="Grade B">Grade B (Minor Refraction)</option>
                   <option value="Grade C">Grade C (Refraction Approval Required)</option>
                 </select>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
+                  Operator Remarks (Optional)
+                </label>
+                <textarea
+                  value={remarks}
+                  onChange={(e) => setRemarks(e.target.value)}
+                  placeholder="Any visual observations, issues, etc."
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm font-medium text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:outline-none resize-none h-20"
+                ></textarea>
               </div>
             </>
           )}

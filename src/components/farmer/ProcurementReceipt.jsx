@@ -20,7 +20,7 @@ export const ProcurementReceipt = ({ token, centre }) => {
         </div>
       </div>
 
-      <div className="bg-slate-50 rounded-2xl p-5 border border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="bg-slate-50 rounded-2xl p-5 border border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <p className="text-[10px] uppercase font-bold text-slate-400 mb-0.5">Token Number</p>
           <p className="text-lg font-mono font-extrabold text-slate-900">{token.token}</p>
@@ -39,6 +39,11 @@ export const ProcurementReceipt = ({ token, centre }) => {
         <div>
           <p className="text-[10px] uppercase font-bold text-slate-400 mb-0.5">Procurement Centre</p>
           <p className="text-sm font-bold text-slate-800">{centre.name}</p>
+        </div>
+        
+        <div>
+          <p className="text-[10px] uppercase font-bold text-slate-400 mb-0.5">Procurement Status</p>
+          <p className="text-sm font-bold text-slate-800">{token.status.replace(/_/g, " ")}</p>
         </div>
       </div>
 

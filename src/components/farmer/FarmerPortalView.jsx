@@ -1,0 +1,150 @@
+import React, { useState } from "react";
+import { useKisanSetu } from "../../context/KisanSetuContext";
+import { FarmerDashboard } from "./FarmerDashboard";
+import { SmartBooking } from "./SmartBooking";
+import { LiveQueueView } from "./LiveQueueView";
+import { ProcurementTimeline } from "./ProcurementTimeline";
+import { PaymentTracker } from "./PaymentTracker";
+import {
+  LayoutDashboard,
+  Calendar,
+  QrCode,
+  Truck,
+  CreditCard,
+  WifiOff
+} from "lucide-react";
+
+export const FarmerPortalView = () => {
+  const { t, lowNetworkMode, setLowNetworkMode, activeToken } = useKisanSetu();
+  const [activeFarmerTab, setActiveFarmerTab] = useState("dashboard"); // dashboard | booking | queue | timeline | payment
+
+  // If low network mode is ON, render simplified rural offline card
+  if (lowNetworkMode) {
+    return (
+      <div className="max-w-2xl mx-auto space-y-6">
+        <div className="bg-amber-50 rounded-3xl p-6 border-2 border-amber-400 text-amber-950 shadow-xl space-y-4">
+          <div className="flex items-center justify-between border-b border-amber-300 pb-3">
+            <div className="flex items-center gap-2">
+              <WifiOff className="w-6 h-6 text-amber-700 animate-pulse" />
+              <h2 className="text-xl font-extrabold">{t("lowNetworkMode")}</h2>
+            </div>
+            <button
+              onClick={() => setLowNetworkMode(false)}
+              className="text-xs bg-amber-800 text-white font-bold px-3 py-1.5 rounded-xl hover:bg-amber-900"
+            >
+              Exit Low-Net Mode
+            </button>
+          </div>
+
+          <p className="text-xs font-semibold">{t("lowNetworkDesc")}</p>
+
+          <div className="bg-white rounded-2xl p-6 border border-amber-300 space-y-3">
+            <div className="flex justify-between items-center text-xs">
+              <span className="text-slate-500 font-bold uppercase">{t("lastSynced")}</span>
+              <span className="font-mono text-slate-800">10:42 AM</span>
+            </div>
+
+            <div className="text-center py-4 bg-slate-900 text-white rounded-2xl">
+              <span className="text-xs text-amber-400 font-extrabold uppercase block">{t("myToken")}</span>
+              <div className="text-5xl font-mono font-extrabold text-emerald-400 mt-1">
+                {activeToken?.id || "A124"}
+              </div>
+              <p className="text-xs text-slate-300 mt-1">
+                {activeToken?.farmerName} • {activeToken?.commodity} ({activeToken?.quantityQtl} Qtl)
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 text-xs font-bold pt-2">
+              <div className="bg-amber-100 p-3 rounded-xl">
+                <span className="text-[10px] text-amber-800 block">{t("queuePosition")}</span>
+                <span className="text-xl text-slate-900">{activeToken?.queuePos || 6} ahead</span>
+              </div>
+              <div className="bg-emerald-100 p-3 rounded-xl">
+                <span className="text-[10px] text-emerald-800 block">{t("estimatedWait")}</span>
+                <span className="text-xl text-slate-900">{activeToken?.estimatedWaitMin || 35} min</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Farmer Sub-navigation bar */}
+      <div className="flex items-center gap-2 border-b border-slate-200 pb-2 overflow-x-auto">
+        <button
+          onClick={() => setActiveFarmerTab("dashboard")}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
+            activeFarmerTab === "dashboard"
+              ? "bg-emerald-700 text-white shadow-sm"
+              : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
+          }`}
+        >
+          <LayoutDashboard className="w-4 h-4" />
+          <span>Dashboard</span>
+        </button>
+
+        <button
+          onClick={() => setActiveFarmerTab("booking")}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
+            activeFarmerTab === "booking"
+              ? "bg-emerald-700 text-white shadow-sm"
+              : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
+          }`}
+        >
+          <Calendar className="w-4 h-4" />
+          <span>{t("bookSlotTitle")}</span>
+        </button>
+
+        <button
+          onClick={() => setActiveFarmerTab("queue")}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
+            activeFarmerTab === "queue"
+              ? "bg-emerald-700 text-white shadow-sm"
+              : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
+          }`}
+        >
+          <QrCode className="w-4 h-4" />
+          <span>Digital Token & Queue</span>
+        </button>
+
+        <button
+          onClick={() => setActiveFarmerTab("timeline")}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
+            activeFarmerTab === "timeline"
+              ? "bg-emerald-700 text-white shadow-sm"
+              : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
+          }`}
+        >
+          <Truck className="w-4 h-4" />
+          <span>Procurement Timeline</span>
+        </button>
+
+        <button
+          onClick={() => setActiveFarmerTab("payment")}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
+            activeFarmerTab === "payment"
+              ? "bg-emerald-700 text-white shadow-sm"
+              : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
+          }`}
+        >
+          <CreditCard className="w-4 h-4" />
+          <span>Payment Tracking</span>
+        </button>
+      </div>
+
+      {/* Render Active Farmer Tab */}
+      {activeFarmerTab === "dashboard" && (
+        <FarmerDashboard onNavigateTab={(tab) => setActiveFarmerTab(tab)} />
+      )}
+      {activeFarmerTab === "booking" && (
+        <SmartBooking onBookingSuccess={() => setActiveFarmerTab("queue")} />
+      )}
+      {activeFarmerTab === "queue" && <LiveQueueView />}
+      {activeFarmerTab === "timeline" && <ProcurementTimeline />}
+      {activeFarmerTab === "payment" && <PaymentTracker />}
+    </div>
+  );
+};

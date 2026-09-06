@@ -96,7 +96,7 @@ export const FarmerPortalView = () => {
           }`}
         >
           <Calendar className="w-4 h-4" />
-          <span>{t("bookSlotTitle")}</span>
+          <span>Book Procurement Slot</span>
         </button>
 
         <button
@@ -108,7 +108,7 @@ export const FarmerPortalView = () => {
           }`}
         >
           <QrCode className="w-4 h-4" />
-          <span>Digital Token & Queue</span>
+          <span>Token & Queue</span>
         </button>
 
         <button
@@ -120,7 +120,7 @@ export const FarmerPortalView = () => {
           }`}
         >
           <Truck className="w-4 h-4" />
-          <span>Procurement Timeline</span>
+          <span>Procurement</span>
         </button>
 
         <button
@@ -144,7 +144,7 @@ export const FarmerPortalView = () => {
           }`}
         >
           <User className="w-4 h-4" />
-          <span>Farmer Profile</span>
+          <span>Profile</span>
         </button>
       </div>
 

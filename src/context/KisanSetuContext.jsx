@@ -33,7 +33,7 @@ export const KisanSetuProvider = ({ children }) => {
   
   // Navigation Tabs persistence
   const [activeFarmerTab, setActiveFarmerTab] = useState(() => getInitialState("ks_activeFarmerTab", "dashboard"));
-  const [activeOperatorTab, setActiveOperatorTab] = useState(() => getInitialState("ks_activeOperatorTab", "queue"));
+  const [activeOperatorTab, setActiveOperatorTab] = useState(() => getInitialState("ks_activeOperatorTab", "dashboard"));
   const [activeAdminTab, setActiveAdminTab] = useState(() => getInitialState("ks_activeAdminTab", "monitoring"));
 
   const [activeCentreId, setActiveCentreId] = useState(() => getInitialState("ks_activeCentreId", "c1"));

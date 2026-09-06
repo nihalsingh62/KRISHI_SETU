@@ -72,8 +72,8 @@ export const HeaderNav = () => {
           <button
             onClick={() => {
               if (currentRole === "farmer" && setActiveFarmerTab) setActiveFarmerTab("dashboard");
-              if (currentRole === "operator" && setActiveOperatorTab) setActiveOperatorTab("queue");
-              if (currentRole === "admin" && setActiveAdminTab) setActiveAdminTab("monitoring");
+              if (currentRole === "operator" && setActiveOperatorTab) setActiveOperatorTab("dashboard");
+              if (currentRole === "admin" && setActiveAdminTab) setActiveAdminTab("dashboard");
             }}
             className="flex items-center gap-2.5 text-left group"
           >

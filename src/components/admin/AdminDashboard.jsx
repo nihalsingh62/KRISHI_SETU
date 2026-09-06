@@ -19,7 +19,7 @@ import {
 
 export const AdminDashboard = () => {
   const { t, centres, bookings, activeAdminTab, setActiveAdminTab } = useKisanSetu();
-  const activeTab = activeAdminTab || "map";
+  const activeTab = activeAdminTab || "dashboard";
   const setActiveTab = setActiveAdminTab;
 
   const totalBooked = bookings.length * 142; // Scaled demo total
@@ -124,18 +124,18 @@ export const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* Admin Nav Tabs */}
+            {/* Admin Nav Tabs */}
       <div className="flex items-center gap-2 border-b border-slate-200 pb-2 overflow-x-auto">
         <button
-          onClick={() => setActiveTab("map")}
+          onClick={() => setActiveTab("dashboard")}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
-            activeTab === "map"
+            activeTab === "dashboard"
               ? "bg-slate-900 text-white shadow-sm"
               : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
           }`}
         >
-          <MapPin className="w-4 h-4 text-emerald-400" />
-          <span>Regional Congestion Heatmap</span>
+          <Building2 className="w-4 h-4 text-slate-400" />
+          <span>Dashboard</span>
         </button>
 
         <button
@@ -147,7 +147,19 @@ export const AdminDashboard = () => {
           }`}
         >
           <Building2 className="w-4 h-4 text-blue-400" />
-          <span>Centre Monitoring & Load Status</span>
+          <span>Centre Monitoring</span>
+        </button>
+        
+        <button
+          onClick={() => setActiveTab("map")}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
+            activeTab === "map"
+              ? "bg-slate-900 text-white shadow-sm"
+              : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
+          }`}
+        >
+          <MapPin className="w-4 h-4 text-emerald-400" />
+          <span>Congestion</span>
         </button>
 
         <button
@@ -159,7 +171,7 @@ export const AdminDashboard = () => {
           }`}
         >
           <TrendingUp className="w-4 h-4 text-amber-400" />
-          <span>Procurement & Commodity Analytics</span>
+          <span>Procurement Analytics</span>
         </button>
 
         <button

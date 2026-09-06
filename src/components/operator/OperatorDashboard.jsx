@@ -21,7 +21,7 @@ import {
 
 export const OperatorDashboard = () => {
   const { t, activeCentre, centres, setActiveCentreId, activeOperatorTab, setActiveOperatorTab } = useKisanSetu();
-  const activeTab = activeOperatorTab || "queue";
+  const activeTab = activeOperatorTab || "dashboard";
   const setActiveTab = setActiveOperatorTab;
 
   return (
@@ -109,8 +109,20 @@ export const OperatorDashboard = () => {
         )}
       </div>
 
-      {/* Operator Navigation Tabs */}
+            {/* Operator Navigation Tabs */}
       <div className="flex items-center gap-2 border-b border-slate-200 pb-2 overflow-x-auto">
+        <button
+          onClick={() => setActiveTab("dashboard")}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
+            activeTab === "dashboard"
+              ? "bg-slate-900 text-white shadow-sm"
+              : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
+          }`}
+        >
+          <Building2 className="w-4 h-4 text-slate-400" />
+          <span>Dashboard</span>
+        </button>
+
         <button
           onClick={() => setActiveTab("queue")}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
@@ -120,7 +132,7 @@ export const OperatorDashboard = () => {
           }`}
         >
           <Users className="w-4 h-4 text-blue-400" />
-          <span>Interactive Live Operational Queue</span>
+          <span>Live Queue</span>
         </button>
 
         <button
@@ -132,7 +144,19 @@ export const OperatorDashboard = () => {
           }`}
         >
           <UserCheck className="w-4 h-4 text-emerald-400" />
-          <span>Farmer Gate Check-In</span>
+          <span>Farmer Check-In</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab("weighing")}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
+            activeTab === "weighing"
+              ? "bg-slate-900 text-white shadow-sm"
+              : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
+          }`}
+        >
+          <Scale className="w-4 h-4 text-amber-500" />
+          <span>Weighing & QC</span>
         </button>
 
         <button
@@ -144,7 +168,7 @@ export const OperatorDashboard = () => {
           }`}
         >
           <Layers className="w-4 h-4 text-indigo-400" />
-          <span>Capacity & Slot Management</span>
+          <span>Slot Management</span>
         </button>
 
         <button
@@ -156,12 +180,13 @@ export const OperatorDashboard = () => {
           }`}
         >
           <TrendingUp className="w-4 h-4 text-amber-400" />
-          <span>Centre Operational Analytics</span>
+          <span>Centre Analytics</span>
         </button>
       </div>
 
       {/* Render Active Operator Tab View */}
       {activeTab === "queue" && <LiveQueueManager />}
+      {activeTab === "weighing" && <LiveQueueManager />}
       {activeTab === "checkin" && <FarmerCheckIn />}
       {activeTab === "slots" && <SlotManager />}
       {activeTab === "analytics" && <CentreAnalytics />}

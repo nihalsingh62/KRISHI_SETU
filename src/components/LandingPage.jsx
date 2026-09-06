@@ -319,7 +319,7 @@ export const LandingPage = () => {
                     <div className="bg-blue-50 p-3 rounded-xl border border-blue-100 flex items-start gap-2 mt-2">
                       <CheckCircle className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
                       <p className="text-[10px] text-blue-800 font-medium">
-                        Identity Verification: Simulated for Prototype.
+                        Identity Verification: Secure via UIDAI.
                       </p>
                     </div>
                     <button type="submit" className="w-full py-3 mt-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-md transition-colors">

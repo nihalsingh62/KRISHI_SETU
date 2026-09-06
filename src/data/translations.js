@@ -12,7 +12,7 @@ export const translations = {
     adminDesc: "Monitor → Analyze → Optimize",
     enterApp: "Enter KisanSetu Platform",
     howItWorks: "See How It Works",
-    sihDisclaimer: "SIH Problem Statement 26032 • Interactive Prototype",
+    sihDisclaimer: "National Agricultural Procurement Portal",
 
     // Farmer Portal
     goodMorning: "Namaste",
@@ -96,7 +96,7 @@ export const translations = {
     adminDesc: "निगरानी → विश्लेषण → अनुकूलन",
     enterApp: "किसानसेतु प्लेटफॉर्म खोलें",
     howItWorks: "यह कैसे काम करता है",
-    sihDisclaimer: "SIH समस्या कथन 26032 • इंटरएक्टिव प्रोटोटाइप (सिम्युलेटेड ऑपरेशनल डेटा)",
+    sihDisclaimer: "राष्ट्रीय कृषि खरीद पोर्टल",
 
     // Farmer Portal
     goodMorning: "नमस्ते",

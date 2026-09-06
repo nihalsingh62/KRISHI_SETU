@@ -37,16 +37,16 @@ export const AdminDashboard = () => {
               <span>{t("adminDashboard")}</span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
-              State Procurement & Congestion Command HQ
+              State Procurement Dashboard
             </h2>
             <p className="text-slate-400 text-xs mt-0.5">
-              Monitoring 128 Procurement Centres • Real-Time AI Congestion Intelligence
+              Monitoring 128 Procurement Centres • Live Congestion Overview
             </p>
           </div>
 
           <div className="flex items-center gap-2 text-xs bg-indigo-950/80 border border-indigo-500/40 px-3 py-2 rounded-xl text-indigo-200">
-            <Sparkles className="w-4 h-4 text-amber-400" />
-            <span>Load Balancing Engine: <strong>ACTIVE</strong></span>
+            <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span>
+            <span>Load Balancing: <strong>ACTIVE</strong></span>
           </div>
         </div>
 

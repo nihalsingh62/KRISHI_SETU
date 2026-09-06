@@ -31,7 +31,7 @@ export const FarmerDashboard = ({ onNavigateTab }) => {
             <div className="flex items-center gap-2 text-emerald-300 text-xs font-semibold uppercase tracking-wider mb-1">
               <span>🌾 {t("goodMorning")}, Ramesh Singh</span>
               <span className="bg-emerald-500/30 text-emerald-200 px-2 py-0.5 rounded text-[10px]">
-                Aadhaar Verified (Simulated)
+                Identity Verified
               </span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
@@ -138,11 +138,11 @@ export const FarmerDashboard = ({ onNavigateTab }) => {
           </div>
         </div>
 
-        {/* Explainable AI Smart Prediction Breakdown */}
+        {/* Wait Time Calculation Breakdown */}
         <div className="mt-6 bg-slate-900 text-slate-200 rounded-2xl p-4 text-xs space-y-2">
           <div className="flex items-center justify-between border-b border-slate-800 pb-2">
             <span className="font-bold text-amber-400 flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4" /> Smart Prediction Calculation
+              <Sparkles className="w-4 h-4" /> Wait Time Calculation
             </span>
             <span className="text-[10px] text-slate-400">Calculated in real-time</span>
           </div>

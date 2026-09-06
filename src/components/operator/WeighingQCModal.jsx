@@ -59,7 +59,7 @@ export const WeighingQCModal = ({ token, modalType, onClose }) => {
                 required
               />
               <p className="text-[11px] text-slate-500 mt-1">
-                Simulated weighbridge digital telemetry input.
+                Weighbridge digital telemetry input (Prototype Override).
               </p>
             </div>
           ) : (

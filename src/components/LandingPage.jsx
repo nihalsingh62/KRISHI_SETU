@@ -53,14 +53,6 @@ export const LandingPage = () => {
                 <span>Enter KisanSetu</span>
                 <ArrowRight className="w-5 h-5" />
               </button>
-
-              <button
-                onClick={() => runDemoStep(1)}
-                className="flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-base shadow-md transition-all"
-              >
-                <Sparkles className="w-5 h-5 text-amber-400" />
-                <span>Launch Interactive SIH Demo</span>
-              </button>
             </div>
           </div>
         </div>
@@ -94,7 +86,7 @@ export const LandingPage = () => {
                 Farmer Portal
               </h3>
               <p className="text-sm text-slate-600 leading-relaxed mb-4">
-                Book predictable slots, track your digital queue position live, receive AI-assisted wait predictions, and track direct bank payments.
+                Book predictable slots, track your digital queue position live, receive wait predictions, and track direct bank payments.
               </p>
               <div className="bg-slate-50 rounded-2xl p-3 text-xs font-medium text-slate-700 space-y-1.5 border border-slate-100">
                 <div className="flex items-center gap-2">
@@ -164,7 +156,7 @@ export const LandingPage = () => {
                 Department Administrator
               </h3>
               <p className="text-sm text-slate-600 leading-relaxed mb-4">
-                System-wide monitoring dashboard with regional congestion heatmaps, centre comparisons, commodity procurement statistics, and load balancing intelligence.
+                System-wide monitoring dashboard with regional congestion heatmaps, centre comparisons, commodity procurement statistics, and load balancing overview.
               </p>
               <div className="bg-slate-50 rounded-2xl p-3 text-xs font-medium text-slate-700 space-y-1.5 border border-slate-100">
                 <div className="flex items-center gap-2">
@@ -237,11 +229,11 @@ export const LandingPage = () => {
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-emerald-400 font-bold">✓</span>
-                  <span>Digital token with live queue position & smart wait prediction</span>
+                  <span>Digital token with live queue position & wait prediction</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-emerald-400 font-bold">✓</span>
-                  <span>Smart load balancing recommends less congested nearby centres</span>
+                  <span>Load balancing recommends less congested nearby centres</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-emerald-400 font-bold">✓</span>

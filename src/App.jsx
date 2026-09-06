@@ -26,7 +26,7 @@ export default function App() {
       <div className="min-h-screen bg-slate-50 font-['Plus_Jakarta_Sans',sans-serif] text-slate-800 antialiased selection:bg-emerald-500 selection:text-white">
         <HeaderNav />
         <MainContent />
-        <DemoWalkthroughBar />
+        {/* <DemoWalkthroughBar /> - Hidden for production, available for dev/testing */}
       </div>
     </KisanSetuProvider>
   );

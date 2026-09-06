@@ -46,9 +46,9 @@ export const HeaderNav = () => {
           </span>
         </div>
         <div className="flex items-center gap-3 text-[11px]">
-          <span className="text-amber-400 flex items-center gap-1 font-medium">
-            <Sparkles className="w-3 h-3" /> Real-Time State Engine Active
-          </span>
+          <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 bg-emerald-100 text-emerald-800 text-[10px] font-bold tracking-wider uppercase rounded-full">
+            <Sparkles className="w-3 h-3" /> Live System Status: Online
+          </div>
           <span className="text-slate-400 hidden md:inline">|</span>
           <span className="text-slate-400 hidden md:inline">Active Token: <strong className="text-slate-200">{activeToken?.id || 'A124'}</strong></span>
         </div>
@@ -134,12 +134,12 @@ export const HeaderNav = () => {
               {lowNetworkMode ? (
                 <>
                   <WifiOff className="w-3.5 h-3.5 text-amber-600" />
-                  <span className="hidden sm:inline">Low-Net Mode: ON</span>
+                  <span className="hidden sm:inline">Low Bandwidth (Offline UI)</span>
                 </>
               ) : (
                 <>
                   <Wifi className="w-3.5 h-3.5 text-slate-500" />
-                  <span className="hidden sm:inline">Low-Net</span>
+                  <span className="hidden sm:inline">Simulate Low Bandwidth</span>
                 </>
               )}
             </button>

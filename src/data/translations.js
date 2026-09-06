@@ -1,8 +1,8 @@
 export const translations = {
   en: {
     appName: "KisanSetu",
-    tagline: "Smart Procurement. Less Waiting. Better Visibility.",
-    subtagline: "Book procurement slots, track live queues, receive smart wait estimates, and monitor real-time payments across procurement centres.",
+    tagline: "Procurement Management. Less Waiting. Better Visibility.",
+    subtagline: "Book procurement slots, track live queues, receive wait estimates, and monitor real-time payments across procurement centres.",
     selectRole: "Continue as",
     farmerRole: "Farmer Portal",
     farmerDesc: "Book → Track → Arrive → Sell → Get Paid",
@@ -12,7 +12,7 @@ export const translations = {
     adminDesc: "Monitor → Analyze → Optimize",
     enterApp: "Enter KisanSetu Platform",
     howItWorks: "See How It Works",
-    sihDisclaimer: "SIH Problem Statement 26032 • Interactive Prototype (Simulated Operational Engine)",
+    sihDisclaimer: "SIH Problem Statement 26032 • Interactive Prototype",
 
     // Farmer Portal
     goodMorning: "Namaste",
@@ -39,7 +39,7 @@ export const translations = {
     selectCommodity: "Select Crop / Commodity",
     enterQuantity: "Enter Quantity (Quintals)",
     selectDate: "Select Date",
-    recommendedCentres: "Smart Recommended Centres",
+    recommendedCentres: "Recommended Centres",
     whyRecommended: "Recommended because of lower wait times and open processing capacity.",
     availableSlots: "Available Time Slots",
     confirmBooking: "Confirm Booking & Generate Token",

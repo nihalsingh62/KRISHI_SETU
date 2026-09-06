@@ -110,7 +110,7 @@ export const SmartBooking = ({ onBookingSuccess }) => {
             </div>
           </div>
 
-          {/* Step 2: Smart Centre Recommendation */}
+          {/* Step 2: Centre Recommendation */}
           <div>
             <div className="flex items-center justify-between mb-3">
               <label className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
@@ -118,7 +118,7 @@ export const SmartBooking = ({ onBookingSuccess }) => {
                 {t("recommendedCentres")}
               </label>
               <span className="text-[11px] text-slate-400">
-                Sorted by AI load balancing & shortest wait
+                Sorted by lowest wait time & capacity
               </span>
             </div>
 

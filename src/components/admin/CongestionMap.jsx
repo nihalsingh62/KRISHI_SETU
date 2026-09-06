@@ -85,9 +85,9 @@ export const CongestionMap = () => {
             </div>
 
             <div className="relative z-10 flex items-center justify-between text-xs text-slate-400 border-t border-slate-800 pt-3">
-              <span className="flex items-center gap-1.5 text-amber-400 font-semibold">
-                <Sparkles className="w-3.5 h-3.5" /> AI Recommendation: Redirect 25% bookings from Main APMC (98%) to Shivaji Hub (61%)
-              </span>
+              <div className="mt-3 bg-amber-50 rounded-lg p-2 border border-amber-200/50 flex items-start gap-2 text-xs text-amber-800 font-medium">
+                <Sparkles className="w-3.5 h-3.5" /> System Recommendation: Redirect 25% bookings from Main APMC (98%) to Shivaji Hub (61%)
+              </div>
             </div>
           </div>
 

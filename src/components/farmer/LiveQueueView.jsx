@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 
 export const LiveQueueView = () => {
-  const { t, activeBooking, activeCentre, tokens } = useKisanSetu();
+  const { t, activeBooking, activeCentre, bookings } = useKisanSetu();
 
   if (!activeBooking) {
     return (

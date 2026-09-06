@@ -303,7 +303,7 @@ export const KisanSetuProvider = ({ children }) => {
     if (notifyMsg) {
       addNotification({
         type: newStatus,
-        title: `Status Update (${updatedObj.token})`,
+        title: `Status Update (${targetTokenStr})`,
         message: notifyMsg,
         time: "Just now"
       });

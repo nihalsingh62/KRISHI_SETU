@@ -117,7 +117,7 @@ export const FarmerDashboard = ({ onNavigateTab }) => {
             <div className="flex items-center gap-4">
               <div className="w-20 h-20 rounded-2xl bg-emerald-100 border-2 border-emerald-500/30 text-emerald-800 flex flex-col items-center justify-center font-extrabold shadow-inner">
                 <span className="text-[10px] text-emerald-600 uppercase font-semibold mb-1 tracking-wider">YOUR TOKEN</span>
-                <span className="text-2xl font-mono text-emerald-900 leading-none">{activeBooking.id}</span>
+                <span className="text-2xl font-mono text-emerald-900 leading-none">{activeBooking.token}</span>
               </div>
               <div>
                 <div className="flex items-center gap-2">

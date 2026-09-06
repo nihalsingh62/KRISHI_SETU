@@ -26,14 +26,14 @@ export const SmartBooking = ({ onBookingSuccess }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const token = bookSlot({
-      crop,
-      quantity: quantity,
+    const newBooking = bookSlot({
+      commodity: crop,
+      quantityQtl: Number(quantity),
       centreId: selectedCentreId,
       date: "Today",
       slotTime: selectedSlot
     });
-    setCreatedToken(token);
+    setCreatedToken(newBooking.token);
     setBookingConfirmed(true);
     if (onBookingSuccess) onBookingSuccess();
   };

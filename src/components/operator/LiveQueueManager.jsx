@@ -21,7 +21,7 @@ export const LiveQueueManager = () => {
   const [modalType, setModalType] = useState(null); // 'weighing' | 'qc' | 'reschedule'
   const [searchTerm, setSearchTerm] = useState("");
 
-  const centreBookings = tokens
+  const centreBookings = bookings
     .filter((tok) => tok.centreId === activeCentre.id)
     .filter((tok) =>
       tok.farmerName.toLowerCase().includes(searchTerm.toLowerCase()) ||

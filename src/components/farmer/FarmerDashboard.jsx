@@ -42,7 +42,7 @@ export const FarmerDashboard = ({ onNavigateTab }) => {
     );
   }
 
-  const isCompleted = ["COMPLETED", "PAYMENT_INITIATED", "PAYMENT_COMPLETED"].includes(activeBooking.status);
+  const isCompleted = ["COMPLETED", "PROCUREMENT_COMPLETE", "PROCUREMENT_COMPLETED", "PAYMENT_INITIATED", "PAYMENT_PROCESSING", "PAYMENT_COMPLETED"].includes(activeBooking.status);
   
   // Determine contextual instruction based on status
   let instructionMsg = "";

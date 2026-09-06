@@ -23,7 +23,21 @@ export const KisanSetuProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(() => getInitialState("ks_isAuthenticated", false));
   const [authenticatedUser, setAuthenticatedUser] = useState(() => getInitialState("ks_authenticatedUser", null));
   const [registeredFarmers, setRegisteredFarmers] = useState(() => getInitialState("ks_registeredFarmers", [
-    { id: "FAR-1001", name: "Ramesh Singh", mobile: "9876543210", aadhaar: "987654321098" } // seed
+    {
+      id: "FAR-1001",
+      name: "Ramesh Singh",
+      mobile: "9876543210",
+      aadhaar: "987654321098",
+      village: "Rampur",
+      district: "Patna",
+      bankDetails: {
+        bankName: "State Bank of India",
+        accountHolder: "Ramesh Singh",
+        holderName: "Ramesh Singh",
+        accountNumber: "98765432104821",
+        ifsc: "SBIN0001234"
+      }
+    } // seed
   ]));
   
   const [centres, setCentres] = useState(() => getInitialState("ks_centres", INITIAL_CENTRES));
@@ -241,73 +255,93 @@ export const KisanSetuProvider = ({ children }) => {
   };
 
   // Updating status from operator portal
-  const updateBookingStatus = (bookingId, newStatus, extraData = {}) => {
+  const updateBookingStatus = (identifier, newStatus, extraData = {}) => {
     const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const nowIso = new Date().toISOString();
     let notifyMsg = "";
+    let targetBooking = null;
+
+    let normalizedStatus = newStatus;
+    if (newStatus === "COMPLETED" || newStatus === "PROCUREMENT_COMPLETE") {
+      normalizedStatus = "PROCUREMENT_COMPLETED";
+    }
 
     const updatedTokens = bookings.map((tok) => {
-      if (tok.bookingId !== bookingId) return tok;
+      const isMatch = tok.bookingId === identifier || tok.token === identifier || tok.id === identifier;
+      if (!isMatch) return tok;
 
-      const history = [...tok.timelineHistory];
-      let updatedObj = { ...tok, status: newStatus, updatedAt: nowIso };
+      const history = Array.isArray(tok.timelineHistory) ? [...tok.timelineHistory] : [];
+      let updatedObj = { ...tok, status: normalizedStatus, updatedAt: nowIso };
 
-      if (newStatus === "ARRIVED") {
+      if (normalizedStatus === "ARRIVED") {
         history.push({ status: "ARRIVED", time: nowTime, desc: "Checked-in at Gate 1" });
         notifyMsg = `Token ${updatedObj.token}: Farmer checked-in at gate.`;
-      } else if (newStatus === "CALLED") {
+      } else if (normalizedStatus === "CALLED") {
         history.push({ status: "CALLED", time: nowTime, desc: "Called for weighing" });
         notifyMsg = `Token ${updatedObj.token}: Proceed to Weighbridge.`;
-      } else if (newStatus === "WEIGHING") {
-        const weight = extraData.actualWeightQtl || tok.actualWeightQtl || (tok.quantityQtl + 0.5);
-        updatedObj.actualWeightQtl = weight;
-        updatedObj.totalAmount = Math.round(weight * tok.mspPerQtl);
+      } else if (normalizedStatus === "WEIGHING") {
+        const weight = extraData.actualWeightQtl || tok.actualWeightQtl || (tok.quantityQtl || tok.quantity || 42);
+        updatedObj.actualWeightQtl = Number(weight);
+        updatedObj.totalAmount = Math.round(Number(weight) * (tok.mspPerQtl || 2275));
         history.push({ status: "WEIGHING", time: nowTime, desc: `Vehicle on Weighbridge. Recorded: ${weight} Qtl` });
         notifyMsg = `Token ${updatedObj.token}: Weighbridge weighing completed (${weight} Qtl).`;
-      } else if (newStatus === "QUALITY_CHECK") {
-        const moisture = extraData.moisturePercent || 11.8;
-        const grade = extraData.grade || "FAQ";
-        updatedObj.moisturePercent = moisture;
+      } else if (normalizedStatus === "QUALITY_CHECK") {
+        const moisture = extraData.moisturePercent || tok.moisturePercent || 11.8;
+        const grade = extraData.grade || tok.grade || "FAQ";
+        updatedObj.moisturePercent = Number(moisture);
         updatedObj.grade = grade;
-        updatedObj.remarks = extraData.remarks || "";
+        updatedObj.remarks = extraData.remarks || tok.remarks || "";
         history.push({ status: "QUALITY_CHECK", time: nowTime, desc: `Quality Check (${moisture}% Moisture, ${grade})${extraData.remarks ? ' - ' + extraData.remarks : ''}` });
         notifyMsg = `Token ${updatedObj.token}: Quality inspection passed (${grade}).`;
-      } else if (newStatus === "PROCUREMENT_COMPLETE") {
+      } else if (normalizedStatus === "APPROVED") {
+        history.push({ status: "APPROVED", time: nowTime, desc: "Quality and quantity approved by Centre Inspector" });
+        notifyMsg = `Token ${updatedObj.token}: Quality approved. Ready for completion.`;
+      } else if (normalizedStatus === "PROCUREMENT_COMPLETED") {
+        const weight = extraData.actualWeightQtl || tok.actualWeightQtl || (tok.quantityQtl || tok.quantity || 42);
+        updatedObj.actualWeightQtl = Number(weight);
+        updatedObj.totalAmount = Math.round(Number(weight) * (tok.mspPerQtl || 2275));
         updatedObj.paymentStatus = "PROCESSING";
-        history.push({ status: "PROCUREMENT_COMPLETE", time: nowTime, desc: "Procurement completed & digital receipt generated" });
+        history.push({ status: "PROCUREMENT_COMPLETED", time: nowTime, desc: "Procurement completed & digital receipt generated" });
         notifyMsg = `Token ${updatedObj.token}: Procurement complete! Payment initiated.`;
-      } else if (newStatus === "PAYMENT_PROCESSING") {
+      } else if (normalizedStatus === "PAYMENT_INITIATED" || normalizedStatus === "PAYMENT_PROCESSING") {
         updatedObj.paymentStatus = "PROCESSING";
         history.push({ status: "PAYMENT_PROCESSING", time: nowTime, desc: "PFMS / Bank Transfer Verification in progress" });
         notifyMsg = `Token ${updatedObj.token}: Direct payment processing underway.`;
-      } else if (newStatus === "PAYMENT_COMPLETED") {
-        const txRef = `DEMO-TRX-${Math.floor(10000 + Math.random() * 90000)}`;
+      } else if (normalizedStatus === "PAYMENT_COMPLETED") {
+        const txRef = extraData.paymentTxRef || tok.paymentTxRef || `DEMO-TRX-${Math.floor(10000 + Math.random() * 90000)}`;
         updatedObj.paymentStatus = "COMPLETED";
         updatedObj.paymentTxRef = txRef;
         history.push({ status: "PAYMENT_COMPLETED", time: nowTime, desc: `Direct Bank Transfer Successful (Ref: ${txRef})` });
         notifyMsg = `Token ${updatedObj.token}: ₹${updatedObj.totalAmount.toLocaleString()} credited to bank account (Ref: ${txRef}).`;
-      } else if (newStatus === "REJECTED") {
+      } else if (normalizedStatus === "REJECTED") {
         history.push({ status: "REJECTED", time: nowTime, desc: `Procurement rejected: ${extraData.remarks || 'Failed quality check'}` });
         notifyMsg = `Token ${updatedObj.token}: Procurement rejected.`;
       }
 
       updatedObj.timelineHistory = history;
-      updatedObj.updatedAt = new Date().toISOString();
+      targetBooking = updatedObj;
       return updatedObj;
     });
+
+    if (!targetBooking) {
+      console.warn(`Booking with identifier ${identifier} not found.`);
+      return false;
+    }
 
     const finalizedTokens = recalculateQueuePositions(updatedTokens);
 
     setBookings(finalizedTokens);
     setCentres((prev) => recalculateCentreMetrics(prev, finalizedTokens));
 
-    if (notifyMsg) {
+    if (notifyMsg && targetBooking) {
       addNotification({
-        type: newStatus,
-        title: `Status Update (${targetTokenStr})`,
+        type: normalizedStatus,
+        title: `Status Update (${targetBooking.token})`,
         message: notifyMsg,
         time: "Just now"
       });
     }
+    return true;
   };
 
   const updateCentreCapacity = (centreId, updates) => {

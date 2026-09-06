@@ -30,8 +30,8 @@ export const ProcurementTimeline = () => {
     { key: "WEIGHING", label: "Weighbridge Weighing", icon: Scale },
     { key: "QUALITY_CHECK", label: "Quality & Moisture Inspection", icon: ShieldCheck },
     { key: "APPROVED", label: "Procurement Approved", icon: CheckCircle2 },
-    { key: "COMPLETED", label: "Procurement Completed", icon: FileText },
-    { key: "PAYMENT_INITIATED", label: "Payment Initiated", icon: CreditCard },
+    { key: "PROCUREMENT_COMPLETED", label: "Procurement Completed", icon: FileText },
+    { key: "PAYMENT_PROCESSING", label: "Payment Processing", icon: CreditCard },
     { key: "PAYMENT_COMPLETED", label: "Payment Transferred to Account", icon: CheckCircle2 }
   ];
 
@@ -45,15 +45,20 @@ export const ProcurementTimeline = () => {
       "WEIGHING",
       "QUALITY_CHECK",
       "APPROVED",
-      "COMPLETED",
+      "PROCUREMENT_COMPLETED",
       "PAYMENT_INITIATED",
+      "PAYMENT_PROCESSING",
       "PAYMENT_COMPLETED"
     ];
-    const currentIndex = statusOrder.indexOf(activeBooking.status);
+    let currentStatus = activeBooking.status;
+    if (currentStatus === "COMPLETED" || currentStatus === "PROCUREMENT_COMPLETE") {
+      currentStatus = "PROCUREMENT_COMPLETED";
+    }
+    const currentIndex = statusOrder.indexOf(currentStatus);
     const stageIndex = statusOrder.indexOf(stageKey);
 
-    if (stageIndex < currentIndex) return "COMPLETED";
-    if (stageIndex === currentIndex) return "IN_PROGRESS";
+    if (currentIndex >= 0 && stageIndex < currentIndex) return "COMPLETED";
+    if (currentIndex >= 0 && stageIndex === currentIndex) return "IN_PROGRESS";
     return "PENDING";
   };
 
@@ -66,7 +71,7 @@ export const ProcurementTimeline = () => {
               Procurement Workflow Status
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
-              Live step-by-step progress tracking for Token <strong>{activeBooking.id}</strong>.
+              Live step-by-step progress tracking for Token <strong>{activeBooking.token}</strong>.
             </p>
           </div>
 

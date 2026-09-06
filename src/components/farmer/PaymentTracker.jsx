@@ -4,7 +4,8 @@ import confetti from "canvas-confetti";
 import { CreditCard, CheckCircle2, Building, ShieldCheck, ArrowRight, Download, Plus, Edit2 } from "lucide-react";
 
 export const PaymentTracker = () => {
-  const { activeBooking, bankDetails, setBankDetails } = useKisanSetu();
+  const { activeBooking, authenticatedUser, updateFarmerBankDetails } = useKisanSetu();
+  const bankDetails = authenticatedUser?.bankDetails || null;
   const [isAddingBank, setIsAddingBank] = useState(false);
   const [formData, setFormData] = useState({ bankName: "", holderName: "", accountNumber: "", ifsc: "" });
 
@@ -29,9 +30,29 @@ export const PaymentTracker = () => {
     }
   }, [isCompleted]);
 
+  useEffect(() => {
+    if (bankDetails) {
+      setFormData({
+        bankName: bankDetails.bankName || "",
+        holderName: bankDetails.accountHolder || bankDetails.holderName || authenticatedUser?.name || "",
+        accountNumber: bankDetails.accountNumber || "",
+        ifsc: bankDetails.ifsc || ""
+      });
+    }
+  }, [bankDetails, authenticatedUser]);
+
   const handleSaveBank = (e) => {
     e.preventDefault();
-    setBankDetails(formData);
+    if (authenticatedUser?.id) {
+      const updated = {
+        bankName: formData.bankName,
+        accountHolder: formData.holderName,
+        holderName: formData.holderName,
+        accountNumber: formData.accountNumber,
+        ifsc: formData.ifsc.toUpperCase()
+      };
+      updateFarmerBankDetails(authenticatedUser.id, updated);
+    }
     setIsAddingBank(false);
   };
 
@@ -105,7 +126,7 @@ export const PaymentTracker = () => {
                 <div className="mt-0.5">
                   <span className="font-bold text-white text-sm block">{bankDetails.bankName}</span>
                   <span className="text-slate-400 text-[11px]">A/C {maskAccount(bankDetails.accountNumber)}</span>
-                  <span className="text-slate-400 text-[11px] block mt-0.5">Account Holder: {bankDetails.holderName} | IFSC: {bankDetails.ifsc}</span>
+                  <span className="text-slate-400 text-[11px] block mt-0.5">Account Holder: {bankDetails.accountHolder || bankDetails.holderName || authenticatedUser?.name} | IFSC: {bankDetails.ifsc}</span>
                   <span className="text-[10px] text-amber-400 block mt-1">✓ Verification: Demo / Simulated</span>
                   
                   {!isAddingBank && (
@@ -114,7 +135,7 @@ export const PaymentTracker = () => {
                       className="absolute top-4 right-4 flex items-center gap-1 text-emerald-400 hover:text-emerald-300 transition-colors"
                     >
                       <Edit2 className="w-3.5 h-3.5" />
-                      <span className="text-[10px] font-bold uppercase tracking-wider">Change</span>
+                      <span className="text-[10px] font-bold uppercase tracking-wider">Edit Bank Details</span>
                     </button>
                   )}
                 </div>
@@ -153,7 +174,7 @@ export const PaymentTracker = () => {
                       required
                       type="text"
                       className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500"
-                      placeholder="e.g. Ramesh Singh"
+                      placeholder={`e.g. ${authenticatedUser?.name || "Farmer Name"}`}
                       value={formData.holderName}
                       onChange={(e) => setFormData({...formData, holderName: e.target.value})}
                     />

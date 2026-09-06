@@ -62,10 +62,10 @@ export const LiveQueueView = () => {
             {t("myToken")}
           </span>
           <div className="text-5xl sm:text-7xl font-mono font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-white tracking-widest">
-            {activeBooking.id}
+            {activeBooking.token}
           </div>
           <span className="text-xs text-slate-300 mt-2 block font-medium">
-            Ramesh Singh • {activeBooking.crop} ({activeBooking.quantity} Quintals)
+            {activeBooking.farmerName} • {activeBooking.crop} ({activeBooking.quantity} Quintals)
           </span>
         </div>
 
@@ -88,7 +88,7 @@ export const LiveQueueView = () => {
 
           <div className="bg-slate-800/80 p-3 rounded-xl border border-slate-700">
             <span className="text-[10px] text-slate-400 block font-medium">Serving Token</span>
-            <strong className="text-indigo-300 font-bold text-xs font-mono">A118</strong>
+            <strong className="text-indigo-300 font-bold text-xs font-mono">{centreBookings.find(b => ["WEIGHING", "CALLED", "QUALITY_CHECK"].includes(b.status))?.token || "Waiting"}</strong>
           </div>
         </div>
       </div>

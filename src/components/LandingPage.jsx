@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useKisanSetu } from "../context/KisanSetuContext";
 import {
   Wheat,
@@ -8,7 +8,8 @@ import {
   ArrowRight,
   CheckCircle,
   ArrowLeft,
-  CheckCircle2
+  CheckCircle2,
+  AlertCircle
 } from "lucide-react";
 
 export const LandingPage = () => {
@@ -30,77 +31,134 @@ export const LandingPage = () => {
   const [ifsc, setIfsc] = useState("");
   const [otp, setOtp] = useState("");
   
-  const [error, setError] = useState("");
+  // Validation errors map
+  const [errors, setErrors] = useState({});
+
+  // Field Refs for auto-focusing
+  const farmerNameRef = useRef(null);
+  const aadhaarRef = useRef(null);
+  const mobileRef = useRef(null);
+  const villageRef = useRef(null);
+  const districtRef = useRef(null);
+  const bankNameRef = useRef(null);
+  const accountHolderRef = useRef(null);
+  const accountNumberRef = useRef(null);
+  const confirmAccountNumberRef = useRef(null);
+  const ifscRef = useRef(null);
+  const otpRef = useRef(null);
+  const loginFarmerIdRef = useRef(null);
+  const loginMobileRef = useRef(null);
+  const loginOtpRef = useRef(null);
+
+  const clearError = (field) => {
+    if (errors[field]) {
+      setErrors((prev) => {
+        const updated = { ...prev };
+        delete updated[field];
+        return updated;
+      });
+    }
+  };
 
   const handleFarmerRegisterInit = (e) => {
     e.preventDefault();
-    setError("");
-    // Validation
-    if (!/^\d{12}$/.test(aadhaarNumber.replace(/\s/g, ''))) {
-      setError("Aadhaar must be exactly 12 digits.");
-      return;
+    const newErrors = {};
+
+    if (!farmerName.trim() || farmerName.trim().length < 3) {
+      newErrors.farmerName = "Enter a valid full name (minimum 3 characters).";
     }
+
+    const cleanAadhaar = aadhaarNumber.replace(/\s/g, '');
+    if (!/^\d{12}$/.test(cleanAadhaar)) {
+      newErrors.aadhaar = "Enter a valid 12-digit Aadhaar/VID number.";
+    }
+
     if (!/^\d{10}$/.test(mobileNumber)) {
-      setError("Mobile number must be exactly 10 digits.");
-      return;
+      newErrors.mobile = "Enter a valid 10-digit Indian mobile number.";
     }
-    if (farmerName.trim().length < 3) {
-      setError("Please enter a valid name.");
-      return;
+
+    if (!village.trim() || village.trim().length < 2) {
+      newErrors.village = "Enter a valid village name.";
     }
-    if (village.trim().length < 2) {
-      setError("Please enter a valid village name.");
-      return;
+
+    if (!district.trim() || district.trim().length < 2) {
+      newErrors.district = "Enter a valid district name.";
     }
-    if (district.trim().length < 2) {
-      setError("Please enter a valid district name.");
-      return;
+
+    if (!bankName.trim() || bankName.trim().length < 2) {
+      newErrors.bankName = "Enter a valid bank name.";
     }
-    if (bankName.trim().length < 2) {
-      setError("Please enter a valid bank name.");
-      return;
+
+    if (!accountHolder.trim() || accountHolder.trim().length < 3) {
+      newErrors.accountHolder = "Enter a valid account holder name.";
     }
-    if (accountHolder.trim().length < 3) {
-      setError("Please enter a valid account holder name.");
-      return;
-    }
+
     if (!/^\d{9,18}$/.test(accountNumber)) {
-      setError("Account Number must be between 9 and 18 digits (numeric only).");
-      return;
+      newErrors.accountNumber = "Account number must contain 9–18 digits.";
     }
+
     if (accountNumber !== confirmAccountNumber) {
-      setError("Account Numbers do not match.");
-      return;
+      newErrors.confirmAccountNumber = "Account numbers do not match.";
     }
-    const ifscUpper = ifsc.toUpperCase();
+
+    const ifscUpper = ifsc.trim().toUpperCase();
     if (!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifscUpper)) {
-      setError("Invalid IFSC code format. Must be 11 characters, 5th character must be '0'.");
+      newErrors.ifsc = "Enter a valid 11-character IFSC (5th character must be '0').";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+
+      const fieldOrder = [
+        { key: 'farmerName', ref: farmerNameRef },
+        { key: 'aadhaar', ref: aadhaarRef },
+        { key: 'mobile', ref: mobileRef },
+        { key: 'village', ref: villageRef },
+        { key: 'district', ref: districtRef },
+        { key: 'bankName', ref: bankNameRef },
+        { key: 'accountHolder', ref: accountHolderRef },
+        { key: 'accountNumber', ref: accountNumberRef },
+        { key: 'confirmAccountNumber', ref: confirmAccountNumberRef },
+        { key: 'ifsc', ref: ifscRef }
+      ];
+
+      for (const field of fieldOrder) {
+        if (newErrors[field.key] && field.ref.current) {
+          field.ref.current.focus();
+          field.ref.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          break;
+        }
+      }
       return;
     }
 
+    setErrors({});
     setOtp("");
     setFarmerFlowStep('register_otp');
   };
 
   const handleFarmerRegisterOTP = (e) => {
     e.preventDefault();
-    setError("");
     if (!/^\d{6}$/.test(otp)) {
-      setError("OTP must be exactly 6 digits.");
+      setErrors({ otp: "OTP must be exactly 6 digits." });
+      if (otpRef.current) otpRef.current.focus();
       return;
     }
+    setErrors({});
+
     // Success - create user
     const newFarmer = registerFarmer({
-      name: farmerName,
+      name: farmerName.trim(),
       aadhaar: aadhaarNumber.replace(/\s/g, ''),
-      mobile: mobileNumber,
-      village,
-      district,
+      mobile: mobileNumber.trim(),
+      village: village.trim(),
+      district: district.trim(),
       bankDetails: {
-        bankName,
-        accountHolder,
-        accountNumber,
-        ifsc: ifsc.toUpperCase()
+        bankName: bankName.trim(),
+        accountHolder: accountHolder.trim(),
+        holderName: accountHolder.trim(),
+        accountNumber: accountNumber.trim(),
+        ifsc: ifsc.trim().toUpperCase()
       }
     });
     setFarmerId(newFarmer.id);
@@ -109,35 +167,47 @@ export const LandingPage = () => {
 
   const handleFarmerLoginInit = (e) => {
     e.preventDefault();
-    setError("");
-    if (farmerId.trim() === "") {
-      setError("Farmer ID is required.");
-      return;
+    const newErrors = {};
+
+    if (!farmerId.trim()) {
+      newErrors.farmerId = "Farmer ID is required (e.g. FAR-1001).";
     }
+
     if (!/^\d{10}$/.test(mobileNumber)) {
-      setError("Mobile number must be exactly 10 digits.");
+      newErrors.mobile = "Mobile number must be exactly 10 digits.";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      if (newErrors.farmerId && loginFarmerIdRef.current) loginFarmerIdRef.current.focus();
+      else if (newErrors.mobile && loginMobileRef.current) loginMobileRef.current.focus();
       return;
     }
+
+    setErrors({});
     setOtp("");
     setFarmerFlowStep('login_otp');
   };
 
   const handleFarmerLoginOTP = (e) => {
     e.preventDefault();
-    setError("");
     if (!/^\d{6}$/.test(otp)) {
-      setError("OTP must be exactly 6 digits.");
+      setErrors({ otp: "OTP must be exactly 6 digits." });
+      if (loginOtpRef.current) loginOtpRef.current.focus();
       return;
     }
-    const success = loginFarmer(farmerId.trim().toUpperCase(), mobileNumber);
+
+    const success = loginFarmer(farmerId.trim().toUpperCase(), mobileNumber.trim());
     if (!success) {
-      setError("Invalid Farmer ID or Mobile Number. User not found.");
+      setErrors({ otp: "Invalid Farmer ID or Mobile Number. User record not found." });
+      if (loginOtpRef.current) loginOtpRef.current.focus();
+    } else {
+      setErrors({});
     }
   };
 
   const handleOperatorAdminLogin = (e) => {
     e.preventDefault();
-    // Simulate authentication
     if (selectedRole === "operator") {
       login("operator", { name: "Operator User", centre: "ABC Procurement Centre", type: "operator" });
     } else if (selectedRole === "admin") {
@@ -168,7 +238,7 @@ export const LandingPage = () => {
             </div>
             
             <button
-              onClick={() => setSelectedRole("farmer")}
+              onClick={() => { setSelectedRole("farmer"); setErrors({}); }}
               className="w-full group bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md hover:border-emerald-500 transition-all flex items-center text-left gap-4"
             >
               <div className="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center group-hover:scale-110 transition-transform shrink-0">
@@ -182,7 +252,7 @@ export const LandingPage = () => {
             </button>
 
             <button
-              onClick={() => setSelectedRole("operator")}
+              onClick={() => { setSelectedRole("operator"); setErrors({}); }}
               className="w-full group bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-500 transition-all flex items-center text-left gap-4"
             >
               <div className="w-12 h-12 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center group-hover:scale-110 transition-transform shrink-0">
@@ -196,7 +266,7 @@ export const LandingPage = () => {
             </button>
 
             <button
-              onClick={() => setSelectedRole("admin")}
+              onClick={() => { setSelectedRole("admin"); setErrors({}); }}
               className="w-full group bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md hover:border-indigo-500 transition-all flex items-center text-left gap-4"
             >
               <div className="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center group-hover:scale-110 transition-transform shrink-0">
@@ -215,18 +285,12 @@ export const LandingPage = () => {
               onClick={() => {
                 setSelectedRole(null);
                 setFarmerFlowStep('choice');
-                setError("");
+                setErrors({});
               }}
               className="text-xs font-semibold text-slate-500 hover:text-slate-900 flex items-center gap-1 mb-6"
             >
               <ArrowLeft className="w-3.5 h-3.5" /> Back to roles
             </button>
-            
-            {error && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-xs font-bold text-red-600">
-                {error}
-              </div>
-            )}
 
             {/* FARMER FLOW */}
             {selectedRole === "farmer" && (
@@ -239,90 +303,254 @@ export const LandingPage = () => {
                       </h3>
                       <p className="text-xs text-slate-500 mt-1">Are you a new or returning user?</p>
                     </div>
-                    <button onClick={() => setFarmerFlowStep('register_init')} className="w-full py-3 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 font-bold transition-colors">
+                    <button 
+                      onClick={() => { setFarmerFlowStep('register_init'); setErrors({}); }} 
+                      className="w-full py-3 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 font-bold transition-colors"
+                    >
                       New Farmer Registration
                     </button>
-                    <button onClick={() => setFarmerFlowStep('login_init')} className="w-full py-3 rounded-xl bg-slate-900 text-white hover:bg-slate-800 font-bold transition-colors">
+                    <button 
+                      onClick={() => { setFarmerFlowStep('login_init'); setErrors({}); }} 
+                      className="w-full py-3 rounded-xl bg-slate-900 text-white hover:bg-slate-800 font-bold transition-colors"
+                    >
                       Login with Farmer ID
                     </button>
                   </div>
                 )}
 
                 {farmerFlowStep === 'register_init' && (
-                  <form onSubmit={handleFarmerRegisterInit} className="space-y-4 animate-in fade-in duration-300">
+                  <form onSubmit={handleFarmerRegisterInit} className="space-y-4 animate-in fade-in duration-300" noValidate>
                     <div className="mb-6">
                       <h3 className="text-xl font-bold text-slate-900">Create Farmer Account</h3>
                       <p className="text-xs text-slate-500 mt-1">Link your Aadhaar to begin.</p>
                     </div>
+
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1">Full Name</label>
-                      <input type="text" placeholder="e.g. Amit Kumar" value={farmerName} onChange={e => setFarmerName(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" required />
+                      <input 
+                        ref={farmerNameRef}
+                        type="text" 
+                        placeholder="e.g. Amit Kumar" 
+                        value={farmerName} 
+                        onChange={e => { setFarmerName(e.target.value); clearError('farmerName'); }} 
+                        className={`w-full rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none border transition-colors ${
+                          errors.farmerName ? 'border-red-500 ring-1 ring-red-500 bg-red-50/30' : 'bg-slate-50 border-slate-200'
+                        }`} 
+                      />
+                      {errors.farmerName && <p className="text-xs text-red-600 font-semibold mt-1 flex items-center gap-1"><AlertCircle className="w-3.5 h-3.5" />{errors.farmerName}</p>}
                     </div>
+
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">Aadhaar Number</label>
-                      <input type="password" placeholder="12 Digit Aadhaar" value={aadhaarNumber} onChange={e => setAadhaarNumber(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" required />
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Aadhaar / VID Number</label>
+                      <input 
+                        ref={aadhaarRef}
+                        type="text" 
+                        inputMode="numeric"
+                        maxLength={12}
+                        placeholder="12 Digit Aadhaar" 
+                        value={aadhaarNumber} 
+                        onChange={e => { 
+                          const val = e.target.value.replace(/\D/g, '').slice(0, 12);
+                          setAadhaarNumber(val); 
+                          clearError('aadhaar'); 
+                        }} 
+                        className={`w-full rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none border transition-colors font-mono ${
+                          errors.aadhaar ? 'border-red-500 ring-1 ring-red-500 bg-red-50/30' : 'bg-slate-50 border-slate-200'
+                        }`} 
+                      />
+                      {errors.aadhaar && <p className="text-xs text-red-600 font-semibold mt-1 flex items-center gap-1"><AlertCircle className="w-3.5 h-3.5" />{errors.aadhaar}</p>}
                     </div>
+
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1">Mobile Number</label>
-                      <input type="tel" placeholder="10 Digit Mobile" value={mobileNumber} onChange={e => setMobileNumber(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" required />
+                      <input 
+                        ref={mobileRef}
+                        type="tel" 
+                        inputMode="numeric"
+                        maxLength={10}
+                        placeholder="10 Digit Mobile" 
+                        value={mobileNumber} 
+                        onChange={e => { 
+                          const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+                          setMobileNumber(val); 
+                          clearError('mobile'); 
+                        }} 
+                        className={`w-full rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none border transition-colors font-mono ${
+                          errors.mobile ? 'border-red-500 ring-1 ring-red-500 bg-red-50/30' : 'bg-slate-50 border-slate-200'
+                        }`} 
+                      />
+                      {errors.mobile && <p className="text-xs text-red-600 font-semibold mt-1 flex items-center gap-1"><AlertCircle className="w-3.5 h-3.5" />{errors.mobile}</p>}
                     </div>
+
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className="block text-xs font-bold text-slate-700 mb-1">Village</label>
-                        <input type="text" placeholder="e.g. Rampur" value={village} onChange={e => setVillage(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" required />
+                        <input 
+                          ref={villageRef}
+                          type="text" 
+                          placeholder="e.g. Rampur" 
+                          value={village} 
+                          onChange={e => { setVillage(e.target.value); clearError('village'); }} 
+                          className={`w-full rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none border transition-colors ${
+                            errors.village ? 'border-red-500 ring-1 ring-red-500 bg-red-50/30' : 'bg-slate-50 border-slate-200'
+                          }`} 
+                        />
+                        {errors.village && <p className="text-xs text-red-600 font-semibold mt-1">{errors.village}</p>}
                       </div>
                       <div>
                         <label className="block text-xs font-bold text-slate-700 mb-1">District</label>
-                        <input type="text" placeholder="e.g. Patna" value={district} onChange={e => setDistrict(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" required />
+                        <input 
+                          ref={districtRef}
+                          type="text" 
+                          placeholder="e.g. Patna" 
+                          value={district} 
+                          onChange={e => { setDistrict(e.target.value); clearError('district'); }} 
+                          className={`w-full rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none border transition-colors ${
+                            errors.district ? 'border-red-500 ring-1 ring-red-500 bg-red-50/30' : 'bg-slate-50 border-slate-200'
+                          }`} 
+                        />
+                        {errors.district && <p className="text-xs text-red-600 font-semibold mt-1">{errors.district}</p>}
                       </div>
                     </div>
                     
                     <div className="pt-2">
                       <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-3">Bank Details</h4>
                     </div>
+
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1">Bank Name</label>
-                      <input type="text" placeholder="e.g. State Bank of India" value={bankName} onChange={e => setBankName(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" required />
+                      <input 
+                        ref={bankNameRef}
+                        type="text" 
+                        placeholder="e.g. State Bank of India" 
+                        value={bankName} 
+                        onChange={e => { setBankName(e.target.value); clearError('bankName'); }} 
+                        className={`w-full rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none border transition-colors ${
+                          errors.bankName ? 'border-red-500 ring-1 ring-red-500 bg-red-50/30' : 'bg-slate-50 border-slate-200'
+                        }`} 
+                      />
+                      {errors.bankName && <p className="text-xs text-red-600 font-semibold mt-1">{errors.bankName}</p>}
                     </div>
+
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1">Account Holder Name</label>
-                      <input type="text" placeholder="e.g. Amit Kumar" value={accountHolder} onChange={e => setAccountHolder(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" required />
+                      <input 
+                        ref={accountHolderRef}
+                        type="text" 
+                        placeholder="e.g. Amit Kumar" 
+                        value={accountHolder} 
+                        onChange={e => { setAccountHolder(e.target.value); clearError('accountHolder'); }} 
+                        className={`w-full rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none border transition-colors ${
+                          errors.accountHolder ? 'border-red-500 ring-1 ring-red-500 bg-red-50/30' : 'bg-slate-50 border-slate-200'
+                        }`} 
+                      />
+                      {errors.accountHolder && <p className="text-xs text-red-600 font-semibold mt-1">{errors.accountHolder}</p>}
                     </div>
+
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1">Account Number</label>
-                      <input type="password" placeholder="9 to 18 digits" value={accountNumber} onChange={e => setAccountNumber(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" required />
+                      <input 
+                        ref={accountNumberRef}
+                        type="password" 
+                        inputMode="numeric"
+                        maxLength={18}
+                        placeholder="9 to 18 digits" 
+                        value={accountNumber} 
+                        onChange={e => { 
+                          const val = e.target.value.replace(/\D/g, '').slice(0, 18);
+                          setAccountNumber(val); 
+                          clearError('accountNumber'); 
+                        }} 
+                        className={`w-full rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none border transition-colors font-mono ${
+                          errors.accountNumber ? 'border-red-500 ring-1 ring-red-500 bg-red-50/30' : 'bg-slate-50 border-slate-200'
+                        }`} 
+                      />
+                      {errors.accountNumber && <p className="text-xs text-red-600 font-semibold mt-1">{errors.accountNumber}</p>}
                     </div>
+
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1">Confirm Account Number</label>
-                      <input type="password" placeholder="Re-enter account number" value={confirmAccountNumber} onChange={e => setConfirmAccountNumber(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" required />
+                      <input 
+                        ref={confirmAccountNumberRef}
+                        type="password" 
+                        inputMode="numeric"
+                        maxLength={18}
+                        placeholder="Re-enter account number" 
+                        value={confirmAccountNumber} 
+                        onChange={e => { 
+                          const val = e.target.value.replace(/\D/g, '').slice(0, 18);
+                          setConfirmAccountNumber(val); 
+                          clearError('confirmAccountNumber'); 
+                        }} 
+                        className={`w-full rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none border transition-colors font-mono ${
+                          errors.confirmAccountNumber ? 'border-red-500 ring-1 ring-red-500 bg-red-50/30' : 'bg-slate-50 border-slate-200'
+                        }`} 
+                      />
+                      {errors.confirmAccountNumber && <p className="text-xs text-red-600 font-semibold mt-1">{errors.confirmAccountNumber}</p>}
                     </div>
+
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1">IFSC Code</label>
-                      <input type="text" placeholder="e.g. SBIN0001234" value={ifsc} onChange={e => setIfsc(e.target.value.toUpperCase())} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none uppercase font-mono" required />
+                      <input 
+                        ref={ifscRef}
+                        type="text" 
+                        maxLength={11}
+                        placeholder="e.g. SBIN0001234" 
+                        value={ifsc} 
+                        onChange={e => { 
+                          const val = e.target.value.toUpperCase().slice(0, 11);
+                          setIfsc(val); 
+                          clearError('ifsc'); 
+                        }} 
+                        className={`w-full rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none border transition-colors uppercase font-mono ${
+                          errors.ifsc ? 'border-red-500 ring-1 ring-red-500 bg-red-50/30' : 'bg-slate-50 border-slate-200'
+                        }`} 
+                      />
+                      {errors.ifsc && <p className="text-xs text-red-600 font-semibold mt-1">{errors.ifsc}</p>}
                     </div>
-                    <button type="submit" className="w-full py-3 mt-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-md transition-colors">
-                      Continue
+
+                    <button type="submit" className="w-full py-3.5 mt-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-md transition-colors">
+                      Continue to Verification
                     </button>
                   </form>
                 )}
 
                 {farmerFlowStep === 'register_otp' && (
-                  <form onSubmit={handleFarmerRegisterOTP} className="space-y-4 animate-in fade-in duration-300">
+                  <form onSubmit={handleFarmerRegisterOTP} className="space-y-4 animate-in fade-in duration-300" noValidate>
                     <div className="mb-6">
                       <h3 className="text-xl font-bold text-slate-900">Aadhaar Verification</h3>
                       <p className="text-xs text-slate-500 mt-1">OTP sent to Aadhaar-linked mobile ******{mobileNumber.slice(-4)}</p>
                     </div>
+
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1">6-Digit OTP</label>
-                      <input type="text" placeholder="_ _ _ _ _ _" value={otp} onChange={e => setOtp(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-center tracking-[1em] text-lg font-mono focus:ring-2 focus:ring-emerald-500 outline-none" required />
+                      <input 
+                        ref={otpRef}
+                        type="text" 
+                        inputMode="numeric"
+                        maxLength={6}
+                        placeholder="_ _ _ _ _ _" 
+                        value={otp} 
+                        onChange={e => { 
+                          const val = e.target.value.replace(/\D/g, '').slice(0, 6);
+                          setOtp(val); 
+                          clearError('otp'); 
+                        }} 
+                        className={`w-full rounded-xl p-3 text-center tracking-[1em] text-lg font-mono focus:ring-2 focus:ring-emerald-500 outline-none border transition-colors ${
+                          errors.otp ? 'border-red-500 ring-1 ring-red-500 bg-red-50/30' : 'bg-slate-50 border-slate-200'
+                        }`} 
+                      />
+                      {errors.otp && <p className="text-xs text-red-600 font-semibold mt-1 text-center">{errors.otp}</p>}
                     </div>
+
                     <div className="bg-blue-50 p-3 rounded-xl border border-blue-100 flex items-start gap-2 mt-2">
                       <CheckCircle className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
                       <p className="text-[10px] text-blue-800 font-medium">
-                        Identity Verification: Secure via UIDAI.
+                        Identity Verification: Secure via UIDAI simulation.
                       </p>
                     </div>
-                    <button type="submit" className="w-full py-3 mt-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-md transition-colors">
+
+                    <button type="submit" className="w-full py-3.5 mt-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-md transition-colors">
                       Verify OTP
                     </button>
                   </form>
@@ -364,46 +592,97 @@ export const LandingPage = () => {
                       </div>
                     </div>
 
-                    <button onClick={() => {
+                    <button 
+                      onClick={() => {
                         setFarmerFlowStep('login_init');
                         setOtp("");
-                    }} className="w-full py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold transition-colors">
+                        setErrors({});
+                      }} 
+                      className="w-full py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold transition-colors"
+                    >
                       Proceed to Login
                     </button>
                   </div>
                 )}
 
                 {farmerFlowStep === 'login_init' && (
-                  <form onSubmit={handleFarmerLoginInit} className="space-y-4 animate-in fade-in duration-300">
+                  <form onSubmit={handleFarmerLoginInit} className="space-y-4 animate-in fade-in duration-300" noValidate>
                     <div className="mb-6">
                       <h3 className="text-xl font-bold text-slate-900">Farmer Login</h3>
                       <p className="text-xs text-slate-500 mt-1">Enter your KisanSetu ID to continue.</p>
                     </div>
+
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1">KisanSetu Farmer ID</label>
-                      <input type="text" placeholder="FAR-XXXX" value={farmerId} onChange={e => setFarmerId(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none uppercase font-mono" required />
+                      <input 
+                        ref={loginFarmerIdRef}
+                        type="text" 
+                        placeholder="FAR-XXXX" 
+                        value={farmerId} 
+                        onChange={e => { setFarmerId(e.target.value.toUpperCase()); clearError('farmerId'); }} 
+                        className={`w-full rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none border transition-colors uppercase font-mono ${
+                          errors.farmerId ? 'border-red-500 ring-1 ring-red-500 bg-red-50/30' : 'bg-slate-50 border-slate-200'
+                        }`} 
+                      />
+                      {errors.farmerId && <p className="text-xs text-red-600 font-semibold mt-1">{errors.farmerId}</p>}
                     </div>
+
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1">Registered Mobile Number</label>
-                      <input type="tel" placeholder="10 Digit Mobile" value={mobileNumber} onChange={e => setMobileNumber(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" required />
+                      <input 
+                        ref={loginMobileRef}
+                        type="tel" 
+                        inputMode="numeric"
+                        maxLength={10}
+                        placeholder="10 Digit Mobile" 
+                        value={mobileNumber} 
+                        onChange={e => { 
+                          const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+                          setMobileNumber(val); 
+                          clearError('mobile'); 
+                        }} 
+                        className={`w-full rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none border transition-colors font-mono ${
+                          errors.mobile ? 'border-red-500 ring-1 ring-red-500 bg-red-50/30' : 'bg-slate-50 border-slate-200'
+                        }`} 
+                      />
+                      {errors.mobile && <p className="text-xs text-red-600 font-semibold mt-1">{errors.mobile}</p>}
                     </div>
-                    <button type="submit" className="w-full py-3 mt-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold shadow-md transition-colors">
+
+                    <button type="submit" className="w-full py-3.5 mt-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold shadow-md transition-colors">
                       Send OTP
                     </button>
                   </form>
                 )}
 
                 {farmerFlowStep === 'login_otp' && (
-                  <form onSubmit={handleFarmerLoginOTP} className="space-y-4 animate-in fade-in duration-300">
+                  <form onSubmit={handleFarmerLoginOTP} className="space-y-4 animate-in fade-in duration-300" noValidate>
                     <div className="mb-6">
                       <h3 className="text-xl font-bold text-slate-900">Verify Login</h3>
                       <p className="text-xs text-slate-500 mt-1">OTP sent to registered mobile ******{mobileNumber.slice(-4)}</p>
                     </div>
+
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1">6-Digit OTP</label>
-                      <input type="text" placeholder="_ _ _ _ _ _" value={otp} onChange={e => setOtp(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-center tracking-[1em] text-lg font-mono focus:ring-2 focus:ring-emerald-500 outline-none" required />
+                      <input 
+                        ref={loginOtpRef}
+                        type="text" 
+                        inputMode="numeric"
+                        maxLength={6}
+                        placeholder="_ _ _ _ _ _" 
+                        value={otp} 
+                        onChange={e => { 
+                          const val = e.target.value.replace(/\D/g, '').slice(0, 6);
+                          setOtp(val); 
+                          clearError('otp'); 
+                        }} 
+                        className={`w-full rounded-xl p-3 text-center tracking-[1em] text-lg font-mono focus:ring-2 focus:ring-emerald-500 outline-none border transition-colors ${
+                          errors.otp ? 'border-red-500 ring-1 ring-red-500 bg-red-50/30' : 'bg-slate-50 border-slate-200'
+                        }`} 
+                      />
+                      {errors.otp && <p className="text-xs text-red-600 font-semibold mt-1 text-center">{errors.otp}</p>}
                     </div>
-                    <button type="submit" className="w-full py-3 mt-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-md transition-colors">
+
+                    <button type="submit" className="w-full py-3.5 mt-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-md transition-colors">
                       Login to Dashboard
                     </button>
                   </form>

@@ -3,7 +3,7 @@ import { useKisanSetu } from "../../context/KisanSetuContext";
 import { Scale, ShieldCheck, X, CheckCircle2 } from "lucide-react";
 
 export const WeighingQCModal = ({ token, modalType, onClose }) => {
-  const { updateTokenStatus } = useKisanSetu();
+  const { updateBookingStatus } = useKisanSetu();
   const [weight, setWeight] = useState(token.actualWeightQtl || (token.quantity + 0.5));
   const [moisture, setMoisture] = useState(token.moisturePercent || 12.0);
   const [grade, setGrade] = useState(token.grade || "Grade A");
@@ -12,9 +12,9 @@ export const WeighingQCModal = ({ token, modalType, onClose }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (modalType === "weighing") {
-      updateTokenStatus(token.token, "WEIGHING", { actualWeightQtl: Number(weight) });
+      updateBookingStatus(token.bookingId || token.token, "WEIGHING", { actualWeightQtl: Number(weight) });
     } else if (modalType === "qc") {
-      updateTokenStatus(token.token, "QUALITY_CHECK", { moisturePercent: Number(moisture), grade });
+      updateBookingStatus(token.bookingId || token.token, "QUALITY_CHECK", { moisturePercent: Number(moisture), grade, remarks });
     }
     onClose();
   };

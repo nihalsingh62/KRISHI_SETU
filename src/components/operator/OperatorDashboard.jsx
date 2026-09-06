@@ -185,6 +185,7 @@ export const OperatorDashboard = () => {
       </div>
 
       {/* Render Active Operator Tab View */}
+      {activeTab === "dashboard" && <LiveQueueManager />}
       {activeTab === "queue" && <LiveQueueManager />}
       {activeTab === "weighing" && <LiveQueueManager />}
       {activeTab === "checkin" && <FarmerCheckIn />}

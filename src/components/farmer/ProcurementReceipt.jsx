@@ -22,13 +22,17 @@ export const ProcurementReceipt = ({ token, centre }) => {
 
             <div className="bg-slate-50 rounded-2xl p-5 border border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
+          <p className="text-[10px] uppercase font-bold text-slate-400 mb-0.5">Farmer Name</p>
+          <p className="text-base font-extrabold text-slate-900">{token.farmerName}</p>
+        </div>
+        <div>
           <p className="text-[10px] uppercase font-bold text-slate-400 mb-0.5">Token Number</p>
           <p className="text-lg font-mono font-extrabold text-slate-900">{token.token}</p>
         </div>
         <div>
-          <p className="text-[10px] uppercase font-bold text-slate-400 mb-0.5">Lot ID</p>
+          <p className="text-[10px] uppercase font-bold text-slate-400 mb-0.5">Booking / Lot ID</p>
           <p className="text-sm font-mono font-bold text-slate-700">
-            KS-{token.crop.substring(0,3).toUpperCase()}-2026-00421
+            {token.bookingId || `KS-${(token.crop || 'WHT').substring(0,3).toUpperCase()}-2026-${token.token}`}
           </p>
         </div>
 

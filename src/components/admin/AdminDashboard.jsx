@@ -188,6 +188,7 @@ export const AdminDashboard = () => {
       </div>
 
       {/* Tab Render */}
+      {activeTab === "dashboard" && <CentreMonitoring />}
       {activeTab === "map" && <CongestionMap />}
       {activeTab === "monitoring" && <CentreMonitoring />}
       {activeTab === "analytics" && <ProcurementAnalytics />}

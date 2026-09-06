@@ -42,26 +42,41 @@ export const FarmerPortalView = () => {
               <span className="font-mono text-slate-800">{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
             </div>
 
-            <div className="text-center py-4 bg-slate-900 text-white rounded-2xl">
-              <span className="text-xs text-amber-400 font-extrabold uppercase block">{t("myToken")}</span>
-              <div className="text-5xl font-mono font-extrabold text-emerald-400 mt-1">
-                {activeBooking?.token || "A124"}
+            {!activeBooking ? (
+              <div className="text-center py-6 bg-slate-100 rounded-2xl border border-slate-200">
+                <p className="text-sm font-bold text-slate-700">No Active Booking</p>
+                <p className="text-xs text-slate-500 mt-1">You do not currently have any scheduled slots.</p>
+                <button
+                  onClick={() => setActiveFarmerTab("booking")}
+                  className="mt-3 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs"
+                >
+                  Book New Slot
+                </button>
               </div>
-              <p className="text-xs text-slate-300 mt-1">
-                {activeBooking?.farmerName} • {activeBooking?.crop} ({activeBooking?.quantity} Qtl)
-              </p>
-            </div>
+            ) : (
+              <>
+                <div className="text-center py-4 bg-slate-900 text-white rounded-2xl">
+                  <span className="text-xs text-amber-400 font-extrabold uppercase block">{t("myToken")}</span>
+                  <div className="text-5xl font-mono font-extrabold text-emerald-400 mt-1">
+                    {activeBooking.token}
+                  </div>
+                  <p className="text-xs text-slate-300 mt-1">
+                    {activeBooking.farmerName} • {activeBooking.crop} ({activeBooking.quantity} Qtl)
+                  </p>
+                </div>
 
-            <div className="grid grid-cols-2 gap-3 text-xs font-bold pt-2">
-              <div className="bg-amber-100 p-3 rounded-xl">
-                <span className="text-[10px] text-amber-800 block">Queue Position</span>
-                <span className="text-xl text-slate-900">{activeBooking?.queuePosition || "-"}</span>
-              </div>
-              <div className="bg-emerald-100 p-3 rounded-xl">
-                <span className="text-[10px] text-emerald-800 block">Est. Wait</span>
-                <span className="text-xl text-slate-900">{activeBooking?.estimatedWait || "-"} min</span>
-              </div>
-            </div>
+                <div className="grid grid-cols-2 gap-3 text-xs font-bold pt-2">
+                  <div className="bg-amber-100 p-3 rounded-xl">
+                    <span className="text-[10px] text-amber-800 block">Queue Position</span>
+                    <span className="text-xl text-slate-900">#{activeBooking.queuePosition || 1}</span>
+                  </div>
+                  <div className="bg-emerald-100 p-3 rounded-xl">
+                    <span className="text-[10px] text-emerald-800 block">Est. Wait</span>
+                    <span className="text-xl text-slate-900">{activeBooking.estimatedWait || 5} min</span>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>

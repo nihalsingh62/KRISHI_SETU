@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 
 export const LiveQueueManager = () => {
-  const { bookings, activeCentre, updateTokenStatus, t } = useKisanSetu();
+  const { bookings, activeCentre, updateBookingStatus, t } = useKisanSetu();
   const [activeModalToken, setActiveModalToken] = useState(null);
   const [modalType, setModalType] = useState(null); // 'weighing' | 'qc' | 'reschedule'
   const [searchTerm, setSearchTerm] = useState("");
@@ -81,25 +81,16 @@ export const LiveQueueManager = () => {
             </thead>
             <tbody className="divide-y divide-slate-100 font-medium text-slate-800">
               {centreBookings.map((tok) => {
-                const isRamesh = tok.token === "A124";
-
                 return (
                   <tr
-                    key={tok.token}
-                    className={`hover:bg-slate-50 transition-colors ${
-                      isRamesh ? "bg-amber-50/60 font-semibold" : ""
-                    }`}
+                    key={tok.bookingId || tok.token}
+                    className="hover:bg-slate-50 transition-colors"
                   >
                     <td className="p-3.5">
                       <div className="flex items-center gap-2">
                         <span className="font-mono font-extrabold text-slate-900 bg-slate-200 px-2 py-1 rounded-md">
                           {tok.token}
                         </span>
-                        {isRamesh && (
-                          <span className="bg-amber-500 text-slate-950 text-[9px] font-extrabold px-1.5 py-0.5 rounded">
-                            DEMO TARGET
-                          </span>
-                        )}
                       </div>
                     </td>
 
@@ -140,14 +131,14 @@ export const LiveQueueManager = () => {
                     <td className="p-3.5 text-right space-x-1.5">
                       {tok.status === "BOOKED" || tok.status === "CONFIRMED" ? (
                         <button
-                          onClick={() => updateBookingStatus(tok.token, "ARRIVED")}
+                          onClick={() => updateBookingStatus(tok.bookingId || tok.token, "ARRIVED")}
                           className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] shadow-xs"
                         >
                           Check In
                         </button>
                       ) : tok.status === "ARRIVED" || tok.status === "WAITING" ? (
                         <button
-                          onClick={() => updateBookingStatus(tok.token, "CALLED")}
+                          onClick={() => updateBookingStatus(tok.bookingId || tok.token, "CALLED")}
                           className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[11px] shadow-xs flex items-center gap-1 inline-flex"
                         >
                           Call Farmer
@@ -169,13 +160,13 @@ export const LiveQueueManager = () => {
                       ) : tok.status === "QUALITY_CHECK" ? (
                         <>
                           <button
-                            onClick={() => updateBookingStatus(tok.token, "APPROVED")}
+                            onClick={() => updateBookingStatus(tok.bookingId || tok.token, "APPROVED")}
                             className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] shadow-xs"
                           >
                             Approve
                           </button>
                           <button
-                            onClick={() => updateBookingStatus(tok.token, "REJECTED")}
+                            onClick={() => updateBookingStatus(tok.bookingId || tok.token, "REJECTED")}
                             className="px-2.5 py-1.5 rounded-lg bg-red-100 hover:bg-red-200 text-red-800 font-bold text-[11px] ml-1"
                           >
                             Reject
@@ -183,21 +174,21 @@ export const LiveQueueManager = () => {
                         </>
                       ) : tok.status === "APPROVED" ? (
                         <button
-                          onClick={() => updateBookingStatus(tok.token, "COMPLETED")}
+                          onClick={() => updateBookingStatus(tok.bookingId || tok.token, "PROCUREMENT_COMPLETED")}
                           className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] shadow-xs"
                         >
                           Complete
                         </button>
                       ) : tok.status === "COMPLETED" || tok.status === "PROCUREMENT_COMPLETE" ? (
                         <button
-                          onClick={() => updateBookingStatus(tok.token, "PAYMENT_INITIATED")}
+                          onClick={() => updateBookingStatus(tok.bookingId || tok.token, "PAYMENT_INITIATED")}
                           className="px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-bold text-[11px] shadow-xs"
                         >
                           Initiate Payment
                         </button>
                       ) : tok.status === "PAYMENT_INITIATED" || tok.status === "PAYMENT_PROCESSING" ? (
                         <button
-                          onClick={() => updateBookingStatus(tok.token, "PAYMENT_COMPLETED")}
+                          onClick={() => updateBookingStatus(tok.bookingId || tok.token, "PAYMENT_COMPLETED")}
                           className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] shadow-xs"
                         >
                           Complete Payment

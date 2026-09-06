@@ -16,16 +16,16 @@ import {
 } from "lucide-react";
 
 export const LiveQueueManager = () => {
-  const { tokens, activeCentre, updateTokenStatus, t } = useKisanSetu();
+  const { bookings, activeCentre, updateTokenStatus, t } = useKisanSetu();
   const [activeModalToken, setActiveModalToken] = useState(null);
   const [modalType, setModalType] = useState(null); // 'weighing' | 'qc' | 'reschedule'
   const [searchTerm, setSearchTerm] = useState("");
 
-  const centreTokens = tokens
+  const centreBookings = tokens
     .filter((tok) => tok.centreId === activeCentre.id)
     .filter((tok) =>
       tok.farmerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      tok.id.toLowerCase().includes(searchTerm.toLowerCase())
+      tok.token.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
   const handleOpenWeighingModal = (tok) => {
@@ -79,12 +79,12 @@ export const LiveQueueManager = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 font-medium text-slate-800">
-              {centreTokens.map((tok) => {
-                const isRamesh = tok.id === "A124";
+              {centreBookings.map((tok) => {
+                const isRamesh = tok.token === "A124";
 
                 return (
                   <tr
-                    key={tok.id}
+                    key={tok.token}
                     className={`hover:bg-slate-50 transition-colors ${
                       isRamesh ? "bg-amber-50/60 font-semibold" : ""
                     }`}
@@ -92,7 +92,7 @@ export const LiveQueueManager = () => {
                     <td className="p-3.5">
                       <div className="flex items-center gap-2">
                         <span className="font-mono font-extrabold text-slate-900 bg-slate-200 px-2 py-1 rounded-md">
-                          {tok.id}
+                          {tok.token}
                         </span>
                         {isRamesh && (
                           <span className="bg-amber-500 text-slate-950 text-[9px] font-extrabold px-1.5 py-0.5 rounded">
@@ -107,13 +107,13 @@ export const LiveQueueManager = () => {
                       <span className="text-[10px] text-slate-400 font-medium">{tok.phone}</span>
                     </td>
 
-                    <td className="p-3.5 font-bold text-slate-800">{tok.commodity}</td>
+                    <td className="p-3.5 font-bold text-slate-800">{tok.crop}</td>
 
                     <td className="p-3.5 font-mono text-slate-900">
                       {tok.actualWeightQtl ? (
                         <span className="text-blue-700 font-extrabold">{tok.actualWeightQtl} Qtl (Actual)</span>
                       ) : (
-                        <span>{tok.quantityQtl} Qtl (Decl)</span>
+                        <span>{tok.quantity} Qtl (Decl)</span>
                       )}
                     </td>
 
@@ -139,13 +139,13 @@ export const LiveQueueManager = () => {
                       {tok.status === "BOOKED" || tok.status === "WAITING" ? (
                         <>
                           <button
-                            onClick={() => updateTokenStatus(tok.id, "ARRIVED")}
+                            onClick={() => updateTokenStatus(tok.token, "ARRIVED")}
                             className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] shadow-xs"
                           >
                             Mark Arrived
                           </button>
                           <button
-                            onClick={() => updateTokenStatus(tok.id, "NO_SHOW")}
+                            onClick={() => updateTokenStatus(tok.token, "NO_SHOW")}
                             className="px-2.5 py-1.5 rounded-lg bg-red-100 hover:bg-red-200 text-red-800 font-bold text-[11px]"
                           >
                             No-Show
@@ -167,21 +167,21 @@ export const LiveQueueManager = () => {
                         </button>
                       ) : tok.status === "QUALITY_CHECK" ? (
                         <button
-                          onClick={() => updateTokenStatus(tok.id, "PROCUREMENT_COMPLETE")}
+                          onClick={() => updateTokenStatus(tok.token, "PROCUREMENT_COMPLETE")}
                           className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] shadow-xs"
                         >
                           Complete Procurement
                         </button>
                       ) : tok.status === "PROCUREMENT_COMPLETE" ? (
                         <button
-                          onClick={() => updateTokenStatus(tok.id, "PAYMENT_PROCESSING")}
+                          onClick={() => updateTokenStatus(tok.token, "PAYMENT_PROCESSING")}
                           className="px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-bold text-[11px] shadow-xs"
                         >
                           Initiate Payment
                         </button>
                       ) : tok.status === "PAYMENT_PROCESSING" ? (
                         <button
-                          onClick={() => updateTokenStatus(tok.id, "PAYMENT_COMPLETED")}
+                          onClick={() => updateTokenStatus(tok.token, "PAYMENT_COMPLETED")}
                           className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] shadow-xs"
                         >
                           Approve Payment ✓

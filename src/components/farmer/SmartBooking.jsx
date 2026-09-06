@@ -17,7 +17,7 @@ import {
 export const SmartBooking = ({ onBookingSuccess }) => {
   const { t, centres, slots, bookSlot } = useKisanSetu();
 
-  const [commodity, setCommodity] = useState("Wheat");
+  const [crop, setCommodity] = useState("Wheat");
   const [quantity, setQuantity] = useState("42");
   const [selectedCentreId, setSelectedCentreId] = useState("c3"); // Default to recommended Shivaji Grain (c3) or ABC (c1)
   const [selectedSlot, setSelectedSlot] = useState("10:30 AM – 11:00 AM");
@@ -27,8 +27,8 @@ export const SmartBooking = ({ onBookingSuccess }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     const token = bookSlot({
-      commodity,
-      quantityQtl: quantity,
+      crop,
+      quantity: quantity,
       centreId: selectedCentreId,
       date: "Today",
       slotTime: selectedSlot
@@ -50,7 +50,7 @@ export const SmartBooking = ({ onBookingSuccess }) => {
               {t("bookSlotTitle")}
             </h2>
             <p className="text-xs text-slate-500">
-              Select commodity, quantity, and smart recommended procurement centre.
+              Select crop, quantity, and smart recommended procurement centre.
             </p>
           </div>
         </div>
@@ -69,7 +69,7 @@ export const SmartBooking = ({ onBookingSuccess }) => {
                     type="button"
                     onClick={() => setCommodity(c)}
                     className={`py-3 px-3 rounded-2xl border text-xs font-bold transition-all text-center flex flex-col items-center gap-1 ${
-                      commodity === c
+                      crop === c
                         ? "bg-emerald-600 text-white border-emerald-600 shadow-md"
                         : "bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100"
                     }`}
@@ -103,7 +103,7 @@ export const SmartBooking = ({ onBookingSuccess }) => {
                 </span>
               </div>
               <p className="text-[11px] text-slate-500 mt-1">
-                Estimated MSP Value: <strong className="text-emerald-700">₹{(Number(quantity || 0) * (commodity === "Wheat" ? 2275 : commodity === "Paddy" ? 2300 : 2090)).toLocaleString()}</strong>
+                Estimated MSP Value: <strong className="text-emerald-700">₹{(Number(quantity || 0) * (crop === "Wheat" ? 2275 : crop === "Paddy" ? 2300 : 2090)).toLocaleString()}</strong>
               </p>
             </div>
           </div>

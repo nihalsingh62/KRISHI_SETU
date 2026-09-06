@@ -20,9 +20,9 @@ import {
 } from "lucide-react";
 
 export const FarmerDashboard = ({ onNavigateTab }) => {
-  const { t, activeToken, activeCentre, lowNetworkMode, setLowNetworkMode } = useKisanSetu();
+  const { t, activeBooking, activeCentre, lowNetworkMode, setLowNetworkMode } = useKisanSetu();
 
-  if (!activeToken) {
+  if (!activeBooking) {
     return (
       <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm text-center">
         <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -42,28 +42,28 @@ export const FarmerDashboard = ({ onNavigateTab }) => {
     );
   }
 
-  const isCompleted = ["PROCUREMENT_COMPLETE", "PAYMENT_PROCESSING", "PAYMENT_COMPLETED"].includes(activeToken.status);
+  const isCompleted = ["PROCUREMENT_COMPLETE", "PAYMENT_PROCESSING", "PAYMENT_COMPLETED"].includes(activeBooking.status);
   
   // Determine contextual instruction based on status
   let instructionMsg = "";
   let instructionColor = "bg-blue-50 border-blue-200 text-blue-800";
   let Icon = BellRing;
 
-  if (activeToken.status === "BOOKED") {
+  if (activeBooking.status === "BOOKED") {
     instructionMsg = "You are not at the centre. Please arrive 15 minutes before your slot time.";
     instructionColor = "bg-slate-50 border-slate-200 text-slate-800";
-  } else if (activeToken.status === "WAITING" || activeToken.status === "ARRIVED") {
-    if (activeToken.queuePos <= 3) {
-      instructionMsg = `You are #${activeToken.queuePos} in queue. Please be ready for your turn.`;
+  } else if (activeBooking.status === "WAITING" || activeBooking.status === "ARRIVED") {
+    if (activeBooking.queuePosition <= 3) {
+      instructionMsg = `You are #${activeBooking.queuePosition} in queue. Please be ready for your turn.`;
       instructionColor = "bg-amber-50 border-amber-200 text-amber-800";
     } else {
-      instructionMsg = `You are #${activeToken.queuePos} in queue. Please wait in the designated parking area.`;
+      instructionMsg = `You are #${activeBooking.queuePosition} in queue. Please wait in the designated parking area.`;
       instructionColor = "bg-blue-50 border-blue-200 text-blue-800";
     }
-  } else if (activeToken.status === "WEIGHING") {
+  } else if (activeBooking.status === "WEIGHING") {
     instructionMsg = "You have been called for weighing. Please proceed to the active Weighbridge.";
     instructionColor = "bg-indigo-50 border-indigo-200 text-indigo-800";
-  } else if (activeToken.status === "QUALITY_CHECK") {
+  } else if (activeBooking.status === "QUALITY_CHECK") {
     instructionMsg = "Quality inspection in progress. Please wait near the QC lab.";
     instructionColor = "bg-indigo-50 border-indigo-200 text-indigo-800";
   }
@@ -75,7 +75,7 @@ export const FarmerDashboard = ({ onNavigateTab }) => {
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
             <div className="flex items-center gap-2 text-emerald-300 text-xs font-semibold uppercase tracking-wider mb-1">
-              <span>🌾 {t("goodMorning")}, {activeToken.farmerName}</span>
+              <span>🌾 {t("goodMorning")}, {activeBooking.farmerName}</span>
               <span className="bg-emerald-500/30 text-emerald-200 px-2 py-0.5 rounded text-[10px]">
                 Identity Verified
               </span>
@@ -84,7 +84,7 @@ export const FarmerDashboard = ({ onNavigateTab }) => {
               {isCompleted ? "Procurement Completed" : t("activeBooking")}
             </h2>
             <p className="text-slate-300 text-xs sm:text-sm mt-1">
-              Slot for <strong>{activeToken.commodity} ({activeToken.quantityQtl} Quintals)</strong> at {activeToken.slot}.
+              Slot for <strong>{activeBooking.crop} ({activeBooking.quantity} Quintals)</strong> at {activeBooking.slot}.
             </p>
           </div>
 
@@ -109,7 +109,7 @@ export const FarmerDashboard = ({ onNavigateTab }) => {
       </div>
 
       {isCompleted ? (
-        <ProcurementReceipt token={activeToken} centre={activeCentre} />
+        <ProcurementReceipt token={activeBooking} centre={activeCentre} />
       ) : (
         /* Main Active Token Card */
         <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-md relative overflow-hidden">
@@ -117,21 +117,21 @@ export const FarmerDashboard = ({ onNavigateTab }) => {
             <div className="flex items-center gap-4">
               <div className="w-20 h-20 rounded-2xl bg-emerald-100 border-2 border-emerald-500/30 text-emerald-800 flex flex-col items-center justify-center font-extrabold shadow-inner">
                 <span className="text-[10px] text-emerald-600 uppercase font-semibold mb-1 tracking-wider">YOUR TOKEN</span>
-                <span className="text-2xl font-mono text-emerald-900 leading-none">{activeToken.id}</span>
+                <span className="text-2xl font-mono text-emerald-900 leading-none">{activeBooking.id}</span>
               </div>
               <div>
                 <div className="flex items-center gap-2">
                   <h3 className="text-xl font-extrabold text-slate-900">
-                    {activeToken.commodity} — {activeToken.quantityQtl} Quintals
+                    {activeBooking.crop} — {activeBooking.quantity} Quintals
                   </h3>
                   <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                    activeToken.status === "WEIGHING" || activeToken.status === "QUALITY_CHECK"
+                    activeBooking.status === "WEIGHING" || activeBooking.status === "QUALITY_CHECK"
                       ? "bg-indigo-100 text-indigo-800"
-                      : activeToken.status === "ARRIVED"
+                      : activeBooking.status === "ARRIVED"
                       ? "bg-blue-100 text-blue-800"
                       : "bg-amber-100 text-amber-800"
                   }`}>
-                    {activeToken.status.replace(/_/g, " ")}
+                    {activeBooking.status.replace(/_/g, " ")}
                   </span>
                 </div>
                 <p className="text-sm font-medium text-slate-500 mt-1 flex items-center gap-1.5">
@@ -139,7 +139,7 @@ export const FarmerDashboard = ({ onNavigateTab }) => {
                   <span>{activeCentre.name}</span>
                 </p>
                 <p className="text-xs font-semibold text-slate-400 mt-0.5 ml-5.5">
-                  Scheduled: {activeToken.slot}
+                  Scheduled: {activeBooking.slot}
                 </p>
               </div>
             </div>
@@ -164,9 +164,9 @@ export const FarmerDashboard = ({ onNavigateTab }) => {
               </span>
               <div className="flex items-baseline gap-2">
                 <span className="text-4xl font-extrabold text-slate-900">
-                  #{activeToken.queuePos}
+                  #{activeBooking.queuePosition}
                 </span>
-                <span className="text-xs text-slate-500 font-bold">({activeToken.queuePos - 1} farmers ahead)</span>
+                <span className="text-xs text-slate-500 font-bold">({activeBooking.queuePosition - 1} farmers ahead)</span>
               </div>
             </div>
 
@@ -176,7 +176,7 @@ export const FarmerDashboard = ({ onNavigateTab }) => {
               </span>
               <div className="flex items-baseline gap-2">
                 <span className="text-4xl font-extrabold text-emerald-700">
-                  {activeToken.estimatedWaitMin}
+                  {activeBooking.estimatedWait}
                 </span>
                 <span className="text-xs text-emerald-800 font-bold">minutes</span>
               </div>

@@ -14,9 +14,9 @@ import {
 } from "lucide-react";
 
 export const LiveQueueView = () => {
-  const { t, activeToken, activeCentre, tokens } = useKisanSetu();
+  const { t, activeBooking, activeCentre, tokens } = useKisanSetu();
 
-  if (!activeToken) {
+  if (!activeBooking) {
     return (
       <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm text-center">
         <p className="text-slate-500 font-medium">No active booking to show queue for.</p>
@@ -25,7 +25,7 @@ export const LiveQueueView = () => {
   }
 
   // Filter tokens at the active centre
-  const centreTokens = tokens.filter((t) => t.centreId === activeCentre.id);
+  const centreBookings = bookings.filter((t) => t.centreId === activeCentre.id);
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -62,10 +62,10 @@ export const LiveQueueView = () => {
             {t("myToken")}
           </span>
           <div className="text-5xl sm:text-7xl font-mono font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-white tracking-widest">
-            {activeToken.id}
+            {activeBooking.id}
           </div>
           <span className="text-xs text-slate-300 mt-2 block font-medium">
-            Ramesh Singh • {activeToken.commodity} ({activeToken.quantityQtl} Quintals)
+            Ramesh Singh • {activeBooking.crop} ({activeBooking.quantity} Quintals)
           </span>
         </div>
 
@@ -73,17 +73,17 @@ export const LiveQueueView = () => {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 text-xs">
           <div className="bg-slate-800/80 p-3 rounded-xl border border-slate-700">
             <span className="text-[10px] text-slate-400 block font-medium">Scheduled Slot</span>
-            <strong className="text-slate-100 font-bold text-xs">{activeToken.slot}</strong>
+            <strong className="text-slate-100 font-bold text-xs">{activeBooking.slot}</strong>
           </div>
 
           <div className="bg-slate-800/80 p-3 rounded-xl border border-slate-700">
             <span className="text-[10px] text-slate-400 block font-medium">Farmers Ahead</span>
-            <strong className="text-amber-400 font-extrabold text-sm">{activeToken.queuePos}</strong>
+            <strong className="text-amber-400 font-extrabold text-sm">{activeBooking.queuePosition}</strong>
           </div>
 
           <div className="bg-slate-800/80 p-3 rounded-xl border border-slate-700">
             <span className="text-[10px] text-slate-400 block font-medium">Est. Waiting</span>
-            <strong className="text-emerald-400 font-extrabold text-sm">{activeToken.estimatedWaitMin} min</strong>
+            <strong className="text-emerald-400 font-extrabold text-sm">{activeBooking.estimatedWait} min</strong>
           </div>
 
           <div className="bg-slate-800/80 p-3 rounded-xl border border-slate-700">
@@ -111,12 +111,12 @@ export const LiveQueueView = () => {
         </div>
 
         <div className="space-y-2.5">
-          {centreTokens.map((tok) => {
-            const isMe = tok.id === activeToken.id;
+          {centreBookings.map((tok) => {
+            const isMe = tok.token === activeBooking.id;
 
             return (
               <div
-                key={tok.id}
+                key={tok.token}
                 className={`p-3.5 rounded-2xl flex items-center justify-between border transition-all ${
                   isMe
                     ? "bg-emerald-50 border-emerald-500 shadow-sm font-bold ring-2 ring-emerald-500/20"
@@ -127,7 +127,7 @@ export const LiveQueueView = () => {
                   <span className={`w-10 h-10 rounded-xl flex items-center justify-center font-mono font-bold text-sm ${
                     isMe ? "bg-emerald-600 text-white" : "bg-slate-200 text-slate-700"
                   }`}>
-                    {tok.id}
+                    {tok.token}
                   </span>
                   <div>
                     <div className="flex items-center gap-2">
@@ -135,7 +135,7 @@ export const LiveQueueView = () => {
                         {tok.farmerName} {isMe && "(YOU)"}
                       </span>
                       <span className="text-[10px] text-slate-500 font-normal">
-                        • {tok.commodity} ({tok.quantityQtl} Qtl)
+                        • {tok.crop} ({tok.quantity} Qtl)
                       </span>
                     </div>
                     <span className="text-[10px] text-slate-400 font-medium">

@@ -4,11 +4,11 @@ import confetti from "canvas-confetti";
 import { CreditCard, CheckCircle2, Building, ShieldCheck, ArrowRight, Download, Plus, Edit2 } from "lucide-react";
 
 export const PaymentTracker = () => {
-  const { activeToken, bankDetails, setBankDetails } = useKisanSetu();
+  const { activeBooking, bankDetails, setBankDetails } = useKisanSetu();
   const [isAddingBank, setIsAddingBank] = useState(false);
   const [formData, setFormData] = useState({ bankName: "", holderName: "", accountNumber: "", ifsc: "" });
 
-  if (!activeToken) {
+  if (!activeBooking) {
     return (
       <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm text-center">
         <p className="text-slate-500 font-medium">No active booking to show payment for.</p>
@@ -16,8 +16,8 @@ export const PaymentTracker = () => {
     );
   }
 
-  const isCompleted = activeToken.paymentStatus === "COMPLETED";
-  const isProcessing = activeToken.paymentStatus === "PROCESSING";
+  const isCompleted = activeBooking.paymentStatus === "COMPLETED";
+  const isProcessing = activeBooking.paymentStatus === "PROCESSING";
 
   useEffect(() => {
     if (isCompleted) {
@@ -61,7 +61,7 @@ export const PaymentTracker = () => {
               ? "bg-blue-100 text-blue-800"
               : "bg-slate-100 text-slate-700"
           }`}>
-            {activeToken.paymentStatus}
+            {activeBooking.paymentStatus}
           </span>
         </div>
 
@@ -73,14 +73,14 @@ export const PaymentTracker = () => {
                 Total Calculated Payable Amount
               </span>
               <div className="text-3xl sm:text-5xl font-extrabold text-emerald-400 mt-1">
-                ₹{activeToken.totalAmount ? activeToken.totalAmount.toLocaleString() : '0'}
+                ₹{activeBooking.totalAmount ? activeBooking.totalAmount.toLocaleString() : '0'}
               </div>
             </div>
 
             <div className="text-left sm:text-right text-xs text-slate-300">
-              <span>Quantity Procured: <strong>{activeToken.actualWeightQtl || activeToken.quantityQtl} Quintals</strong></span>
+              <span>Quantity Procured: <strong>{activeBooking.actualWeightQtl || activeBooking.quantity} Quintals</strong></span>
               <br />
-              <span>Government MSP Rate: <strong>₹{activeToken.mspPerQtl} / Qtl</strong></span>
+              <span>Government MSP Rate: <strong>₹{activeBooking.mspPerQtl} / Qtl</strong></span>
             </div>
           </div>
 
@@ -124,7 +124,7 @@ export const PaymentTracker = () => {
             <div className="bg-slate-800/80 p-4 rounded-2xl border border-slate-700">
               <span className="text-[10px] text-slate-400 block uppercase font-bold">Transaction Reference</span>
               <span className="font-bold font-mono text-amber-400 text-sm block mt-0.5">
-                {activeToken.paymentTxRef || "PENDING_VERIFICATION"}
+                {activeBooking.paymentTxRef || "PENDING_VERIFICATION"}
               </span>
               <span className="text-slate-400 text-[11px]">PFMS Gateway Sync</span>
             </div>

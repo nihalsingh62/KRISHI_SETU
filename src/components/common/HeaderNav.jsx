@@ -29,7 +29,7 @@ export const HeaderNav = () => {
     authenticatedUser,
     logout,
     notifications,
-    activeToken,
+    activeBooking,
     setActiveFarmerTab,
     setActiveOperatorTab,
     setActiveAdminTab

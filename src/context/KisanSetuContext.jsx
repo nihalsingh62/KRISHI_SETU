@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { INITIAL_CENTRES, INITIAL_SLOTS, INITIAL_TOKENS, INITIAL_NOTIFICATIONS } from "../data/mockData";
+import { INITIAL_CENTRES, INITIAL_SLOTS, INITIAL_BOOKINGS, INITIAL_NOTIFICATIONS } from "../data/mockData";
 import { translations } from "../data/translations";
 
 const KisanSetuContext = createContext();
@@ -28,7 +28,7 @@ export const KisanSetuProvider = ({ children }) => {
   
   const [centres, setCentres] = useState(() => getInitialState("ks_centres", INITIAL_CENTRES));
   const [slots, setSlots] = useState(() => getInitialState("ks_slots", INITIAL_SLOTS));
-  const [tokens, setTokens] = useState(() => getInitialState("ks_tokens", INITIAL_TOKENS));
+  const [bookings, setBookings] = useState(() => getInitialState("ks_bookings", INITIAL_BOOKINGS));
   const [notifications, setNotifications] = useState(() => getInitialState("ks_notifications", INITIAL_NOTIFICATIONS));
   
   // Navigation Tabs persistence
@@ -47,7 +47,7 @@ export const KisanSetuProvider = ({ children }) => {
   useEffect(() => { localStorage.setItem("ks_registeredFarmers", JSON.stringify(registeredFarmers)); }, [registeredFarmers]);
   useEffect(() => { localStorage.setItem("ks_centres", JSON.stringify(centres)); }, [centres]);
   useEffect(() => { localStorage.setItem("ks_slots", JSON.stringify(slots)); }, [slots]);
-  useEffect(() => { localStorage.setItem("ks_tokens", JSON.stringify(tokens)); }, [tokens]);
+  useEffect(() => { localStorage.setItem("ks_bookings", JSON.stringify(bookings)); }, [bookings]);
   useEffect(() => { localStorage.setItem("ks_notifications", JSON.stringify(notifications)); }, [notifications]);
   useEffect(() => { localStorage.setItem("ks_activeFarmerTab", JSON.stringify(activeFarmerTab)); }, [activeFarmerTab]);
   useEffect(() => { localStorage.setItem("ks_activeOperatorTab", JSON.stringify(activeOperatorTab)); }, [activeOperatorTab]);
@@ -93,15 +93,15 @@ export const KisanSetuProvider = ({ children }) => {
   };
 
   // Calculate active token based on authenticated user
-  const getActiveToken = () => {
+  const getActiveBooking = () => {
     if (currentRole === "farmer" && authenticatedUser) {
       // Find the most recent token for this farmer
-      const farmerTokens = tokens.filter(t => t.farmerId === authenticatedUser.id || t.farmerName === authenticatedUser.name);
+      const farmerTokens = bookings.filter(t => t.farmerId === authenticatedUser.id || t.farmerName === authenticatedUser.name);
       return farmerTokens.length > 0 ? farmerTokens[farmerTokens.length - 1] : null;
     }
     return null;
   };
-  const activeToken = getActiveToken();
+  const activeBooking = getActiveBooking();
   const activeCentre = centres.find((c) => c.id === activeCentreId) || centres[0];
 
 
@@ -134,19 +134,19 @@ export const KisanSetuProvider = ({ children }) => {
   };
 
   const recalculateQueuePositions = (tokenList) => {
-    // Re-evaluate queue positions for each centre based on active waiting tokens
+    // Re-evaluate queue positions for each centre based on active waiting bookings
     const updated = [...tokenList];
     const centresSet = new Set(updated.map(t => t.centreId));
     
     centresSet.forEach(cId => {
-      // Find tokens in queue (BOOKED, WAITING, ARRIVED) for this centre
+      // Find bookings in queue (BOOKED, WAITING, ARRIVED) for this centre
       const inQueueTokens = updated.filter(t => t.centreId === cId && ["BOOKED", "WAITING", "ARRIVED"].includes(t.status));
       // Sort them by their current queuePos or time (simulated by ID logic or bookedAt)
       inQueueTokens.sort((a, b) => a.id.localeCompare(b.id));
       
       inQueueTokens.forEach((tok, index) => {
         // Queue position is index + 1
-        const tIndex = updated.findIndex(t => t.id === tok.id);
+        const tIndex = updated.findIndex(t => t.bookingId === tok.bookingId);
         if (tIndex !== -1) {
           updated[tIndex].queuePos = index + 1;
           updated[tIndex].estimatedWaitMin = Math.max(10, Math.round((index + 1) * 6)); // Rough estimate dynamically decreasing
@@ -160,22 +160,31 @@ export const KisanSetuProvider = ({ children }) => {
   const bookSlot = ({ commodity, quantityQtl, centreId, date, slotTime }) => {
     if (!authenticatedUser) return null;
 
-    const nextTokenNum = `A${125 + tokens.length - 5}`;
+    const bookingId = `BKG-${Date.now()}`;
+    const nextTokenNum = `A${125 + bookings.length - 5}`;
     const centre = centres.find((c) => c.id === centreId) || centres[0];
     const msp = commodity === "Wheat" ? 2275 : commodity === "Paddy" ? 2300 : 2090;
     const estWait = Math.max(10, Math.round(centre.queueDepth * (centre.avgProcessingMin / centre.activeCounters)));
 
-    const newToken = {
-      id: nextTokenNum,
+    const newBooking = {
+      bookingId: bookingId,
+      id: bookingId,
+      token: nextTokenNum,
       farmerId: authenticatedUser.id,
       farmerName: authenticatedUser.name,
       phone: authenticatedUser.mobile,
-      commodity,
+      crop: commodity,
+      commodity: commodity,
+      quantity: Number(quantityQtl),
       quantityQtl: Number(quantityQtl),
       centreId,
+      centreName: centre.name,
+      date: date,
       slot: slotTime,
       status: "BOOKED",
+      queuePosition: centre.queueDepth + 1,
       queuePos: centre.queueDepth + 1,
+      estimatedWait: estWait,
       estimatedWaitMin: estWait,
       actualWeightQtl: null,
       moisturePercent: null,
@@ -184,16 +193,17 @@ export const KisanSetuProvider = ({ children }) => {
       totalAmount: Math.round(Number(quantityQtl) * msp),
       paymentStatus: "NOT_INITIATED",
       paymentTxRef: null,
+      createdAt: new Date().toISOString(),
       bookedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       timelineHistory: [
         { status: "BOOKED", time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), desc: `Slot booked at ${centre.name} for ${slotTime}` }
       ]
     };
 
-    let updatedTokens = [...tokens, newToken];
+    let updatedTokens = [...bookings, newBooking];
     updatedTokens = recalculateQueuePositions(updatedTokens);
     
-    setTokens(updatedTokens);
+    setBookings(updatedTokens);
 
     // Update slots
     setSlots((prevSlots) =>
@@ -217,71 +227,72 @@ export const KisanSetuProvider = ({ children }) => {
       time: "Just now"
     });
 
-    return newToken;
+    return newBooking;
   };
 
   // Updating status from operator portal
-  const updateTokenStatus = (tokenId, newStatus, extraData = {}) => {
+  const updateBookingStatus = (bookingId, newStatus, extraData = {}) => {
     const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     let notifyMsg = "";
 
-    const updatedTokens = tokens.map((tok) => {
-      if (tok.id !== tokenId) return tok;
+    const updatedTokens = bookings.map((tok) => {
+      if (tok.bookingId !== bookingId) return tok;
 
       const history = [...tok.timelineHistory];
-      let updatedObj = { ...tok, status: newStatus };
+      let updatedObj = { ...tok, status: newStatus, updatedAt: nowIso };
 
       if (newStatus === "ARRIVED") {
         history.push({ status: "ARRIVED", time: nowTime, desc: "Checked-in at Gate 1" });
-        notifyMsg = `Token ${tokenId}: Farmer checked-in at gate.`;
+        notifyMsg = `Token ${updatedObj.token}: Farmer checked-in at gate.`;
       } else if (newStatus === "CALLED") {
         history.push({ status: "CALLED", time: nowTime, desc: "Called for weighing" });
-        notifyMsg = `Token ${tokenId}: Proceed to Weighbridge.`;
+        notifyMsg = `Token ${updatedObj.token}: Proceed to Weighbridge.`;
       } else if (newStatus === "WEIGHING") {
         const weight = extraData.actualWeightQtl || tok.actualWeightQtl || (tok.quantityQtl + 0.5);
         updatedObj.actualWeightQtl = weight;
         updatedObj.totalAmount = Math.round(weight * tok.mspPerQtl);
         history.push({ status: "WEIGHING", time: nowTime, desc: `Vehicle on Weighbridge. Recorded: ${weight} Qtl` });
-        notifyMsg = `Token ${tokenId}: Weighbridge weighing completed (${weight} Qtl).`;
+        notifyMsg = `Token ${updatedObj.token}: Weighbridge weighing completed (${weight} Qtl).`;
       } else if (newStatus === "QUALITY_CHECK") {
         const moisture = extraData.moisturePercent || 12.0;
         const grade = extraData.grade || "Grade A";
         updatedObj.moisturePercent = moisture;
         updatedObj.grade = grade;
         history.push({ status: "QUALITY_CHECK", time: nowTime, desc: `Passed Quality Test (${moisture}% Moisture, ${grade})` });
-        notifyMsg = `Token ${tokenId}: Quality inspection passed (${grade}).`;
+        notifyMsg = `Token ${updatedObj.token}: Quality inspection passed (${grade}).`;
       } else if (newStatus === "PROCUREMENT_COMPLETE") {
         updatedObj.paymentStatus = "PROCESSING";
         history.push({ status: "PROCUREMENT_COMPLETE", time: nowTime, desc: "Procurement completed & digital receipt generated" });
-        notifyMsg = `Token ${tokenId}: Procurement complete! Payment initiated.`;
+        notifyMsg = `Token ${updatedObj.token}: Procurement complete! Payment initiated.`;
       } else if (newStatus === "PAYMENT_PROCESSING") {
         updatedObj.paymentStatus = "PROCESSING";
         history.push({ status: "PAYMENT_PROCESSING", time: nowTime, desc: "PFMS / Bank Transfer Verification in progress" });
-        notifyMsg = `Token ${tokenId}: Direct payment processing underway.`;
+        notifyMsg = `Token ${updatedObj.token}: Direct payment processing underway.`;
       } else if (newStatus === "PAYMENT_COMPLETED") {
         const txRef = `DEMO-TRX-${Math.floor(10000 + Math.random() * 90000)}`;
         updatedObj.paymentStatus = "COMPLETED";
         updatedObj.paymentTxRef = txRef;
         history.push({ status: "PAYMENT_COMPLETED", time: nowTime, desc: `Direct Bank Transfer Successful (Ref: ${txRef})` });
-        notifyMsg = `Token ${tokenId}: ₹${updatedObj.totalAmount.toLocaleString()} credited to bank account (Ref: ${txRef}).`;
+        notifyMsg = `Token ${updatedObj.token}: ₹${updatedObj.totalAmount.toLocaleString()} credited to bank account (Ref: ${txRef}).`;
       } else if (newStatus === "REJECTED") {
         history.push({ status: "REJECTED", time: nowTime, desc: `Procurement rejected: ${extraData.remarks || 'Failed quality check'}` });
-        notifyMsg = `Token ${tokenId}: Procurement rejected.`;
+        notifyMsg = `Token ${updatedObj.token}: Procurement rejected.`;
       }
 
       updatedObj.timelineHistory = history;
+      updatedObj.updatedAt = new Date().toISOString();
       return updatedObj;
     });
 
     const finalizedTokens = recalculateQueuePositions(updatedTokens);
 
-    setTokens(finalizedTokens);
+    setBookings(finalizedTokens);
     setCentres((prev) => recalculateCentreMetrics(prev, finalizedTokens));
 
     if (notifyMsg) {
       addNotification({
         type: newStatus,
-        title: `Status Update (${tokenId})`,
+        title: `Status Update (${updatedObj.token})`,
         message: notifyMsg,
         time: "Just now"
       });
@@ -355,14 +366,14 @@ export const KisanSetuProvider = ({ children }) => {
         updateFarmerBankDetails,
         centres,
         slots,
-        tokens,
+        bookings,
         notifications,
         activeCentreId,
         setActiveCentreId,
-        activeToken, // dynamically computed based on authenticatedUser
+        activeBooking, // dynamically computed based on authenticatedUser
         activeCentre,
         bookSlot,
-        updateTokenStatus,
+        updateBookingStatus,
         updateCentreCapacity,
         updateSlotCapacity,
         addNotification,

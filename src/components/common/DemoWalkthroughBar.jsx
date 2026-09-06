@@ -3,7 +3,7 @@ import { useKisanSetu } from "../../context/KisanSetuContext";
 import { Play, ChevronRight, ChevronLeft, RotateCcw, Sparkles, CheckCircle2, User, Building2, ShieldCheck } from "lucide-react";
 
 export const DemoWalkthroughBar = () => {
-  const { demoStep, runDemoStep, activeToken } = useKisanSetu();
+  const { demoStep, runDemoStep, activeBooking } = useKisanSetu();
   const [collapsed, setCollapsed] = useState(false);
 
   const DEMO_STEPS = [
@@ -73,7 +73,7 @@ export const DemoWalkthroughBar = () => {
 
               <div className="hidden sm:flex items-center gap-1.5 text-xs bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-700 text-slate-300">
                 <span className="text-slate-400">Current Token:</span>
-                <strong className="text-emerald-400 font-mono">{activeToken?.id || 'A124'}</strong>
+                <strong className="text-emerald-400 font-mono">{activeBooking?.id || 'A124'}</strong>
               </div>
             </div>
 

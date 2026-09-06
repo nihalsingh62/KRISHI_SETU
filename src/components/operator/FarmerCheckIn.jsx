@@ -3,14 +3,14 @@ import { useKisanSetu } from "../../context/KisanSetuContext";
 import { Search, UserCheck, CheckCircle2, QrCode } from "lucide-react";
 
 export const FarmerCheckIn = () => {
-  const { tokens, activeCentre, updateTokenStatus } = useKisanSetu();
+  const { bookings, activeCentre, updateTokenStatus } = useKisanSetu();
   const [searchTokenId, setSearchTokenId] = useState("A124");
-  const [searchedToken, setSearchedToken] = useState(tokens.find((t) => t.id === "A124") || null);
+  const [searchedToken, setSearchedToken] = useState(bookings.find((t) => t.token === "A124") || null);
 
   const handleSearch = (e) => {
     e.preventDefault();
-    const found = tokens.find(
-      (t) => t.id.toLowerCase() === searchTokenId.toLowerCase() && t.centreId === activeCentre.id
+    const found = bookings.find(
+      (t) => t.token.toLowerCase() === searchTokenId.toLowerCase() && t.centreId === activeCentre.id
     );
     setSearchedToken(found || null);
   };
@@ -72,7 +72,7 @@ export const FarmerCheckIn = () => {
             <div className="grid grid-cols-2 gap-3 text-xs pt-3 border-t border-slate-200">
               <div>
                 <span className="text-[10px] text-slate-400 block font-semibold">Commodity</span>
-                <strong className="text-slate-800">{searchedToken.commodity} ({searchedToken.quantityQtl} Qtl)</strong>
+                <strong className="text-slate-800">{searchedToken.crop} ({searchedToken.quantity} Qtl)</strong>
               </div>
               <div>
                 <span className="text-[10px] text-slate-400 block font-semibold">Slot</span>

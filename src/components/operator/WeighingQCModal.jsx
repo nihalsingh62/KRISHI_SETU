@@ -4,16 +4,16 @@ import { Scale, ShieldCheck, X, CheckCircle2 } from "lucide-react";
 
 export const WeighingQCModal = ({ token, modalType, onClose }) => {
   const { updateTokenStatus } = useKisanSetu();
-  const [weight, setWeight] = useState(token.actualWeightQtl || (token.quantityQtl + 0.5));
+  const [weight, setWeight] = useState(token.actualWeightQtl || (token.quantity + 0.5));
   const [moisture, setMoisture] = useState(token.moisturePercent || 12.0);
   const [grade, setGrade] = useState(token.grade || "Grade A");
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (modalType === "weighing") {
-      updateTokenStatus(token.id, "WEIGHING", { actualWeightQtl: Number(weight) });
+      updateTokenStatus(token.token, "WEIGHING", { actualWeightQtl: Number(weight) });
     } else if (modalType === "qc") {
-      updateTokenStatus(token.id, "QUALITY_CHECK", { moisturePercent: Number(moisture), grade });
+      updateTokenStatus(token.token, "QUALITY_CHECK", { moisturePercent: Number(moisture), grade });
     }
     onClose();
   };
@@ -40,9 +40,9 @@ export const WeighingQCModal = ({ token, modalType, onClose }) => {
 
         <form onSubmit={handleSubmit} className="space-y-4 pt-4 text-xs">
           <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100 font-medium text-slate-700">
-            <span>Token: <strong>{token.id}</strong> • {token.farmerName}</span>
+            <span>Token: <strong>{token.token}</strong> • {token.farmerName}</span>
             <br />
-            <span className="text-slate-500">Declared Quantity: <strong>{token.quantityQtl} Quintals ({token.commodity})</strong></span>
+            <span className="text-slate-500">Declared Quantity: <strong>{token.quantity} Quintals ({token.crop})</strong></span>
           </div>
 
           {modalType === "weighing" ? (

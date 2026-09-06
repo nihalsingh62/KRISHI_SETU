@@ -17,7 +17,7 @@ import {
 import { FarmerProfile } from "./FarmerProfile";
 
 export const FarmerPortalView = () => {
-  const { t, lowNetworkMode, setLowNetworkMode, activeToken, activeFarmerTab, setActiveFarmerTab } = useKisanSetu();
+  const { t, lowNetworkMode, setLowNetworkMode, activeBooking, activeFarmerTab, setActiveFarmerTab } = useKisanSetu();
 
   // If low network mode is ON, render simplified rural offline card
   if (lowNetworkMode) {
@@ -48,21 +48,21 @@ export const FarmerPortalView = () => {
             <div className="text-center py-4 bg-slate-900 text-white rounded-2xl">
               <span className="text-xs text-amber-400 font-extrabold uppercase block">{t("myToken")}</span>
               <div className="text-5xl font-mono font-extrabold text-emerald-400 mt-1">
-                {activeToken?.id || "A124"}
+                {activeBooking?.id || "A124"}
               </div>
               <p className="text-xs text-slate-300 mt-1">
-                {activeToken?.farmerName} • {activeToken?.commodity} ({activeToken?.quantityQtl} Qtl)
+                {activeBooking?.farmerName} • {activeBooking?.crop} ({activeBooking?.quantity} Qtl)
               </p>
             </div>
 
             <div className="grid grid-cols-2 gap-3 text-xs font-bold pt-2">
               <div className="bg-amber-100 p-3 rounded-xl">
-                <span className="text-[10px] text-amber-800 block">{t("queuePosition")}</span>
-                <span className="text-xl text-slate-900">{activeToken?.queuePos || 6} ahead</span>
+                <span className="text-[10px] text-amber-800 block">{t("queuePositionition")}</span>
+                <span className="text-xl text-slate-900">{activeBooking?.queuePosition || 6} ahead</span>
               </div>
               <div className="bg-emerald-100 p-3 rounded-xl">
                 <span className="text-[10px] text-emerald-800 block">{t("estimatedWait")}</span>
-                <span className="text-xl text-slate-900">{activeToken?.estimatedWaitMin || 35} min</span>
+                <span className="text-xl text-slate-900">{activeBooking?.estimatedWait || 35} min</span>
               </div>
             </div>
           </div>

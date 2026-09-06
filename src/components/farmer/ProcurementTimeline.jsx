@@ -13,9 +13,9 @@ import {
 } from "lucide-react";
 
 export const ProcurementTimeline = () => {
-  const { activeToken, activeCentre } = useKisanSetu();
+  const { activeBooking, activeCentre } = useKisanSetu();
 
-  if (!activeToken) {
+  if (!activeBooking) {
     return (
       <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm text-center">
         <p className="text-slate-500 font-medium">No active booking to show timeline for.</p>
@@ -43,7 +43,7 @@ export const ProcurementTimeline = () => {
       "PAYMENT_PROCESSING",
       "PAYMENT_COMPLETED"
     ];
-    const currentIndex = statusOrder.indexOf(activeToken.status);
+    const currentIndex = statusOrder.indexOf(activeBooking.status);
     const stageIndex = statusOrder.indexOf(stageKey);
 
     if (stageIndex < currentIndex) return "COMPLETED";
@@ -60,12 +60,12 @@ export const ProcurementTimeline = () => {
               Procurement Workflow Status
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
-              Live step-by-step progress tracking for Token <strong>{activeToken.id}</strong>.
+              Live step-by-step progress tracking for Token <strong>{activeBooking.id}</strong>.
             </p>
           </div>
 
           <span className="text-xs font-bold px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full">
-            {activeToken.status.replace(/_/g, " ")}
+            {activeBooking.status.replace(/_/g, " ")}
           </span>
         </div>
 
@@ -106,21 +106,21 @@ export const ProcurementTimeline = () => {
                   </div>
 
                   {/* Recorded extra details */}
-                  {st.key === "WEIGHING" && activeToken.actualWeightQtl && (
+                  {st.key === "WEIGHING" && activeBooking.actualWeightQtl && (
                     <p className="text-xs text-blue-700 bg-blue-50 p-2.5 rounded-xl mt-1.5 font-medium border border-blue-100">
-                      ⚖️ Recorded Weight: <strong>{activeToken.actualWeightQtl} Quintals</strong> (Declared: {activeToken.quantityQtl} Qtl)
+                      ⚖️ Recorded Weight: <strong>{activeBooking.actualWeightQtl} Quintals</strong> (Declared: {activeBooking.quantity} Qtl)
                     </p>
                   )}
 
-                  {st.key === "QUALITY_CHECK" && activeToken.moisturePercent && (
+                  {st.key === "QUALITY_CHECK" && activeBooking.moisturePercent && (
                     <p className="text-xs text-emerald-800 bg-emerald-50 p-2.5 rounded-xl mt-1.5 font-medium border border-emerald-100">
-                      🔬 Quality Test Passed: Moisture <strong>{activeToken.moisturePercent}%</strong> | Grade: <strong>{activeToken.grade}</strong>
+                      🔬 Quality Test Passed: Moisture <strong>{activeBooking.moisturePercent}%</strong> | Grade: <strong>{activeBooking.grade}</strong>
                     </p>
                   )}
 
-                  {st.key === "PAYMENT_COMPLETED" && activeToken.paymentTxRef && (
+                  {st.key === "PAYMENT_COMPLETED" && activeBooking.paymentTxRef && (
                     <p className="text-xs text-emerald-900 bg-emerald-100 p-2.5 rounded-xl mt-1.5 font-bold border border-emerald-300">
-                      🎉 Direct Bank Transfer Reference: <strong>{activeToken.paymentTxRef}</strong>
+                      🎉 Direct Bank Transfer Reference: <strong>{activeBooking.paymentTxRef}</strong>
                     </p>
                   )}
                 </div>

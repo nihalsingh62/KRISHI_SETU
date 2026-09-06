@@ -11,7 +11,8 @@ import {
   Truck,
   CreditCard,
   WifiOff,
-  User
+  User,
+  QrCode
 } from "lucide-react";
 import { FarmerProfile } from "./FarmerProfile";
 

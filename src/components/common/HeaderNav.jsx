@@ -32,8 +32,7 @@ export const HeaderNav = () => {
     activeToken,
     setActiveFarmerTab,
     setActiveOperatorTab,
-    setActiveAdminTab,
-    currentRole
+    setActiveAdminTab
   } = useKisanSetu();
 
   const [activePopover, setActivePopover] = useState(null); // 'notifications' | 'network' | 'user' | 'mobile' | null
@@ -70,7 +69,7 @@ export const HeaderNav = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <button 
+          <button
             onClick={() => {
               if (currentRole === "farmer" && setActiveFarmerTab) setActiveFarmerTab("dashboard");
               if (currentRole === "operator" && setActiveOperatorTab) setActiveOperatorTab("queue");
@@ -106,16 +105,15 @@ export const HeaderNav = () => {
 
           {/* Right Action Tools */}
           <div className="flex items-center gap-2 sm:gap-4">
-            
+
             {/* Low Network Toggle Dropdown */}
             <div className="relative">
               <button
                 onClick={() => togglePopover("network")}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
-                  lowNetworkMode
-                    ? "bg-amber-50 text-amber-800 border-amber-300 font-bold"
-                    : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
-                }`}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${lowNetworkMode
+                  ? "bg-amber-50 text-amber-800 border-amber-300 font-bold"
+                  : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
+                  }`}
               >
                 {lowNetworkMode ? (
                   <>
@@ -135,8 +133,8 @@ export const HeaderNav = () => {
                   <div className="px-4 pb-2 border-b border-slate-100">
                     <p className="text-xs font-bold text-slate-800">Connectivity</p>
                     <p className="text-[10px] text-slate-500 mt-0.5">
-                      Status: {lowNetworkMode ? "Offline UI Active" : "Connected"}<br/>
-                      Network quality: {lowNetworkMode ? "Poor" : "Good"}<br/>
+                      Status: {lowNetworkMode ? "Offline UI Active" : "Connected"}<br />
+                      Network quality: {lowNetworkMode ? "Poor" : "Good"}<br />
                       Last synced: {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </p>
                   </div>
@@ -156,17 +154,15 @@ export const HeaderNav = () => {
             <div className="flex items-center bg-slate-100 rounded-lg p-0.5 border border-slate-200 text-xs">
               <button
                 onClick={() => setLanguage("en")}
-                className={`px-2 py-1 rounded-md font-bold transition-all ${
-                  language === "en" ? "bg-white text-emerald-700 shadow-xs" : "text-slate-600"
-                }`}
+                className={`px-2 py-1 rounded-md font-bold transition-all ${language === "en" ? "bg-white text-emerald-700 shadow-xs" : "text-slate-600"
+                  }`}
               >
                 EN
               </button>
               <button
                 onClick={() => setLanguage("hi")}
-                className={`px-2 py-1 rounded-md font-bold transition-all ${
-                  language === "hi" ? "bg-white text-emerald-700 shadow-xs" : "text-slate-600"
-                }`}
+                className={`px-2 py-1 rounded-md font-bold transition-all ${language === "hi" ? "bg-white text-emerald-700 shadow-xs" : "text-slate-600"
+                  }`}
               >
                 हिंदी
               </button>
@@ -239,7 +235,7 @@ export const HeaderNav = () => {
                       <p className="text-[10px] text-slate-500 capitalize">{currentRole}</p>
                     </div>
                     {currentRole === "farmer" && (
-                      <button 
+                      <button
                         onClick={() => {
                           setActivePopover(null);
                           if (setActiveFarmerTab) setActiveFarmerTab("profile");

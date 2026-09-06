@@ -1,10 +1,12 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useKisanSetu } from "../../context/KisanSetuContext";
 import confetti from "canvas-confetti";
-import { CreditCard, CheckCircle2, Building, ShieldCheck, ArrowRight, Download } from "lucide-react";
+import { CreditCard, CheckCircle2, Building, ShieldCheck, ArrowRight, Download, Plus, Edit2 } from "lucide-react";
 
 export const PaymentTracker = () => {
-  const { activeToken, activeCentre } = useKisanSetu();
+  const { activeToken, bankDetails, setBankDetails } = useKisanSetu();
+  const [isAddingBank, setIsAddingBank] = useState(false);
+  const [formData, setFormData] = useState({ bankName: "", holderName: "", accountNumber: "", ifsc: "" });
 
   if (!activeToken) return null;
 
@@ -20,6 +22,17 @@ export const PaymentTracker = () => {
       });
     }
   }, [isCompleted]);
+
+  const handleSaveBank = (e) => {
+    e.preventDefault();
+    setBankDetails(formData);
+    setIsAddingBank(false);
+  };
+
+  const maskAccount = (acc) => {
+    if (!acc || acc.length < 4) return "****";
+    return `XXXX XXXX ${acc.slice(-4)}`;
+  };
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -66,11 +79,40 @@ export const PaymentTracker = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-6 text-xs text-slate-300">
-            <div className="bg-slate-800/80 p-4 rounded-2xl border border-slate-700">
+            <div className="bg-slate-800/80 p-4 rounded-2xl border border-slate-700 relative">
               <span className="text-[10px] text-slate-400 block uppercase font-bold">Beneficiary Account</span>
-              <span className="font-bold text-white text-sm block mt-0.5">Ramesh Singh</span>
-              <span className="text-slate-400 text-[11px]">State Bank of India • A/C ****4821</span>
-              <span className="text-[10px] text-emerald-400 block mt-1">✓ Aadhaar & Bank Linked</span>
+              
+              {!bankDetails ? (
+                <div className="mt-2">
+                  <span className="text-slate-300 font-bold block mb-2 text-sm text-red-400">No bank account linked</span>
+                  {!isAddingBank && (
+                    <button
+                      onClick={() => setIsAddingBank(true)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg transition-colors text-[11px]"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      Add Bank Account
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div className="mt-0.5">
+                  <span className="font-bold text-white text-sm block">{bankDetails.bankName}</span>
+                  <span className="text-slate-400 text-[11px]">A/C {maskAccount(bankDetails.accountNumber)}</span>
+                  <span className="text-slate-400 text-[11px] block mt-0.5">Account Holder: {bankDetails.holderName} | IFSC: {bankDetails.ifsc}</span>
+                  <span className="text-[10px] text-amber-400 block mt-1">✓ Verification: Demo / Simulated</span>
+                  
+                  {!isAddingBank && (
+                    <button
+                      onClick={() => setIsAddingBank(true)}
+                      className="absolute top-4 right-4 flex items-center gap-1 text-emerald-400 hover:text-emerald-300 transition-colors"
+                    >
+                      <Edit2 className="w-3.5 h-3.5" />
+                      <span className="text-[10px] font-bold uppercase tracking-wider">Change</span>
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="bg-slate-800/80 p-4 rounded-2xl border border-slate-700">
@@ -81,6 +123,76 @@ export const PaymentTracker = () => {
               <span className="text-slate-400 text-[11px]">PFMS Gateway Sync</span>
             </div>
           </div>
+          
+          {/* Add Bank Form */}
+          {isAddingBank && (
+            <div className="mt-4 bg-slate-800 rounded-2xl p-5 border border-emerald-500/30">
+              <h4 className="text-sm font-bold text-white mb-4">{bankDetails ? "Change Bank Account" : "Link New Bank Account"}</h4>
+              <form onSubmit={handleSaveBank} className="space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[10px] text-slate-400 uppercase font-bold block mb-1">Bank Name</label>
+                    <input 
+                      required
+                      type="text"
+                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500"
+                      placeholder="e.g. State Bank of India"
+                      value={formData.bankName}
+                      onChange={(e) => setFormData({...formData, bankName: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-slate-400 uppercase font-bold block mb-1">Account Holder Name</label>
+                    <input 
+                      required
+                      type="text"
+                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500"
+                      placeholder="e.g. Ramesh Singh"
+                      value={formData.holderName}
+                      onChange={(e) => setFormData({...formData, holderName: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-slate-400 uppercase font-bold block mb-1">Account Number</label>
+                    <input 
+                      required
+                      type="text"
+                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500"
+                      placeholder="Account Number"
+                      value={formData.accountNumber}
+                      onChange={(e) => setFormData({...formData, accountNumber: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-slate-400 uppercase font-bold block mb-1">IFSC Code</label>
+                    <input 
+                      required
+                      type="text"
+                      className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500"
+                      placeholder="e.g. SBIN0001234"
+                      value={formData.ifsc}
+                      onChange={(e) => setFormData({...formData, ifsc: e.target.value})}
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center justify-end gap-2 mt-4">
+                  <button 
+                    type="button" 
+                    onClick={() => setIsAddingBank(false)}
+                    className="px-4 py-2 rounded-lg text-xs font-bold text-slate-300 hover:text-white transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit"
+                    className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition-colors"
+                  >
+                    Save & Verify (Demo)
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
         </div>
       </div>
     </div>

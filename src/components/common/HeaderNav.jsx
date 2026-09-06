@@ -32,15 +32,36 @@ export const HeaderNav = () => {
     activeToken
   } = useKisanSetu();
 
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [networkMenuOpen, setNetworkMenuOpen] = useState(false);
+  const [activePopover, setActivePopover] = useState(null); // 'notifications' | 'network' | 'user' | 'mobile' | null
+  const headerRef = React.useRef(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (headerRef.current && !headerRef.current.contains(event.target)) {
+        setActivePopover(null);
+      }
+    };
+    const handleEscape = (event) => {
+      if (event.key === 'Escape') {
+        setActivePopover(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, []);
+
+  const togglePopover = (popoverName) => {
+    setActivePopover((prev) => (prev === popoverName ? null : popoverName));
+  };
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   return (
-    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs">
+    <header ref={headerRef} className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs">
       {/* Main Navbar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
@@ -78,7 +99,7 @@ export const HeaderNav = () => {
             {/* Low Network Toggle Dropdown */}
             <div className="relative">
               <button
-                onClick={() => setNetworkMenuOpen(!networkMenuOpen)}
+                onClick={() => togglePopover("network")}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${
                   lowNetworkMode
                     ? "bg-amber-50 text-amber-800 border-amber-300 font-bold"
@@ -98,7 +119,7 @@ export const HeaderNav = () => {
                 )}
               </button>
 
-              {networkMenuOpen && (
+              {activePopover === "network" && (
                 <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-200 py-3 z-50">
                   <div className="px-4 pb-2 border-b border-slate-100">
                     <p className="text-xs font-bold text-slate-800">Connectivity</p>
@@ -110,7 +131,7 @@ export const HeaderNav = () => {
                   </div>
                   <div className="px-2 pt-2">
                     <button
-                      onClick={() => { setLowNetworkMode(!lowNetworkMode); setNetworkMenuOpen(false); }}
+                      onClick={() => { setLowNetworkMode(!lowNetworkMode); setActivePopover(null); }}
                       className="w-full text-left px-3 py-2 text-xs font-semibold rounded-lg hover:bg-slate-50 transition-colors"
                     >
                       {lowNetworkMode ? "Disable Low-Bandwidth Mode" : "Enable Low-Bandwidth Mode"}
@@ -144,7 +165,7 @@ export const HeaderNav = () => {
             {isAuthenticated && (
               <div className="relative">
                 <button
-                  onClick={() => setShowNotifications(!showNotifications)}
+                  onClick={() => togglePopover("notifications")}
                   className="relative p-2 text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-100 transition-colors"
                 >
                   <Bell className="w-5 h-5" />
@@ -155,7 +176,7 @@ export const HeaderNav = () => {
                   )}
                 </button>
 
-                {showNotifications && (
+                {activePopover === "notifications" && (
                   <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-xl border border-slate-200 py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                     <div className="px-4 py-2 border-b border-slate-100 flex items-center justify-between">
                       <h4 className="font-bold text-slate-800 text-sm flex items-center gap-2">
@@ -190,7 +211,7 @@ export const HeaderNav = () => {
             {isAuthenticated && authenticatedUser && (
               <div className="relative hidden md:block">
                 <button
-                  onClick={() => setUserMenuOpen(!userMenuOpen)}
+                  onClick={() => togglePopover("user")}
                   className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-full hover:bg-slate-100 transition-colors border border-transparent hover:border-slate-200"
                 >
                   <div className="w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center">
@@ -200,7 +221,7 @@ export const HeaderNav = () => {
                   <ChevronDown className="w-3.5 h-3.5 text-slate-500" />
                 </button>
 
-                {userMenuOpen && (
+                {activePopover === "user" && (
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-slate-200 py-1 z-50">
                     <div className="px-4 py-3 border-b border-slate-100">
                       <p className="text-sm font-bold text-slate-800">{authenticatedUser.name}</p>
@@ -213,7 +234,7 @@ export const HeaderNav = () => {
                     )}
                     <button
                       onClick={() => {
-                        setUserMenuOpen(false);
+                        setActivePopover(null);
                         logout();
                       }}
                       className="w-full text-left px-4 py-2.5 text-xs font-medium text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2"
@@ -227,17 +248,17 @@ export const HeaderNav = () => {
 
             {/* Mobile Hamburger Menu button */}
             <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              onClick={() => togglePopover("mobile")}
               className="md:hidden p-2 text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-100"
             >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {activePopover === "mobile" ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
         </div>
       </div>
 
       {/* Mobile Menu Dropdown */}
-      {mobileMenuOpen && (
+      {activePopover === "mobile" && (
         <div className="md:hidden bg-slate-50 border-b border-slate-200 px-4 py-3 space-y-2">
           {isAuthenticated ? (
             <>
@@ -246,7 +267,7 @@ export const HeaderNav = () => {
                 <p className="text-[10px] text-slate-500 uppercase">{currentRole} Portal</p>
               </div>
               <button
-                onClick={() => { setMobileMenuOpen(false); logout(); }}
+                onClick={() => { setActivePopover(null); logout(); }}
                 className="w-full flex items-center justify-center p-2.5 rounded-xl font-bold text-sm bg-red-100 text-red-700 border border-red-200"
               >
                 Logout

@@ -10,6 +10,7 @@ export const KisanSetuProvider = ({ children }) => {
   const [currentRole, setCurrentRole] = useState("landing"); // landing | farmer | operator | admin
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authenticatedUser, setAuthenticatedUser] = useState(null);
+  const [bankDetails, setBankDetails] = useState(null); // { bankName, holderName, accountNumber, ifsc }
   
   const [centres, setCentres] = useState(INITIAL_CENTRES);
   const [slots, setSlots] = useState(INITIAL_SLOTS);
@@ -51,6 +52,29 @@ export const KisanSetuProvider = ({ children }) => {
     });
   };
 
+  const recalculateQueuePositions = (tokenList) => {
+    // Re-evaluate queue positions for each centre based on active waiting tokens
+    const updated = [...tokenList];
+    const centresSet = new Set(updated.map(t => t.centreId));
+    
+    centresSet.forEach(cId => {
+      // Find tokens in queue (BOOKED, WAITING, ARRIVED) for this centre
+      const inQueueTokens = updated.filter(t => t.centreId === cId && ["BOOKED", "WAITING", "ARRIVED"].includes(t.status));
+      // Sort them by their current queuePos or time (simulated by ID logic or bookedAt)
+      inQueueTokens.sort((a, b) => a.id.localeCompare(b.id));
+      
+      inQueueTokens.forEach((tok, index) => {
+        // Queue position is index + 1
+        const tIndex = updated.findIndex(t => t.id === tok.id);
+        if (tIndex !== -1) {
+          updated[tIndex].queuePos = index + 1;
+          updated[tIndex].estimatedWaitMin = Math.max(10, Math.round((index + 1) * 6)); // Rough estimate dynamically decreasing
+        }
+      });
+    });
+    return updated;
+  };
+
   // Booking a slot by farmer
   const bookSlot = ({ farmerName, phone, commodity, quantityQtl, centreId, date, slotTime }) => {
     const nextTokenNum = `A${125 + tokens.length - 5}`;
@@ -82,7 +106,9 @@ export const KisanSetuProvider = ({ children }) => {
       ]
     };
 
-    const updatedTokens = [...tokens, newToken];
+    let updatedTokens = [...tokens, newToken];
+    updatedTokens = recalculateQueuePositions(updatedTokens);
+    
     setTokens(updatedTokens);
     setActiveFarmerTokenId(nextTokenNum);
 
@@ -165,8 +191,10 @@ export const KisanSetuProvider = ({ children }) => {
       return updatedObj;
     });
 
-    setTokens(updatedTokens);
-    setCentres((prev) => recalculateCentreMetrics(prev, updatedTokens));
+    const finalizedTokens = recalculateQueuePositions(updatedTokens);
+
+    setTokens(finalizedTokens);
+    setCentres((prev) => recalculateCentreMetrics(prev, finalizedTokens));
 
     if (notifyMsg) {
       addNotification({
@@ -282,6 +310,8 @@ export const KisanSetuProvider = ({ children }) => {
         authenticatedUser,
         login,
         logout,
+        bankDetails,
+        setBankDetails,
         centres,
         slots,
         tokens,

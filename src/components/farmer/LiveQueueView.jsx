@@ -16,7 +16,13 @@ import {
 export const LiveQueueView = () => {
   const { t, activeToken, activeCentre, tokens } = useKisanSetu();
 
-  if (!activeToken) return null;
+  if (!activeToken) {
+    return (
+      <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm text-center">
+        <p className="text-slate-500 font-medium">No active booking to show queue for.</p>
+      </div>
+    );
+  }
 
   // Filter tokens at the active centre
   const centreTokens = tokens.filter((t) => t.centreId === activeCentre.id);

@@ -8,7 +8,13 @@ export const PaymentTracker = () => {
   const [isAddingBank, setIsAddingBank] = useState(false);
   const [formData, setFormData] = useState({ bankName: "", holderName: "", accountNumber: "", ifsc: "" });
 
-  if (!activeToken) return null;
+  if (!activeToken) {
+    return (
+      <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm text-center">
+        <p className="text-slate-500 font-medium">No active booking to show payment for.</p>
+      </div>
+    );
+  }
 
   const isCompleted = activeToken.paymentStatus === "COMPLETED";
   const isProcessing = activeToken.paymentStatus === "PROCESSING";

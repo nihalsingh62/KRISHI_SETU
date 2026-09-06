@@ -4,25 +4,106 @@ import { translations } from "../data/translations";
 
 const KisanSetuContext = createContext();
 
+// Helper to initialize state from localStorage or fallback
+const getInitialState = (key, fallback) => {
+  try {
+    const item = localStorage.getItem(key);
+    return item ? JSON.parse(item) : fallback;
+  } catch (error) {
+    console.warn(`Error reading localStorage for ${key}`, error);
+    return fallback;
+  }
+};
+
 export const KisanSetuProvider = ({ children }) => {
-  const [language, setLanguage] = useState("en");
-  const [lowNetworkMode, setLowNetworkMode] = useState(false);
-  const [currentRole, setCurrentRole] = useState("landing"); // landing | farmer | operator | admin
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [authenticatedUser, setAuthenticatedUser] = useState(null);
-  const [bankDetails, setBankDetails] = useState(null); // { bankName, holderName, accountNumber, ifsc }
+  // Persistent State
+  const [language, setLanguage] = useState(() => getInitialState("ks_language", "en"));
+  const [lowNetworkMode, setLowNetworkMode] = useState(() => getInitialState("ks_lowNetworkMode", false));
+  const [currentRole, setCurrentRole] = useState(() => getInitialState("ks_currentRole", "landing"));
+  const [isAuthenticated, setIsAuthenticated] = useState(() => getInitialState("ks_isAuthenticated", false));
+  const [authenticatedUser, setAuthenticatedUser] = useState(() => getInitialState("ks_authenticatedUser", null));
+  const [registeredFarmers, setRegisteredFarmers] = useState(() => getInitialState("ks_registeredFarmers", [
+    { id: "FAR-1001", name: "Ramesh Singh", mobile: "9876543210", aadhaar: "987654321098" } // seed
+  ]));
   
-  const [centres, setCentres] = useState(INITIAL_CENTRES);
-  const [slots, setSlots] = useState(INITIAL_SLOTS);
-  const [tokens, setTokens] = useState(INITIAL_TOKENS);
-  const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS);
-  const [activeFarmerTokenId, setActiveFarmerTokenId] = useState("A124"); // Ramesh Singh
-  const [activeCentreId, setActiveCentreId] = useState("c1"); // ABC Procurement Centre
-  const [demoStep, setDemoStep] = useState(0);
+  const [centres, setCentres] = useState(() => getInitialState("ks_centres", INITIAL_CENTRES));
+  const [slots, setSlots] = useState(() => getInitialState("ks_slots", INITIAL_SLOTS));
+  const [tokens, setTokens] = useState(() => getInitialState("ks_tokens", INITIAL_TOKENS));
+  const [notifications, setNotifications] = useState(() => getInitialState("ks_notifications", INITIAL_NOTIFICATIONS));
+  
+  // Navigation Tabs persistence
+  const [activeFarmerTab, setActiveFarmerTab] = useState(() => getInitialState("ks_activeFarmerTab", "dashboard"));
+  const [activeOperatorTab, setActiveOperatorTab] = useState(() => getInitialState("ks_activeOperatorTab", "queue"));
+  const [activeAdminTab, setActiveAdminTab] = useState(() => getInitialState("ks_activeAdminTab", "monitoring"));
+
+  const [activeCentreId, setActiveCentreId] = useState(() => getInitialState("ks_activeCentreId", "c1"));
+
+  // Persist State Changes
+  useEffect(() => { localStorage.setItem("ks_language", JSON.stringify(language)); }, [language]);
+  useEffect(() => { localStorage.setItem("ks_lowNetworkMode", JSON.stringify(lowNetworkMode)); }, [lowNetworkMode]);
+  useEffect(() => { localStorage.setItem("ks_currentRole", JSON.stringify(currentRole)); }, [currentRole]);
+  useEffect(() => { localStorage.setItem("ks_isAuthenticated", JSON.stringify(isAuthenticated)); }, [isAuthenticated]);
+  useEffect(() => { localStorage.setItem("ks_authenticatedUser", JSON.stringify(authenticatedUser)); }, [authenticatedUser]);
+  useEffect(() => { localStorage.setItem("ks_registeredFarmers", JSON.stringify(registeredFarmers)); }, [registeredFarmers]);
+  useEffect(() => { localStorage.setItem("ks_centres", JSON.stringify(centres)); }, [centres]);
+  useEffect(() => { localStorage.setItem("ks_slots", JSON.stringify(slots)); }, [slots]);
+  useEffect(() => { localStorage.setItem("ks_tokens", JSON.stringify(tokens)); }, [tokens]);
+  useEffect(() => { localStorage.setItem("ks_notifications", JSON.stringify(notifications)); }, [notifications]);
+  useEffect(() => { localStorage.setItem("ks_activeFarmerTab", JSON.stringify(activeFarmerTab)); }, [activeFarmerTab]);
+  useEffect(() => { localStorage.setItem("ks_activeOperatorTab", JSON.stringify(activeOperatorTab)); }, [activeOperatorTab]);
+  useEffect(() => { localStorage.setItem("ks_activeAdminTab", JSON.stringify(activeAdminTab)); }, [activeAdminTab]);
+  useEffect(() => { localStorage.setItem("ks_activeCentreId", JSON.stringify(activeCentreId)); }, [activeCentreId]);
 
   const t = (key) => {
     return translations[language]?.[key] || translations["en"]?.[key] || key;
   };
+
+  // Farmer Registration
+  const registerFarmer = (details) => {
+    const newId = `FAR-${1000 + registeredFarmers.length + 1}`;
+    const newFarmer = {
+      id: newId,
+      ...details,
+      createdAt: new Date().toISOString()
+    };
+    setRegisteredFarmers(prev => [...prev, newFarmer]);
+    return newFarmer;
+  };
+
+  // Farmer Login
+  const loginFarmer = (farmerId, mobile) => {
+    const farmer = registeredFarmers.find(f => f.id === farmerId && f.mobile === mobile);
+    if (farmer) {
+      login("farmer", { ...farmer, type: "farmer" });
+      return true;
+    }
+    return false;
+  };
+
+  const login = (role, userDetails) => {
+    setIsAuthenticated(true);
+    setAuthenticatedUser(userDetails);
+    setCurrentRole(role);
+  };
+
+  const logout = () => {
+    setIsAuthenticated(false);
+    setAuthenticatedUser(null);
+    setCurrentRole("landing");
+  };
+
+  // Calculate active token based on authenticated user
+  const getActiveToken = () => {
+    if (currentRole === "farmer" && authenticatedUser) {
+      // Find the most recent token for this farmer
+      const farmerTokens = tokens.filter(t => t.farmerId === authenticatedUser.id || t.farmerName === authenticatedUser.name);
+      return farmerTokens.length > 0 ? farmerTokens[farmerTokens.length - 1] : null;
+    }
+    return null;
+  };
+  const activeToken = getActiveToken();
+  const activeCentre = centres.find((c) => c.id === activeCentreId) || centres[0];
+
 
   // Helper to re-calculate centre congestion load % & status
   const recalculateCentreMetrics = (centreList, tokenList) => {
@@ -76,7 +157,9 @@ export const KisanSetuProvider = ({ children }) => {
   };
 
   // Booking a slot by farmer
-  const bookSlot = ({ farmerName, phone, commodity, quantityQtl, centreId, date, slotTime }) => {
+  const bookSlot = ({ commodity, quantityQtl, centreId, date, slotTime }) => {
+    if (!authenticatedUser) return null;
+
     const nextTokenNum = `A${125 + tokens.length - 5}`;
     const centre = centres.find((c) => c.id === centreId) || centres[0];
     const msp = commodity === "Wheat" ? 2275 : commodity === "Paddy" ? 2300 : 2090;
@@ -84,8 +167,9 @@ export const KisanSetuProvider = ({ children }) => {
 
     const newToken = {
       id: nextTokenNum,
-      farmerName: farmerName || "Ramesh Singh",
-      phone: phone || "+91 98765 43210",
+      farmerId: authenticatedUser.id,
+      farmerName: authenticatedUser.name,
+      phone: authenticatedUser.mobile,
       commodity,
       quantityQtl: Number(quantityQtl),
       centreId,
@@ -110,7 +194,6 @@ export const KisanSetuProvider = ({ children }) => {
     updatedTokens = recalculateQueuePositions(updatedTokens);
     
     setTokens(updatedTokens);
-    setActiveFarmerTokenId(nextTokenNum);
 
     // Update slots
     setSlots((prevSlots) =>
@@ -151,11 +234,14 @@ export const KisanSetuProvider = ({ children }) => {
       if (newStatus === "ARRIVED") {
         history.push({ status: "ARRIVED", time: nowTime, desc: "Checked-in at Gate 1" });
         notifyMsg = `Token ${tokenId}: Farmer checked-in at gate.`;
+      } else if (newStatus === "CALLED") {
+        history.push({ status: "CALLED", time: nowTime, desc: "Called for weighing" });
+        notifyMsg = `Token ${tokenId}: Proceed to Weighbridge.`;
       } else if (newStatus === "WEIGHING") {
         const weight = extraData.actualWeightQtl || tok.actualWeightQtl || (tok.quantityQtl + 0.5);
         updatedObj.actualWeightQtl = weight;
         updatedObj.totalAmount = Math.round(weight * tok.mspPerQtl);
-        history.push({ status: "WEIGHING", time: nowTime, desc: `Vehicle on Weighbridge #1. Recorded: ${weight} Qtl` });
+        history.push({ status: "WEIGHING", time: nowTime, desc: `Vehicle on Weighbridge. Recorded: ${weight} Qtl` });
         notifyMsg = `Token ${tokenId}: Weighbridge weighing completed (${weight} Qtl).`;
       } else if (newStatus === "QUALITY_CHECK") {
         const moisture = extraData.moisturePercent || 12.0;
@@ -178,13 +264,9 @@ export const KisanSetuProvider = ({ children }) => {
         updatedObj.paymentTxRef = txRef;
         history.push({ status: "PAYMENT_COMPLETED", time: nowTime, desc: `Direct Bank Transfer Successful (Ref: ${txRef})` });
         notifyMsg = `Token ${tokenId}: ₹${updatedObj.totalAmount.toLocaleString()} credited to bank account (Ref: ${txRef}).`;
-      } else if (newStatus === "NO_SHOW") {
-        history.push({ status: "NO_SHOW", time: nowTime, desc: "Farmer flagged as No-Show by operator" });
-        notifyMsg = `Token ${tokenId}: Marked as No-Show. Contact centre to reschedule.`;
-      } else if (newStatus === "RESCHEDULED") {
-        updatedObj.slot = extraData.newSlot || "11:30 AM – 12:00 PM";
-        history.push({ status: "RESCHEDULED", time: nowTime, desc: `Rescheduled to ${updatedObj.slot}` });
-        notifyMsg = `Token ${tokenId}: Slot rescheduled to ${updatedObj.slot}.`;
+      } else if (newStatus === "REJECTED") {
+        history.push({ status: "REJECTED", time: nowTime, desc: `Procurement rejected: ${extraData.remarks || 'Failed quality check'}` });
+        notifyMsg = `Token ${tokenId}: Procurement rejected.`;
       }
 
       updatedObj.timelineHistory = history;
@@ -240,60 +322,17 @@ export const KisanSetuProvider = ({ children }) => {
     setNotifications((prev) => [{ id: Date.now(), read: false, ...notif }, ...prev]);
   };
 
-  const activeToken = tokens.find((t) => t.id === activeFarmerTokenId) || tokens[4]; // Ramesh A124
-  const activeCentre = centres.find((c) => c.id === activeCentreId) || centres[0];
-
-  // Demo walkthrough step runner (19 steps from SIH prompt)
-  const runDemoStep = (stepIndex) => {
-    setDemoStep(stepIndex);
-    if (stepIndex === 0) {
-      // Step 1: Open landing
-      setCurrentRole("landing");
-    } else if (stepIndex === 1) {
-      // Step 2-4: Farmer views smart recommendations & picks Centre B (c3) or Centre A (c1)
-      setCurrentRole("farmer");
-      setActiveFarmerTokenId("A124");
-    } else if (stepIndex === 2) {
-      // Step 5-7: Farmer chooses slot 10:30, token A124 generated, sees 6 ahead 35 min wait
-      setCurrentRole("farmer");
-      updateTokenStatus("A124", "BOOKED");
-    } else if (stepIndex === 3) {
-      // Step 8: Operator sees A124 Ramesh Waiting
-      setCurrentRole("operator");
-    } else if (stepIndex === 4) {
-      // Step 9-10: Operator marks arrived -> Farmer sees Arrived ✓
-      updateTokenStatus("A124", "ARRIVED");
-    } else if (stepIndex === 5) {
-      // Step 11-13: Operator starts weighing (42.5 Qtl) -> Farmer sees Weighing in progress
-      updateTokenStatus("A124", "WEIGHING", { actualWeightQtl: 42.5 });
-    } else if (stepIndex === 6) {
-      // Step 14: Quality check passes
-      updateTokenStatus("A124", "QUALITY_CHECK", { moisturePercent: 12.0, grade: "Grade A" });
-    } else if (stepIndex === 7) {
-      // Step 15-16: Operator completes procurement -> Farmer sees Procurement Completed ✓
-      updateTokenStatus("A124", "PROCUREMENT_COMPLETE");
-    } else if (stepIndex === 8) {
-      // Step 17: Payment becomes Payment Processing
-      updateTokenStatus("A124", "PAYMENT_PROCESSING");
-    } else if (stepIndex === 9) {
-      // Step 18: Payment completed DEMO-TRX-10482
-      updateTokenStatus("A124", "PAYMENT_COMPLETED");
-    } else if (stepIndex === 10) {
-      // Step 19: Admin dashboard view reflecting complete transaction
-      setCurrentRole("admin");
+  // Used for updating a farmer's bank details profile
+  const updateFarmerBankDetails = (farmerId, newBankDetails) => {
+    setRegisteredFarmers(prev => prev.map(f => {
+      if(f.id === farmerId) {
+        return { ...f, bankDetails: newBankDetails };
+      }
+      return f;
+    }));
+    if (authenticatedUser && authenticatedUser.id === farmerId) {
+      setAuthenticatedUser(prev => ({ ...prev, bankDetails: newBankDetails }));
     }
-  };
-
-  const login = (role, userDetails) => {
-    setIsAuthenticated(true);
-    setAuthenticatedUser(userDetails);
-    setCurrentRole(role);
-  };
-
-  const logout = () => {
-    setIsAuthenticated(false);
-    setAuthenticatedUser(null);
-    setCurrentRole("landing");
   };
 
   return (
@@ -310,25 +349,29 @@ export const KisanSetuProvider = ({ children }) => {
         authenticatedUser,
         login,
         logout,
-        bankDetails,
-        setBankDetails,
+        registeredFarmers,
+        registerFarmer,
+        loginFarmer,
+        updateFarmerBankDetails,
         centres,
         slots,
         tokens,
         notifications,
-        activeFarmerTokenId,
-        setActiveFarmerTokenId,
         activeCentreId,
         setActiveCentreId,
-        activeToken,
+        activeToken, // dynamically computed based on authenticatedUser
         activeCentre,
         bookSlot,
         updateTokenStatus,
         updateCentreCapacity,
         updateSlotCapacity,
         addNotification,
-        demoStep,
-        runDemoStep
+        activeFarmerTab,
+        setActiveFarmerTab,
+        activeOperatorTab,
+        setActiveOperatorTab,
+        activeAdminTab,
+        setActiveAdminTab
       }}
     >
       {children}

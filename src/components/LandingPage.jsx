@@ -8,12 +8,11 @@ import {
   ArrowRight,
   CheckCircle,
   ArrowLeft,
-  CheckCircle2,
-  QrCode
+  CheckCircle2
 } from "lucide-react";
 
 export const LandingPage = () => {
-  const { t, login } = useKisanSetu();
+  const { login, registerFarmer, loginFarmer } = useKisanSetu();
   const [selectedRole, setSelectedRole] = useState(null); // 'farmer' | 'operator' | 'admin'
   
   // Farmer specific states
@@ -21,31 +20,80 @@ export const LandingPage = () => {
   const [farmerId, setFarmerId] = useState("");
   const [mobileNumber, setMobileNumber] = useState("");
   const [aadhaarNumber, setAadhaarNumber] = useState("");
+  const [farmerName, setFarmerName] = useState("");
+  const [otp, setOtp] = useState("");
   
+  const [error, setError] = useState("");
+
   const handleFarmerRegisterInit = (e) => {
     e.preventDefault();
+    setError("");
+    // Validation
+    if (!/^\d{12}$/.test(aadhaarNumber.replace(/\s/g, ''))) {
+      setError("Aadhaar must be exactly 12 digits.");
+      return;
+    }
+    if (!/^\d{10}$/.test(mobileNumber)) {
+      setError("Mobile number must be exactly 10 digits.");
+      return;
+    }
+    if (farmerName.trim().length < 3) {
+      setError("Please enter a valid name.");
+      return;
+    }
+    setOtp("");
     setFarmerFlowStep('register_otp');
   };
 
   const handleFarmerRegisterOTP = (e) => {
     e.preventDefault();
-    // Simulate ID generation
-    const newId = `KS-BR-${Math.floor(100000 + Math.random() * 900000)}`;
-    setFarmerId(newId);
+    setError("");
+    if (!/^\d{6}$/.test(otp)) {
+      setError("OTP must be exactly 6 digits.");
+      return;
+    }
+    // Success - create user
+    const newFarmer = registerFarmer({
+      name: farmerName,
+      aadhaar: aadhaarNumber.replace(/\s/g, ''),
+      mobile: mobileNumber
+    });
+    setFarmerId(newFarmer.id);
     setFarmerFlowStep('register_success');
   };
 
   const handleFarmerLoginInit = (e) => {
     e.preventDefault();
+    setError("");
+    if (farmerId.trim() === "") {
+      setError("Farmer ID is required.");
+      return;
+    }
+    if (!/^\d{10}$/.test(mobileNumber)) {
+      setError("Mobile number must be exactly 10 digits.");
+      return;
+    }
+    setOtp("");
     setFarmerFlowStep('login_otp');
   };
 
-  const handleLogin = (e) => {
+  const handleFarmerLoginOTP = (e) => {
+    e.preventDefault();
+    setError("");
+    if (!/^\d{6}$/.test(otp)) {
+      setError("OTP must be exactly 6 digits.");
+      return;
+    }
+    const success = loginFarmer(farmerId.trim().toUpperCase(), mobileNumber);
+    if (!success) {
+      setError("Invalid Farmer ID or Mobile Number. User not found.");
+    }
+  };
+
+  const handleOperatorAdminLogin = (e) => {
     e.preventDefault();
     // Simulate authentication
-    if (selectedRole === "farmer") {
-      login("farmer", { name: "Ramesh Singh", id: farmerId || "KS-BR-104821", type: "farmer" });
-    } else if (selectedRole === "operator") {
+    if (selectedRole === "operator") {
       login("operator", { name: "Operator User", centre: "ABC Procurement Centre", type: "operator" });
     } else if (selectedRole === "admin") {
       login("admin", { name: "System Admin", type: "admin" });
@@ -66,17 +114,12 @@ export const LandingPage = () => {
           <p className="mt-2 text-sm text-slate-600 font-medium">
             Digital Procurement & Queue Management
           </p>
-          {!selectedRole && (
-            <p className="mt-4 text-xs text-slate-500 max-w-sm mx-auto">
-              Book your procurement slot, receive a digital token, and track your queue without waiting at the mandi.
-            </p>
-          )}
         </div>
 
         {!selectedRole ? (
           <div className="space-y-4 mt-8">
             <div className="text-center mb-4">
-              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Select Role</h3>
+              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Select Portal</h3>
             </div>
             
             <button
@@ -127,12 +170,19 @@ export const LandingPage = () => {
               onClick={() => {
                 setSelectedRole(null);
                 setFarmerFlowStep('choice');
+                setError("");
               }}
               className="text-xs font-semibold text-slate-500 hover:text-slate-900 flex items-center gap-1 mb-6"
             >
               <ArrowLeft className="w-3.5 h-3.5" /> Back to roles
             </button>
             
+            {error && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-xs font-bold text-red-600">
+                {error}
+              </div>
+            )}
+
             {/* FARMER FLOW */}
             {selectedRole === "farmer" && (
               <>
@@ -160,12 +210,16 @@ export const LandingPage = () => {
                       <p className="text-xs text-slate-500 mt-1">Link your Aadhaar to begin.</p>
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">Aadhaar Number</label>
-                      <input type="text" placeholder="XXXX XXXX XXXX" value={aadhaarNumber} onChange={e => setAadhaarNumber(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" required />
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Full Name</label>
+                      <input type="text" placeholder="e.g. Amit Kumar" value={farmerName} onChange={e => setFarmerName(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" required />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">Aadhaar-linked Mobile Number</label>
-                      <input type="tel" placeholder="+91" value={mobileNumber} onChange={e => setMobileNumber(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" required />
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Aadhaar Number</label>
+                      <input type="text" placeholder="12 Digit Aadhaar" value={aadhaarNumber} onChange={e => setAadhaarNumber(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" required />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Mobile Number</label>
+                      <input type="tel" placeholder="10 Digit Mobile" value={mobileNumber} onChange={e => setMobileNumber(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" required />
                     </div>
                     <button type="submit" className="w-full py-3 mt-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-md transition-colors">
                       Continue
@@ -177,16 +231,16 @@ export const LandingPage = () => {
                   <form onSubmit={handleFarmerRegisterOTP} className="space-y-4 animate-in fade-in duration-300">
                     <div className="mb-6">
                       <h3 className="text-xl font-bold text-slate-900">Aadhaar Verification</h3>
-                      <p className="text-xs text-slate-500 mt-1">OTP sent to Aadhaar-linked mobile {mobileNumber.slice(-4).padStart(10, 'X')}</p>
+                      <p className="text-xs text-slate-500 mt-1">OTP sent to Aadhaar-linked mobile ******{mobileNumber.slice(-4)}</p>
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1">6-Digit OTP</label>
-                      <input type="text" placeholder="_ _ _ _ _ _" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-center tracking-[1em] text-lg font-mono focus:ring-2 focus:ring-emerald-500 outline-none" required />
+                      <input type="text" placeholder="_ _ _ _ _ _" value={otp} onChange={e => setOtp(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-center tracking-[1em] text-lg font-mono focus:ring-2 focus:ring-emerald-500 outline-none" required />
                     </div>
                     <div className="bg-blue-50 p-3 rounded-xl border border-blue-100 flex items-start gap-2 mt-2">
                       <CheckCircle className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
                       <p className="text-[10px] text-blue-800 font-medium">
-                        Verification: Demo / Simulated for prototype.
+                        Identity Verification: Simulated for Prototype.
                       </p>
                     </div>
                     <button type="submit" className="w-full py-3 mt-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-md transition-colors">
@@ -221,17 +275,20 @@ export const LandingPage = () => {
                         <div className="grid grid-cols-2 gap-4 mt-4 pt-4 border-t border-slate-700/50">
                           <div>
                             <p className="text-[10px] uppercase font-bold text-slate-400">Name</p>
-                            <p className="text-sm font-bold">Ramesh Singh</p>
+                            <p className="text-sm font-bold">{farmerName}</p>
                           </div>
                           <div>
                             <p className="text-[10px] uppercase font-bold text-slate-400">Aadhaar Linked</p>
-                            <p className="text-sm font-mono">{aadhaarNumber ? `XXXX XXXX ${aadhaarNumber.slice(-4)}` : "XXXX XXXX 4821"}</p>
+                            <p className="text-sm font-mono">XXXX XXXX {aadhaarNumber.slice(-4)}</p>
                           </div>
                         </div>
                       </div>
                     </div>
 
-                    <button onClick={() => setFarmerFlowStep('login_init')} className="w-full py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold transition-colors">
+                    <button onClick={() => {
+                        setFarmerFlowStep('login_init');
+                        setOtp("");
+                    }} className="w-full py-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold transition-colors">
                       Proceed to Login
                     </button>
                   </div>
@@ -245,11 +302,11 @@ export const LandingPage = () => {
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1">KisanSetu Farmer ID</label>
-                      <input type="text" placeholder="KS-BR-XXXXXX" value={farmerId} onChange={e => setFarmerId(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none uppercase font-mono" required />
+                      <input type="text" placeholder="FAR-XXXX" value={farmerId} onChange={e => setFarmerId(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none uppercase font-mono" required />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1">Registered Mobile Number</label>
-                      <input type="tel" placeholder="+91" value={mobileNumber} onChange={e => setMobileNumber(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" required />
+                      <input type="tel" placeholder="10 Digit Mobile" value={mobileNumber} onChange={e => setMobileNumber(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" required />
                     </div>
                     <button type="submit" className="w-full py-3 mt-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold shadow-md transition-colors">
                       Send OTP
@@ -258,14 +315,14 @@ export const LandingPage = () => {
                 )}
 
                 {farmerFlowStep === 'login_otp' && (
-                  <form onSubmit={handleLogin} className="space-y-4 animate-in fade-in duration-300">
+                  <form onSubmit={handleFarmerLoginOTP} className="space-y-4 animate-in fade-in duration-300">
                     <div className="mb-6">
                       <h3 className="text-xl font-bold text-slate-900">Verify Login</h3>
-                      <p className="text-xs text-slate-500 mt-1">OTP sent to registered mobile {mobileNumber.slice(-4).padStart(10, 'X')}</p>
+                      <p className="text-xs text-slate-500 mt-1">OTP sent to registered mobile ******{mobileNumber.slice(-4)}</p>
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1">6-Digit OTP</label>
-                      <input type="text" placeholder="_ _ _ _ _ _" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-center tracking-[1em] text-lg font-mono focus:ring-2 focus:ring-emerald-500 outline-none" required />
+                      <input type="text" placeholder="_ _ _ _ _ _" value={otp} onChange={e => setOtp(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-center tracking-[1em] text-lg font-mono focus:ring-2 focus:ring-emerald-500 outline-none" required />
                     </div>
                     <button type="submit" className="w-full py-3 mt-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-md transition-colors">
                       Login to Dashboard
@@ -277,7 +334,7 @@ export const LandingPage = () => {
 
             {/* OPERATOR FLOW */}
             {selectedRole === "operator" && (
-              <form onSubmit={handleLogin} className="space-y-4 animate-in fade-in duration-300">
+              <form onSubmit={handleOperatorAdminLogin} className="space-y-4 animate-in fade-in duration-300">
                 <div className="mb-6">
                   <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
                     <Building2 className="w-5 h-5 text-blue-600"/> Operator Login
@@ -307,7 +364,7 @@ export const LandingPage = () => {
 
             {/* ADMIN FLOW */}
             {selectedRole === "admin" && (
-              <form onSubmit={handleLogin} className="space-y-4 animate-in fade-in duration-300">
+              <form onSubmit={handleOperatorAdminLogin} className="space-y-4 animate-in fade-in duration-300">
                 <div className="mb-6">
                   <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
                     <ShieldCheck className="w-5 h-5 text-indigo-600"/> Administrator Login

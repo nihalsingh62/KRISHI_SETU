@@ -22,7 +22,25 @@ import {
 export const FarmerDashboard = ({ onNavigateTab }) => {
   const { t, activeToken, activeCentre, lowNetworkMode, setLowNetworkMode } = useKisanSetu();
 
-  if (!activeToken) return null;
+  if (!activeToken) {
+    return (
+      <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm text-center">
+        <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <Calendar className="w-8 h-8 text-slate-400" />
+        </div>
+        <h3 className="text-xl font-bold text-slate-800">No Active Booking</h3>
+        <p className="text-sm text-slate-500 mt-2 max-w-sm mx-auto mb-6">
+          You don't have any upcoming slot booked. Book a new slot to get started with the procurement process.
+        </p>
+        <button
+          onClick={() => onNavigateTab("booking")}
+          className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md transition-colors"
+        >
+          Book New Slot
+        </button>
+      </div>
+    );
+  }
 
   const isCompleted = ["PROCUREMENT_COMPLETE", "PAYMENT_PROCESSING", "PAYMENT_COMPLETED"].includes(activeToken.status);
   

@@ -15,7 +15,13 @@ import {
 export const ProcurementTimeline = () => {
   const { activeToken, activeCentre } = useKisanSetu();
 
-  if (!activeToken) return null;
+  if (!activeToken) {
+    return (
+      <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm text-center">
+        <p className="text-slate-500 font-medium">No active booking to show timeline for.</p>
+      </div>
+    );
+  }
 
   const STAGES = [
     { key: "BOOKED", label: "Slot Booked", icon: Clock },

@@ -29,7 +29,11 @@ export const HeaderNav = () => {
     authenticatedUser,
     logout,
     notifications,
-    activeToken
+    activeToken,
+    setActiveFarmerTab,
+    setActiveOperatorTab,
+    setActiveAdminTab,
+    currentRole
   } = useKisanSetu();
 
   const [activePopover, setActivePopover] = useState(null); // 'notifications' | 'network' | 'user' | 'mobile' | null
@@ -66,8 +70,15 @@ export const HeaderNav = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex items-center gap-2.5">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-md shadow-emerald-600/20">
+          <button 
+            onClick={() => {
+              if (currentRole === "farmer" && setActiveFarmerTab) setActiveFarmerTab("dashboard");
+              if (currentRole === "operator" && setActiveOperatorTab) setActiveOperatorTab("queue");
+              if (currentRole === "admin" && setActiveAdminTab) setActiveAdminTab("monitoring");
+            }}
+            className="flex items-center gap-2.5 text-left group"
+          >
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-md shadow-emerald-600/20 group-hover:scale-105 transition-transform">
               <Wheat className="w-6 h-6" />
             </div>
             <div>
@@ -76,11 +87,11 @@ export const HeaderNav = () => {
                   KisanSetu
                 </span>
               </div>
-              <p className="text-[10px] font-medium text-slate-500 tracking-wide uppercase">
+              <p className="text-[10px] font-medium text-slate-500 tracking-wide uppercase group-hover:text-emerald-600 transition-colors">
                 Digital Procurement
               </p>
             </div>
-          </div>
+          </button>
 
           {/* Role Indicator / Center */}
           <div className="hidden md:flex items-center">
@@ -228,7 +239,13 @@ export const HeaderNav = () => {
                       <p className="text-[10px] text-slate-500 capitalize">{currentRole}</p>
                     </div>
                     {currentRole === "farmer" && (
-                      <button className="w-full text-left px-4 py-2.5 text-xs font-medium text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-2">
+                      <button 
+                        onClick={() => {
+                          setActivePopover(null);
+                          if (setActiveFarmerTab) setActiveFarmerTab("profile");
+                        }}
+                        className="w-full text-left px-4 py-2.5 text-xs font-medium text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-2"
+                      >
                         <User className="w-4 h-4" /> Profile
                       </button>
                     )}

@@ -27,8 +27,6 @@ export const SmartBooking = ({ onBookingSuccess }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     const token = bookSlot({
-      farmerName: "Ramesh Singh",
-      phone: "+91 98765 43210",
       commodity,
       quantityQtl: quantity,
       centreId: selectedCentreId,

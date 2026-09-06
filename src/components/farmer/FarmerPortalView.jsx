@@ -8,15 +8,15 @@ import { PaymentTracker } from "./PaymentTracker";
 import {
   LayoutDashboard,
   Calendar,
-  QrCode,
   Truck,
   CreditCard,
-  WifiOff
+  WifiOff,
+  User
 } from "lucide-react";
+import { FarmerProfile } from "./FarmerProfile";
 
 export const FarmerPortalView = () => {
-  const { t, lowNetworkMode, setLowNetworkMode, activeToken } = useKisanSetu();
-  const [activeFarmerTab, setActiveFarmerTab] = useState("dashboard"); // dashboard | booking | queue | timeline | payment
+  const { t, lowNetworkMode, setLowNetworkMode, activeToken, activeFarmerTab, setActiveFarmerTab } = useKisanSetu();
 
   // If low network mode is ON, render simplified rural offline card
   if (lowNetworkMode) {
@@ -133,6 +133,18 @@ export const FarmerPortalView = () => {
           <CreditCard className="w-4 h-4" />
           <span>Payment Tracking</span>
         </button>
+
+        <button
+          onClick={() => setActiveFarmerTab("profile")}
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
+            activeFarmerTab === "profile"
+              ? "bg-emerald-700 text-white shadow-sm"
+              : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
+          }`}
+        >
+          <User className="w-4 h-4" />
+          <span>Farmer Profile</span>
+        </button>
       </div>
 
       {/* Render Active Farmer Tab */}
@@ -145,6 +157,7 @@ export const FarmerPortalView = () => {
       {activeFarmerTab === "queue" && <LiveQueueView />}
       {activeFarmerTab === "timeline" && <ProcurementTimeline />}
       {activeFarmerTab === "payment" && <PaymentTracker />}
+      {activeFarmerTab === "profile" && <FarmerProfile />}
     </div>
   );
 };

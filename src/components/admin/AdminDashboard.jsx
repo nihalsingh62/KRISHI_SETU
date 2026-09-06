@@ -40,7 +40,7 @@ export const AdminDashboard = () => {
               State Procurement Dashboard
             </h2>
             <p className="text-slate-400 text-xs mt-0.5">
-              Monitoring 128 Procurement Centres • Live Congestion Overview
+              Monitoring 128 Procurement Centres
             </p>
           </div>
 
@@ -80,6 +80,45 @@ export const AdminDashboard = () => {
           <div className="bg-slate-800/80 p-3.5 rounded-2xl border border-slate-700">
             <span className="text-[10px] text-slate-400 font-semibold block">Payments Pending</span>
             <span className="text-2xl font-extrabold text-teal-400">174</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Actionable Alerts Section */}
+      <div className="bg-red-50 border border-red-200 rounded-3xl p-6 shadow-sm">
+        <h3 className="text-sm font-bold text-red-800 uppercase tracking-wider mb-4 flex items-center gap-2">
+          <AlertTriangle className="w-5 h-5" /> Centres Requiring Attention
+        </h3>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-white rounded-2xl p-5 border border-red-100 shadow-sm">
+            <div className="flex justify-between items-start mb-2">
+              <h4 className="font-extrabold text-slate-900">Main APMC City Yard</h4>
+              <span className="bg-red-100 text-red-800 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">Critical</span>
+            </div>
+            <div className="text-xs text-slate-600 mb-4 space-y-1">
+              <p><strong>96%</strong> capacity • <strong>52</strong> farmers waiting • <strong>81 min</strong> average wait</p>
+            </div>
+            <div className="bg-slate-50 rounded-xl p-3 border border-slate-200">
+              <p className="text-[10px] font-bold uppercase text-slate-500 mb-1">Suggested Action</p>
+              <p className="text-xs text-slate-800 font-medium">Redirect new bookings to Shivaji Grain Collection Centre.</p>
+              <p className="text-[10px] text-emerald-600 font-bold mt-1">Potential queue reduction: approx 22%</p>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl p-5 border border-red-100 shadow-sm">
+            <div className="flex justify-between items-start mb-2">
+              <h4 className="font-extrabold text-slate-900">Rampur Mandi Hub</h4>
+              <span className="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">High Load</span>
+            </div>
+            <div className="text-xs text-slate-600 mb-4 space-y-1">
+              <p><strong>94%</strong> capacity • <strong>37</strong> farmers waiting • <strong>68 min</strong> average wait</p>
+            </div>
+            <div className="bg-slate-50 rounded-xl p-3 border border-slate-200">
+              <p className="text-[10px] font-bold uppercase text-slate-500 mb-1">Suggested Action</p>
+              <p className="text-xs text-slate-800 font-medium">Deploy 2 additional Quality Check operators.</p>
+              <p className="text-[10px] text-emerald-600 font-bold mt-1">Estimated wait reduction: 15 mins</p>
+            </div>
           </div>
         </div>
       </div>

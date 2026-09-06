@@ -1,249 +1,183 @@
-import React from "react";
+import React, { useState } from "react";
 import { useKisanSetu } from "../context/KisanSetuContext";
 import {
   Wheat,
   User,
   Building2,
   ShieldCheck,
-  Clock,
-  QrCode,
-  LineChart,
   ArrowRight,
-  Sparkles,
-  AlertTriangle,
   CheckCircle,
-  XCircle,
-  Truck,
-  CreditCard,
-  Layers,
-  Bot,
-  Globe
+  ArrowLeft
 } from "lucide-react";
 
 export const LandingPage = () => {
-  const { t, setCurrentRole, runDemoStep } = useKisanSetu();
+  const { t, login } = useKisanSetu();
+  const [selectedRole, setSelectedRole] = useState(null); // 'farmer' | 'operator' | 'admin'
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    // Simulate authentication
+    if (selectedRole === "farmer") {
+      login("farmer", { name: "Ramesh Singh", id: "XXXX XXXX 4821", type: "farmer" });
+    } else if (selectedRole === "operator") {
+      login("operator", { name: "Operator User", centre: "ABC Procurement Centre", type: "operator" });
+    } else if (selectedRole === "admin") {
+      login("admin", { name: "System Admin", type: "admin" });
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50 pb-28">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden py-12 lg:py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center max-w-3xl mx-auto space-y-6">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold">
-              <Sparkles className="w-4 h-4 text-emerald-600" />
-              <span>SIH Problem Statement 26032 Platform Solution</span>
-            </div>
-
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-tight">
-              Smart Procurement. <br />
-              <span className="bg-gradient-to-r from-emerald-600 via-teal-600 to-indigo-600 bg-clip-text text-transparent">
-                Less Waiting. Better Visibility.
-              </span>
-            </h1>
-
-            <p className="text-base sm:text-lg text-slate-600 font-normal leading-relaxed">
-              Book procurement slots, receive digital tokens, track your live queue, know exactly when to arrive, and monitor procurement and payment status — while procurement centres manage daily operations and administrators monitor congestion across centres.
-            </p>
-
-            <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
-              <button
-                onClick={() => setCurrentRole("farmer")}
-                className="flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-base shadow-lg shadow-emerald-600/25 hover:shadow-xl hover:scale-105 transition-all"
-              >
-                <span>Enter KisanSetu</span>
-                <ArrowRight className="w-5 h-5" />
-              </button>
-            </div>
+    <div className="min-h-[85vh] bg-slate-50 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md mx-auto w-full space-y-8">
+        
+        <div className="text-center">
+          <div className="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-lg mb-4">
+            <Wheat className="w-10 h-10" />
           </div>
-        </div>
-      </section>
-
-      {/* Role Selection Grid */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="text-center mb-10">
-          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">
-            Select Your Role to Access Portal
+          <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+            KisanSetu
           </h2>
-          <p className="text-sm text-slate-500 mt-1">
-            Experience three synchronized perspectives of the same underlying real-time workflow.
+          <p className="mt-2 text-sm text-slate-600 font-medium">
+            Digital Procurement & Queue Management
           </p>
+          {!selectedRole && (
+            <p className="mt-4 text-xs text-slate-500 max-w-sm mx-auto">
+              Book your procurement slot, receive a digital token, and track your queue without waiting at the mandi.
+            </p>
+          )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Farmer Card */}
-          <div
-            onClick={() => setCurrentRole("farmer")}
-            className="group relative bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-md hover:shadow-2xl hover:border-emerald-500 transition-all cursor-pointer flex flex-col justify-between"
-          >
-            <div>
-              <div className="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <User className="w-8 h-8" />
+        {!selectedRole ? (
+          <div className="space-y-4 mt-8">
+            <div className="text-center mb-4">
+              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Select Role</h3>
+            </div>
+            
+            <button
+              onClick={() => setSelectedRole("farmer")}
+              className="w-full group bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md hover:border-emerald-500 transition-all flex items-center text-left gap-4"
+            >
+              <div className="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center group-hover:scale-110 transition-transform shrink-0">
+                <User className="w-6 h-6" />
               </div>
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">
-                Role 1 • Farmer
-              </span>
-              <h3 className="text-2xl font-bold text-slate-900 mt-3 mb-2">
-                Farmer Portal
+              <div className="flex-1">
+                <h4 className="text-lg font-bold text-slate-900">Farmer</h4>
+                <p className="text-xs text-slate-500">Book & Track Procurement</p>
+              </div>
+              <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-emerald-500 transition-colors" />
+            </button>
+
+            <button
+              onClick={() => setSelectedRole("operator")}
+              className="w-full group bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-500 transition-all flex items-center text-left gap-4"
+            >
+              <div className="w-12 h-12 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center group-hover:scale-110 transition-transform shrink-0">
+                <Building2 className="w-6 h-6" />
+              </div>
+              <div className="flex-1">
+                <h4 className="text-lg font-bold text-slate-900">Procurement Centre Operator</h4>
+                <p className="text-xs text-slate-500">Manage Queue & Procurement</p>
+              </div>
+              <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-blue-500 transition-colors" />
+            </button>
+
+            <button
+              onClick={() => setSelectedRole("admin")}
+              className="w-full group bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md hover:border-indigo-500 transition-all flex items-center text-left gap-4"
+            >
+              <div className="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center group-hover:scale-110 transition-transform shrink-0">
+                <ShieldCheck className="w-6 h-6" />
+              </div>
+              <div className="flex-1">
+                <h4 className="text-lg font-bold text-slate-900">Department Administrator</h4>
+                <p className="text-xs text-slate-500">Monitor Procurement Network</p>
+              </div>
+              <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-indigo-500 transition-colors" />
+            </button>
+          </div>
+        ) : (
+          <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-xl mt-8 animate-in slide-in-from-bottom-4 fade-in duration-300">
+            <button 
+              onClick={() => setSelectedRole(null)}
+              className="text-xs font-semibold text-slate-500 hover:text-slate-900 flex items-center gap-1 mb-6"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" /> Back to roles
+            </button>
+            
+            <div className="mb-6">
+              <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                {selectedRole === "farmer" && <><User className="w-5 h-5 text-emerald-600"/> Farmer Login</>}
+                {selectedRole === "operator" && <><Building2 className="w-5 h-5 text-blue-600"/> Operator Login</>}
+                {selectedRole === "admin" && <><ShieldCheck className="w-5 h-5 text-indigo-600"/> Administrator Login</>}
               </h3>
-              <p className="text-sm text-slate-600 leading-relaxed mb-4">
-                Book predictable slots, track your digital queue position live, receive wait predictions, and track direct bank payments.
-              </p>
-              <div className="bg-slate-50 rounded-2xl p-3 text-xs font-medium text-slate-700 space-y-1.5 border border-slate-100">
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-emerald-600" />
-                  <span>Book → Track → Arrive → Sell → Get Paid</span>
-                </div>
-                <div className="flex items-center gap-2 text-slate-500">
-                  <Globe className="w-3.5 h-3.5 text-slate-400" />
-                  <span>Bilingual (English & हिंदी) + Offline Mode</span>
-                </div>
-              </div>
-            </div>
-            <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between font-bold text-sm text-emerald-700">
-              <span>Open Farmer View</span>
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </div>
-          </div>
-
-          {/* Operator Card */}
-          <div
-            onClick={() => setCurrentRole("operator")}
-            className="group relative bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-md hover:shadow-2xl hover:border-blue-500 transition-all cursor-pointer flex flex-col justify-between"
-          >
-            <div>
-              <div className="w-14 h-14 rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <Building2 className="w-8 h-8" />
-              </div>
-              <span className="text-xs font-bold uppercase tracking-wider text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full">
-                Role 2 • Procurement Operator
-              </span>
-              <h3 className="text-2xl font-bold text-slate-900 mt-3 mb-2">
-                Procurement Centre
-              </h3>
-              <p className="text-sm text-slate-600 leading-relaxed mb-4">
-                Operational control room for managing daily arrivals, gate check-in, weighbridge weighing, quality testing, and capacity balancing.
-              </p>
-              <div className="bg-slate-50 rounded-2xl p-3 text-xs font-medium text-slate-700 space-y-1.5 border border-slate-100">
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-blue-600" />
-                  <span>Manage → Queue → Process → Complete</span>
-                </div>
-                <div className="flex items-center gap-2 text-slate-500">
-                  <Layers className="w-3.5 h-3.5 text-slate-400" />
-                  <span>Capacity Controls & No-Show Handling</span>
-                </div>
-              </div>
-            </div>
-            <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between font-bold text-sm text-blue-700">
-              <span>Open Operator View</span>
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </div>
-          </div>
-
-          {/* Admin Card */}
-          <div
-            onClick={() => setCurrentRole("admin")}
-            className="group relative bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-md hover:shadow-2xl hover:border-indigo-500 transition-all cursor-pointer flex flex-col justify-between"
-          >
-            <div>
-              <div className="w-14 h-14 rounded-2xl bg-indigo-100 text-indigo-700 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <ShieldCheck className="w-8 h-8" />
-              </div>
-              <span className="text-xs font-bold uppercase tracking-wider text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">
-                Role 3 • Admin & Department
-              </span>
-              <h3 className="text-2xl font-bold text-slate-900 mt-3 mb-2">
-                Department Administrator
-              </h3>
-              <p className="text-sm text-slate-600 leading-relaxed mb-4">
-                System-wide monitoring dashboard with regional congestion heatmaps, centre comparisons, commodity procurement statistics, and load balancing overview.
-              </p>
-              <div className="bg-slate-50 rounded-2xl p-3 text-xs font-medium text-slate-700 space-y-1.5 border border-slate-100">
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="w-4 h-4 text-indigo-600" />
-                  <span>Monitor → Analyze → Optimize</span>
-                </div>
-                <div className="flex items-center gap-2 text-slate-500">
-                  <LineChart className="w-3.5 h-3.5 text-slate-400" />
-                  <span>Congestion Map & Procurement Analytics</span>
-                </div>
-              </div>
-            </div>
-            <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between font-bold text-sm text-indigo-700">
-              <span>Open Admin Dashboard</span>
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Without vs With KisanSetu Comparison */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="bg-slate-900 rounded-3xl p-8 sm:p-12 text-white shadow-2xl relative overflow-hidden">
-          <div className="text-center max-w-2xl mx-auto mb-10">
-            <span className="text-emerald-400 text-xs font-bold uppercase tracking-wider">
-              Transforming Mandi Operations
-            </span>
-            <h3 className="text-2xl sm:text-3xl font-extrabold mt-2">
-              Why KisanSetu Changes the Game
-            </h3>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Without KisanSetu */}
-            <div className="bg-slate-800/80 rounded-2xl p-6 border border-slate-700">
-              <div className="flex items-center gap-2 text-red-400 font-bold text-lg mb-4">
-                <XCircle className="w-6 h-6" />
-                <span>WITHOUT KISANSETU</span>
-              </div>
-              <ul className="space-y-3 text-sm text-slate-300">
-                <li className="flex items-start gap-2">
-                  <span className="text-red-400 font-bold">•</span>
-                  <span>Uncertain arrival without scheduled slots</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-red-400 font-bold">•</span>
-                  <span>Overcrowded Mandis & 8-12 hour queue waiting</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-red-400 font-bold">•</span>
-                  <span>Centres overloaded while nearby capacity sits empty</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-red-400 font-bold">•</span>
-                  <span>Manual paper tokens & lack of payment tracking</span>
-                </li>
-              </ul>
+              <p className="text-xs text-slate-500 mt-1">Please authenticate to continue.</p>
             </div>
 
-            {/* With KisanSetu */}
-            <div className="bg-emerald-950/80 rounded-2xl p-6 border border-emerald-500/50 relative">
-              <div className="flex items-center gap-2 text-emerald-400 font-bold text-lg mb-4">
-                <CheckCircle className="w-6 h-6" />
-                <span>WITH KISANSETU</span>
-              </div>
-              <ul className="space-y-3 text-sm text-emerald-100">
-                <li className="flex items-start gap-2">
-                  <span className="text-emerald-400 font-bold">✓</span>
-                  <span>Book predictable time slots online or via mobile</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-emerald-400 font-bold">✓</span>
-                  <span>Digital token with live queue position & wait prediction</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-emerald-400 font-bold">✓</span>
-                  <span>Load balancing recommends less congested nearby centres</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-emerald-400 font-bold">✓</span>
-                  <span>Real-time weighbridge, quality check & payment tracking</span>
-                </li>
-              </ul>
-            </div>
+            <form onSubmit={handleLogin} className="space-y-4">
+              {selectedRole === "farmer" && (
+                <>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Aadhaar / VID</label>
+                    <input type="text" placeholder="XXXX XXXX XXXX" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" required defaultValue="9876 5432 1098" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Mobile Number</label>
+                    <input type="tel" placeholder="+91" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" required defaultValue="9876543210" />
+                  </div>
+                  <div className="bg-emerald-50 p-3 rounded-xl border border-emerald-100 flex items-start gap-2 mt-2">
+                    <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <p className="text-[10px] text-emerald-800 font-medium">
+                      Identity verification simulated for prototype.
+                    </p>
+                  </div>
+                  <button type="submit" className="w-full py-3 mt-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-md transition-colors">
+                    Verify & Continue
+                  </button>
+                </>
+              )}
+
+              {selectedRole === "operator" && (
+                <>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Employee ID</label>
+                    <input type="text" placeholder="OP-XXXX" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none" required defaultValue="OP-1042" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Procurement Centre</label>
+                    <select className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                      <option>ABC Procurement Centre</option>
+                      <option>Rampur Mandi Hub</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Password / OTP</label>
+                    <input type="password" placeholder="••••••••" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none" required defaultValue="password" />
+                  </div>
+                  <button type="submit" className="w-full py-3 mt-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-md transition-colors">
+                    Login to Centre
+                  </button>
+                </>
+              )}
+
+              {selectedRole === "admin" && (
+                <>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Administrator ID</label>
+                    <input type="text" placeholder="ADMIN-XXXX" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" required defaultValue="ADMIN-001" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Password / OTP</label>
+                    <input type="password" placeholder="••••••••" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" required defaultValue="password" />
+                  </div>
+                  <button type="submit" className="w-full py-3 mt-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-md transition-colors">
+                    Access Dashboard
+                  </button>
+                </>
+              )}
+            </form>
           </div>
-        </div>
-      </section>
+        )}
+      </div>
     </div>
   );
 };

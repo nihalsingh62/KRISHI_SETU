@@ -8,6 +8,9 @@ export const KisanSetuProvider = ({ children }) => {
   const [language, setLanguage] = useState("en");
   const [lowNetworkMode, setLowNetworkMode] = useState(false);
   const [currentRole, setCurrentRole] = useState("landing"); // landing | farmer | operator | admin
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authenticatedUser, setAuthenticatedUser] = useState(null);
+  
   const [centres, setCentres] = useState(INITIAL_CENTRES);
   const [slots, setSlots] = useState(INITIAL_SLOTS);
   const [tokens, setTokens] = useState(INITIAL_TOKENS);
@@ -253,6 +256,18 @@ export const KisanSetuProvider = ({ children }) => {
     }
   };
 
+  const login = (role, userDetails) => {
+    setIsAuthenticated(true);
+    setAuthenticatedUser(userDetails);
+    setCurrentRole(role);
+  };
+
+  const logout = () => {
+    setIsAuthenticated(false);
+    setAuthenticatedUser(null);
+    setCurrentRole("landing");
+  };
+
   return (
     <KisanSetuContext.Provider
       value={{
@@ -263,6 +278,10 @@ export const KisanSetuProvider = ({ children }) => {
         setLowNetworkMode,
         currentRole,
         setCurrentRole,
+        isAuthenticated,
+        authenticatedUser,
+        login,
+        logout,
         centres,
         slots,
         tokens,

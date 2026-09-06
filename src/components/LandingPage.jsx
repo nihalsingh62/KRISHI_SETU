@@ -21,6 +21,13 @@ export const LandingPage = () => {
   const [mobileNumber, setMobileNumber] = useState("");
   const [aadhaarNumber, setAadhaarNumber] = useState("");
   const [farmerName, setFarmerName] = useState("");
+  const [village, setVillage] = useState("");
+  const [district, setDistrict] = useState("");
+  const [bankName, setBankName] = useState("");
+  const [accountHolder, setAccountHolder] = useState("");
+  const [accountNumber, setAccountNumber] = useState("");
+  const [confirmAccountNumber, setConfirmAccountNumber] = useState("");
+  const [ifsc, setIfsc] = useState("");
   const [otp, setOtp] = useState("");
   
   const [error, setError] = useState("");
@@ -41,6 +48,36 @@ export const LandingPage = () => {
       setError("Please enter a valid name.");
       return;
     }
+    if (village.trim().length < 2) {
+      setError("Please enter a valid village name.");
+      return;
+    }
+    if (district.trim().length < 2) {
+      setError("Please enter a valid district name.");
+      return;
+    }
+    if (bankName.trim().length < 2) {
+      setError("Please enter a valid bank name.");
+      return;
+    }
+    if (accountHolder.trim().length < 3) {
+      setError("Please enter a valid account holder name.");
+      return;
+    }
+    if (!/^\d{9,18}$/.test(accountNumber)) {
+      setError("Account Number must be between 9 and 18 digits (numeric only).");
+      return;
+    }
+    if (accountNumber !== confirmAccountNumber) {
+      setError("Account Numbers do not match.");
+      return;
+    }
+    const ifscUpper = ifsc.toUpperCase();
+    if (!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifscUpper)) {
+      setError("Invalid IFSC code format. Must be 11 characters, 5th character must be '0'.");
+      return;
+    }
+
     setOtp("");
     setFarmerFlowStep('register_otp');
   };
@@ -56,7 +93,15 @@ export const LandingPage = () => {
     const newFarmer = registerFarmer({
       name: farmerName,
       aadhaar: aadhaarNumber.replace(/\s/g, ''),
-      mobile: mobileNumber
+      mobile: mobileNumber,
+      village,
+      district,
+      bankDetails: {
+        bankName,
+        accountHolder,
+        accountNumber,
+        ifsc: ifsc.toUpperCase()
+      }
     });
     setFarmerId(newFarmer.id);
     setFarmerFlowStep('register_success');
@@ -215,11 +260,45 @@ export const LandingPage = () => {
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1">Aadhaar Number</label>
-                      <input type="text" placeholder="12 Digit Aadhaar" value={aadhaarNumber} onChange={e => setAadhaarNumber(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" required />
+                      <input type="password" placeholder="12 Digit Aadhaar" value={aadhaarNumber} onChange={e => setAadhaarNumber(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" required />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1">Mobile Number</label>
                       <input type="tel" placeholder="10 Digit Mobile" value={mobileNumber} onChange={e => setMobileNumber(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" required />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">Village</label>
+                        <input type="text" placeholder="e.g. Rampur" value={village} onChange={e => setVillage(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" required />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 mb-1">District</label>
+                        <input type="text" placeholder="e.g. Patna" value={district} onChange={e => setDistrict(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" required />
+                      </div>
+                    </div>
+                    
+                    <div className="pt-2">
+                      <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider mb-3">Bank Details</h4>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Bank Name</label>
+                      <input type="text" placeholder="e.g. State Bank of India" value={bankName} onChange={e => setBankName(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" required />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Account Holder Name</label>
+                      <input type="text" placeholder="e.g. Amit Kumar" value={accountHolder} onChange={e => setAccountHolder(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" required />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Account Number</label>
+                      <input type="password" placeholder="9 to 18 digits" value={accountNumber} onChange={e => setAccountNumber(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" required />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">Confirm Account Number</label>
+                      <input type="password" placeholder="Re-enter account number" value={confirmAccountNumber} onChange={e => setConfirmAccountNumber(e.target.value)} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none" required />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">IFSC Code</label>
+                      <input type="text" placeholder="e.g. SBIN0001234" value={ifsc} onChange={e => setIfsc(e.target.value.toUpperCase())} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none uppercase font-mono" required />
                     </div>
                     <button type="submit" className="w-full py-3 mt-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-md transition-colors">
                       Continue

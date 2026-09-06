@@ -109,7 +109,7 @@ export const INITIAL_BOOKINGS = [
     date: "2026-09-06",
     updatedAt: "2026-09-06T10:00:00Z",
     slot: "09:00 AM – 10:00 AM",
-    status: "PROCUREMENT_COMPLETE",
+    status: "COMPLETED",
     queuePosition: 0,
     estimatedWait: 0,
     actualWeightQtl: 60.5,
@@ -125,7 +125,7 @@ export const INITIAL_BOOKINGS = [
       { status: "ARRIVED", time: "09:05 AM", desc: "Gate entry verified" },
       { status: "WEIGHING", time: "09:20 AM", desc: "Weighbridge recorded 60.5 Qtl" },
       { status: "QUALITY_CHECK", time: "09:35 AM", desc: "Passed (11.8% moisture, Grade A)" },
-      { status: "PROCUREMENT_COMPLETE", time: "09:48 AM", desc: "Receipt generated" },
+      { status: "COMPLETED", time: "09:48 AM", desc: "Receipt generated" },
       { status: "PAYMENT_COMPLETED", time: "09:55 AM", desc: "Direct Bank Transfer Successful (Ref: DEMO-TRX-10479)" }
     ]
   },

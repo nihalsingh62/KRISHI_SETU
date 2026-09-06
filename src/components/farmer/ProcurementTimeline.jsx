@@ -23,24 +23,30 @@ export const ProcurementTimeline = () => {
     );
   }
 
-  const STAGES = [
+    const STAGES = [
     { key: "BOOKED", label: "Slot Booked", icon: Clock },
     { key: "ARRIVED", label: "Farmer Checked-In at Gate", icon: Building2 },
+    { key: "CALLED", label: "Called for Weighing", icon: Clock },
     { key: "WEIGHING", label: "Weighbridge Weighing", icon: Scale },
     { key: "QUALITY_CHECK", label: "Quality & Moisture Inspection", icon: ShieldCheck },
-    { key: "PROCUREMENT_COMPLETE", label: "Procurement Completed", icon: FileText },
-    { key: "PAYMENT_PROCESSING", label: "Payment Processing (PFMS)", icon: CreditCard },
+    { key: "APPROVED", label: "Procurement Approved", icon: CheckCircle2 },
+    { key: "COMPLETED", label: "Procurement Completed", icon: FileText },
+    { key: "PAYMENT_INITIATED", label: "Payment Initiated", icon: CreditCard },
     { key: "PAYMENT_COMPLETED", label: "Payment Transferred to Account", icon: CheckCircle2 }
   ];
 
   const getStageState = (stageKey) => {
     const statusOrder = [
       "BOOKED",
+      "CONFIRMED",
+      "WAITING",
       "ARRIVED",
+      "CALLED",
       "WEIGHING",
       "QUALITY_CHECK",
-      "PROCUREMENT_COMPLETE",
-      "PAYMENT_PROCESSING",
+      "APPROVED",
+      "COMPLETED",
+      "PAYMENT_INITIATED",
       "PAYMENT_COMPLETED"
     ];
     const currentIndex = statusOrder.indexOf(activeBooking.status);

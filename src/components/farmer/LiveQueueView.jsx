@@ -146,7 +146,7 @@ export const LiveQueueView = () => {
 
                 <div className="text-right">
                   <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold inline-block ${
-                    tok.status === "PROCUREMENT_COMPLETE" || tok.status === "PAYMENT_COMPLETED"
+                    tok.status === "COMPLETED" || tok.status === "PAYMENT_COMPLETED"
                       ? "bg-emerald-100 text-emerald-800"
                       : tok.status === "WEIGHING" || tok.status === "QUALITY_CHECK"
                       ? "bg-blue-100 text-blue-800"

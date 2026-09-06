@@ -18,8 +18,9 @@ import {
 } from "lucide-react";
 
 export const AdminDashboard = () => {
-  const { t, centres, tokens } = useKisanSetu();
-  const [activeTab, setActiveTab] = useState("map"); // map | monitoring | analytics | settings
+  const { t, centres, tokens, activeAdminTab, setActiveAdminTab } = useKisanSetu();
+  const activeTab = activeAdminTab || "map";
+  const setActiveTab = setActiveAdminTab;
 
   const totalBooked = tokens.length * 142; // Scaled demo total
   const totalWaiting = centres.reduce((acc, c) => acc + c.queueDepth, 0) * 105;

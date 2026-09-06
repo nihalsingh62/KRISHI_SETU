@@ -20,8 +20,9 @@ import {
 } from "lucide-react";
 
 export const OperatorDashboard = () => {
-  const { t, activeCentre, centres, setActiveCentreId } = useKisanSetu();
-  const [activeTab, setActiveTab] = useState("queue"); // queue | checkin | slots | analytics
+  const { t, activeCentre, centres, setActiveCentreId, activeOperatorTab, setActiveOperatorTab } = useKisanSetu();
+  const activeTab = activeOperatorTab || "queue";
+  const setActiveTab = setActiveOperatorTab;
 
   return (
     <div className="space-y-6">

@@ -98,6 +98,7 @@ export const INITIAL_SLOTS = [
 export const INITIAL_TOKENS = [
   {
     id: "A120",
+    farmerId: "FAR-1010",
     farmerName: "Rajesh Yadav",
     phone: "+91 98111 22334",
     commodity: "Wheat",
@@ -126,6 +127,7 @@ export const INITIAL_TOKENS = [
   },
   {
     id: "A121",
+    farmerId: "FAR-1011",
     farmerName: "Suresh Kumar",
     phone: "+91 98222 33445",
     commodity: "Wheat",
@@ -151,6 +153,7 @@ export const INITIAL_TOKENS = [
   },
   {
     id: "A122",
+    farmerId: "FAR-1012",
     farmerName: "Mohan Patel",
     phone: "+91 98333 44556",
     commodity: "Wheat",
@@ -175,6 +178,7 @@ export const INITIAL_TOKENS = [
   },
   {
     id: "A123",
+    farmerId: "FAR-1013",
     farmerName: "Anita Devi",
     phone: "+91 98444 55667",
     commodity: "Paddy",
@@ -198,6 +202,7 @@ export const INITIAL_TOKENS = [
   },
   {
     id: "A124",
+    farmerId: "FAR-1001",
     farmerName: "Ramesh Singh",
     phone: "+91 98765 43210",
     commodity: "Wheat",
@@ -221,6 +226,7 @@ export const INITIAL_TOKENS = [
   },
   {
     id: "A125",
+    farmerId: "FAR-1015",
     farmerName: "Vikram Singh",
     phone: "+91 98555 66778",
     commodity: "Maize",

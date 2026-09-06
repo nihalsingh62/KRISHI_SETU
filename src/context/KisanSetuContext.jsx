@@ -139,17 +139,27 @@ export const KisanSetuProvider = ({ children }) => {
     const centresSet = new Set(updated.map(t => t.centreId));
     
     centresSet.forEach(cId => {
-      // Find bookings in queue (BOOKED, WAITING, ARRIVED) for this centre
-      const inQueueTokens = updated.filter(t => t.centreId === cId && ["BOOKED", "WAITING", "ARRIVED"].includes(t.status));
-      // Sort them by their current queuePos or time (simulated by ID logic or bookedAt)
-      inQueueTokens.sort((a, b) => a.id.localeCompare(b.id));
+      // Reset processing and completed
+      updated.filter(t => t.centreId === cId).forEach(tok => {
+        const tIndex = updated.findIndex(t => t.bookingId === tok.bookingId);
+        if (!["BOOKED", "CONFIRMED", "ARRIVED", "WAITING"].includes(tok.status)) {
+          updated[tIndex].queuePosition = 0;
+          updated[tIndex].estimatedWait = 0;
+        }
+      });
+
+      // Find bookings in queue (BOOKED, CONFIRMED, WAITING, ARRIVED) for this centre
+      const inQueueTokens = updated.filter(t => t.centreId === cId && ["BOOKED", "CONFIRMED", "ARRIVED", "WAITING"].includes(t.status));
+      
+      // Sort them by their booking ID which contains timestamp (or bookedAt)
+      inQueueTokens.sort((a, b) => a.bookingId.localeCompare(b.bookingId));
       
       inQueueTokens.forEach((tok, index) => {
         // Queue position is index + 1
         const tIndex = updated.findIndex(t => t.bookingId === tok.bookingId);
         if (tIndex !== -1) {
-          updated[tIndex].queuePos = index + 1;
-          updated[tIndex].estimatedWaitMin = Math.max(10, Math.round((index + 1) * 6)); // Rough estimate dynamically decreasing
+          updated[tIndex].queuePosition = index + 1;
+          updated[tIndex].estimatedWait = Math.max(5, Math.round((index + 1) * 6)); // Rough estimate dynamically decreasing
         }
       });
     });
@@ -166,7 +176,7 @@ export const KisanSetuProvider = ({ children }) => {
     const msp = commodity === "Wheat" ? 2275 : commodity === "Paddy" ? 2300 : 2090;
     const estWait = Math.max(10, Math.round(centre.queueDepth * (centre.avgProcessingMin / centre.activeCounters)));
 
-    const newBooking = {
+        const newBooking = {
       bookingId: bookingId,
       id: bookingId,
       token: nextTokenNum,

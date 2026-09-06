@@ -73,7 +73,8 @@ export const LiveQueueManager = () => {
                 <th className="p-3.5">Farmer Name</th>
                 <th className="p-3.5">Commodity</th>
                 <th className="p-3.5">Quantity</th>
-                <th className="p-3.5">Slot</th>
+                <th className="p-3.5">Queue Pos</th>
+                <th className="p-3.5">Est. Wait</th>
                 <th className="p-3.5">Status</th>
                 <th className="p-3.5 rounded-r-xl text-right">Operational Actions</th>
               </tr>
@@ -117,7 +118,8 @@ export const LiveQueueManager = () => {
                       )}
                     </td>
 
-                    <td className="p-3.5 text-slate-600">{tok.slot}</td>
+                    <td className="p-3.5 font-bold text-amber-600">{tok.queuePosition > 0 ? tok.queuePosition : "-"}</td>
+                    <td className="p-3.5 font-bold text-emerald-600">{tok.estimatedWait > 0 ? `${tok.estimatedWait} min` : "-"}</td>
 
                     <td className="p-3.5">
                       <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${

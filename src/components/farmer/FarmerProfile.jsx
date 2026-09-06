@@ -8,7 +8,7 @@ export const FarmerProfile = () => {
   const [saved, setSaved] = useState(false);
   const [formData, setFormData] = useState({
     bankName: authenticatedUser?.bankDetails?.bankName || "",
-    holderName: authenticatedUser?.bankDetails?.holderName || "",
+    holderName: authenticatedUser?.bankDetails?.accountHolder || "",
     accountNumber: authenticatedUser?.bankDetails?.accountNumber || "",
     ifsc: authenticatedUser?.bankDetails?.ifsc || ""
   });
@@ -45,13 +45,27 @@ export const FarmerProfile = () => {
             <div className="grid grid-cols-2 gap-x-12 gap-y-4">
               <div>
                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Mobile Number</p>
-                <p className="text-sm font-semibold">+91 {authenticatedUser.mobile}</p>
+                <p className="text-sm font-semibold font-mono">
+                  {authenticatedUser.mobile ? `${authenticatedUser.mobile.slice(0, 2)}******${authenticatedUser.mobile.slice(-2)}` : "N/A"}
+                </p>
               </div>
               <div>
                 <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Aadhaar Linked</p>
                 <p className="text-sm font-mono font-semibold">
                   XXXX XXXX {authenticatedUser.aadhaar?.slice(-4) || "****"}
                 </p>
+              </div>
+              <div>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Village</p>
+                <p className="text-sm font-semibold">{authenticatedUser.village || "N/A"}</p>
+              </div>
+              <div>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">District</p>
+                <p className="text-sm font-semibold">{authenticatedUser.district || "N/A"}</p>
+              </div>
+              <div>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Preferred Language</p>
+                <p className="text-sm font-semibold">English / Hindi</p>
               </div>
             </div>
           </div>
@@ -153,12 +167,12 @@ export const FarmerProfile = () => {
                 </div>
                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Account Holder</p>
-                  <p className="text-sm font-bold text-slate-900">{authenticatedUser.bankDetails.holderName}</p>
+                  <p className="text-sm font-bold text-slate-900">{authenticatedUser.bankDetails.accountHolder || authenticatedUser.bankDetails.holderName}</p>
                 </div>
                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Account Number</p>
                   <p className="text-sm font-mono font-bold text-slate-900">
-                    XXXX XXXX {authenticatedUser.bankDetails.accountNumber?.slice(-4)}
+                    XXXXXX{authenticatedUser.bankDetails.accountNumber?.slice(-4) || "****"}
                   </p>
                 </div>
                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">

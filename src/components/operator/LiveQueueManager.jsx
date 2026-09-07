@@ -122,6 +122,8 @@ export const LiveQueueManager = () => {
                           ? "bg-indigo-100 text-indigo-800"
                           : tok.status === "NO_SHOW"
                           ? "bg-red-100 text-red-800"
+                          : tok.status === "CANCELLED"
+                          ? "bg-rose-100 text-rose-800"
                           : "bg-slate-200 text-slate-700"
                       }`}>
                         {tok.status.replace(/_/g, " ")}

@@ -15,6 +15,106 @@ const getInitialState = (key, fallback) => {
   }
 };
 
+// Helper to re-calculate centre congestion load % & status
+const recalculateCentreMetrics = (centreList, tokenList) => {
+  return centreList.map((centre) => {
+    const centreTokens = tokenList.filter((tok) => tok.centreId === centre.id);
+    const booked = centreTokens.filter((tok) => tok.status !== "CANCELLED").length;
+    const arrived = centreTokens.filter((tok) => [
+      "ARRIVED",
+      "WEIGHING",
+      "QUALITY_CHECK",
+      "APPROVED",
+      "PROCUREMENT_COMPLETE",
+      "PROCUREMENT_COMPLETED",
+      "PAYMENT_PROCESSING",
+      "PAYMENT_COMPLETED"
+    ].includes(tok.status)).length;
+    const processing = centreTokens.filter((tok) => ["WEIGHING", "QUALITY_CHECK", "APPROVED"].includes(tok.status)).length;
+    const completed = centreTokens.filter((tok) => ["PROCUREMENT_COMPLETE", "PROCUREMENT_COMPLETED", "PAYMENT_PROCESSING", "PAYMENT_COMPLETED"].includes(tok.status)).length;
+    const queueDepth = centreTokens.filter((tok) => ["WAITING", "BOOKED", "ARRIVED"].includes(tok.status)).length;
+
+    const loadPercent = Math.min(100, Math.round((booked / centre.capacity) * 100));
+    let status = "NORMAL";
+    if (loadPercent >= 95) status = "CRITICAL";
+    else if (loadPercent >= 80) status = "HIGH_LOAD";
+
+    return {
+      ...centre,
+      booked,
+      arrived,
+      processing,
+      completed,
+      queueDepth,
+      loadPercent,
+      status
+    };
+  });
+};
+
+// Slot-wise individual queue position & automatic queue shifting
+// Grouping: SAME CENTRE + SAME DATE + SAME TIME SLOT
+const recalculateQueuePositions = (tokenList) => {
+  const updated = tokenList.map(tok => ({ ...tok }));
+  const activeQueueStatuses = ["BOOKED", "CONFIRMED", "ARRIVED", "WAITING", "CALLED", "WEIGHING", "QUALITY_CHECK", "APPROVED"];
+  
+  // Clear queue position for non-queue statuses (e.g. CANCELLED, REJECTED, COMPLETED)
+  updated.forEach(tok => {
+    if (!activeQueueStatuses.includes(tok.status)) {
+      tok.queuePosition = 0;
+      tok.queuePos = 0;
+      tok.estimatedWait = 0;
+      tok.estimatedWaitMin = 0;
+    }
+  });
+
+  // Group active bookings by: SAME CENTRE + SAME DATE + SAME TIME SLOT
+  const slotGroups = new Map();
+
+  updated.forEach(tok => {
+    if (activeQueueStatuses.includes(tok.status)) {
+      const cId = tok.centreId || "c1";
+      const date = tok.date || "Today";
+      const slot = tok.slot || tok.slotTime || "Default";
+      const groupKey = `${cId}__${date}__${slot}`;
+
+      if (!slotGroups.has(groupKey)) {
+        slotGroups.set(groupKey, []);
+      }
+      slotGroups.get(groupKey).push(tok);
+    }
+  });
+
+  // Assign individual sequential queue positions within each centre/date/slot
+  slotGroups.forEach((groupBookings) => {
+    groupBookings.sort((a, b) => {
+      const timeA = a.slotBookedAt || a.createdAt || "";
+      const timeB = b.slotBookedAt || b.createdAt || "";
+      if (timeA && timeB && timeA !== timeB) {
+        return timeA.localeCompare(timeB);
+      }
+      if (a.bookingId && b.bookingId && a.bookingId !== b.bookingId) {
+        return a.bookingId.localeCompare(b.bookingId);
+      }
+      const numA = parseInt((a.token || "").replace(/\D/g, ""), 10) || 0;
+      const numB = parseInt((b.token || "").replace(/\D/g, ""), 10) || 0;
+      return numA - numB;
+    });
+
+    groupBookings.forEach((tok, index) => {
+      const pos = index + 1;
+      tok.queuePosition = pos;
+      tok.queuePos = pos;
+      // Estimated wait calculation: 5m for #1, then adds 6m per position
+      const estWait = Math.max(5, Math.round((pos - 1) * 6 + 5));
+      tok.estimatedWait = estWait;
+      tok.estimatedWaitMin = estWait;
+    });
+  });
+
+  return updated;
+};
+
 export const KisanSetuProvider = ({ children }) => {
   // Persistent State
   const [language, setLanguage] = useState(() => getInitialState("ks_language", "en"));
@@ -42,7 +142,7 @@ export const KisanSetuProvider = ({ children }) => {
   
   const [centres, setCentres] = useState(() => getInitialState("ks_centres", INITIAL_CENTRES));
   const [slots, setSlots] = useState(() => getInitialState("ks_slots", INITIAL_SLOTS));
-  const [bookings, setBookings] = useState(() => getInitialState("ks_bookings", INITIAL_BOOKINGS));
+  const [bookings, setBookings] = useState(() => recalculateQueuePositions(getInitialState("ks_bookings", INITIAL_BOOKINGS)));
   const [notifications, setNotifications] = useState(() => getInitialState("ks_notifications", INITIAL_NOTIFICATIONS));
   
   // Navigation Tabs persistence
@@ -112,87 +212,57 @@ export const KisanSetuProvider = ({ children }) => {
     setCurrentRole("landing");
   };
 
-  // Farmer active booking - strictly scoped to authenticatedUser.id
+  // Farmer active booking - strictly follows Active Booking Rule
+  // A farmer must never have two active bookings.
+  // Active statuses: BOOKED, CONFIRMED, ARRIVED, WAITING, CALLED, WEIGHING, QUALITY_CHECK, APPROVED.
+  // Cancelled/completed historical bookings must NOT count as active bookings.
   const getActiveBooking = () => {
     if (currentRole === "farmer" && authenticatedUser) {
       const farmerTokens = bookings.filter(t => t.farmerId === authenticatedUser.id);
-      return farmerTokens.length > 0 ? farmerTokens[farmerTokens.length - 1] : null;
+      const activeStatuses = [
+        "BOOKED",
+        "CONFIRMED",
+        "ARRIVED",
+        "WAITING",
+        "CALLED",
+        "WEIGHING",
+        "QUALITY_CHECK",
+        "APPROVED"
+      ];
+      const active = farmerTokens.filter(t => activeStatuses.includes(t.status));
+      if (active.length > 0) {
+        return active[active.length - 1];
+      }
+
+      // If no active pre-completion booking, check if latest booking was completed (for receipt display on dashboard),
+      // but CANCELLED or REJECTED bookings never count as active!
+      const lastToken = farmerTokens.length > 0 ? farmerTokens[farmerTokens.length - 1] : null;
+      if (lastToken && ["PROCUREMENT_COMPLETE", "PROCUREMENT_COMPLETED", "PAYMENT_PROCESSING", "PAYMENT_COMPLETED"].includes(lastToken.status)) {
+        return lastToken;
+      }
+      return null;
     }
     return null;
   };
   const activeBooking = getActiveBooking();
   const activeCentre = centres.find((c) => c.id === activeCentreId) || centres[0];
 
-  // Helper to re-calculate centre congestion load % & status
-  const recalculateCentreMetrics = (centreList, tokenList) => {
-    return centreList.map((centre) => {
-      const centreTokens = tokenList.filter((tok) => tok.centreId === centre.id);
-      const booked = centreTokens.filter((tok) => tok.status !== "CANCELLED").length;
-      const arrived = centreTokens.filter((tok) => [
-        "ARRIVED",
-        "WEIGHING",
-        "QUALITY_CHECK",
-        "APPROVED",
-        "PROCUREMENT_COMPLETE",
-        "PROCUREMENT_COMPLETED",
-        "PAYMENT_PROCESSING",
-        "PAYMENT_COMPLETED"
-      ].includes(tok.status)).length;
-      const processing = centreTokens.filter((tok) => ["WEIGHING", "QUALITY_CHECK", "APPROVED"].includes(tok.status)).length;
-      const completed = centreTokens.filter((tok) => ["PROCUREMENT_COMPLETE", "PROCUREMENT_COMPLETED", "PAYMENT_PROCESSING", "PAYMENT_COMPLETED"].includes(tok.status)).length;
-      const queueDepth = centreTokens.filter((tok) => ["WAITING", "BOOKED", "ARRIVED"].includes(tok.status)).length;
-
-      const loadPercent = Math.min(100, Math.round((booked / centre.capacity) * 100));
-      let status = "NORMAL";
-      if (loadPercent >= 95) status = "CRITICAL";
-      else if (loadPercent >= 80) status = "HIGH_LOAD";
-
-      return {
-        ...centre,
-        booked,
-        arrived,
-        processing,
-        completed,
-        queueDepth,
-        loadPercent,
-        status
-      };
-    });
+  // Helper to check if a booking can be cancelled / rescheduled (before scheduled slot arrival)
+  const isBookingCancellable = (booking) => {
+    if (!booking) return false;
+    // Can only cancel pre-arrival
+    if (!["BOOKED", "CONFIRMED"].includes(booking.status)) {
+      return false;
+    }
+    // Cannot cancel past dates
+    if (booking.date && booking.date !== "Today") {
+      const todayStr = new Date().toISOString().split("T")[0];
+      if (booking.date < todayStr) return false;
+    }
+    return true;
   };
 
-  const recalculateQueuePositions = (tokenList) => {
-    const updated = [...tokenList];
-    const centresSet = new Set(updated.map(t => t.centreId));
-    
-    centresSet.forEach(cId => {
-      // Clear position for non-queue statuses
-      updated.filter(t => t.centreId === cId).forEach(tok => {
-        const tIndex = updated.findIndex(t => t.bookingId === tok.bookingId);
-        if (!["BOOKED", "CONFIRMED", "ARRIVED", "WAITING"].includes(tok.status)) {
-          if (tIndex !== -1) {
-            updated[tIndex].queuePosition = 0;
-            updated[tIndex].estimatedWait = 0;
-          }
-        }
-      });
-
-      // Find active bookings in queue for this centre
-      const inQueueTokens = updated.filter(t => t.centreId === cId && ["BOOKED", "CONFIRMED", "ARRIVED", "WAITING"].includes(t.status));
-      
-      inQueueTokens.sort((a, b) => a.bookingId.localeCompare(b.bookingId));
-      
-      inQueueTokens.forEach((tok, index) => {
-        const tIndex = updated.findIndex(t => t.bookingId === tok.bookingId);
-        if (tIndex !== -1) {
-          updated[tIndex].queuePosition = index + 1;
-          updated[tIndex].estimatedWait = Math.max(5, Math.round((index + 1) * 6));
-        }
-      });
-    });
-    return updated;
-  };
-
-  // Booking a slot by farmer with duplicate booking prevention
+  // Booking a slot by farmer with Active Booking Rule (never two active bookings)
   const bookSlot = ({ commodity, crop, quantityQtl, quantity, centreId, date, slotTime, slot }) => {
     if (!authenticatedUser) return null;
 
@@ -201,19 +271,19 @@ export const KisanSetuProvider = ({ children }) => {
     const chosenSlot = slotTime || slot || "10:00 AM – 11:00 AM";
     const chosenDate = date || "Today";
 
-    // Duplicate booking prevention: search active bookings for same farmerId, date, centreId, slot
+    // Active booking rule: A farmer must never have two active bookings.
+    // Active statuses: BOOKED, CONFIRMED, ARRIVED, WAITING, CALLED, WEIGHING, QUALITY_CHECK, APPROVED.
+    // Cancelled/completed historical bookings must NOT count as active bookings.
+    const activeStatuses = ["BOOKED", "CONFIRMED", "ARRIVED", "WAITING", "CALLED", "WEIGHING", "QUALITY_CHECK", "APPROVED"];
     const existingActive = bookings.find((b) => 
       b.farmerId === authenticatedUser.id &&
-      b.centreId === centreId &&
-      (b.slot === chosenSlot || b.slotTime === chosenSlot) &&
-      (b.date === chosenDate || b.date === "Today" || chosenDate === "Today") &&
-      !["CANCELLED", "REJECTED"].includes(b.status)
+      activeStatuses.includes(b.status)
     );
 
     if (existingActive) {
       return {
         error: "DUPLICATE_BOOKING",
-        message: "You already have an active booking for this slot.",
+        message: "You already have an active booking.",
         existingBooking: existingActive
       };
     }
@@ -228,7 +298,6 @@ export const KisanSetuProvider = ({ children }) => {
 
     const centre = centres.find((c) => c.id === centreId) || centres[0];
     const msp = chosenCrop === "Wheat" ? 2275 : chosenCrop === "Paddy" ? 2300 : 2090;
-    const estWait = Math.max(10, Math.round(centre.queueDepth * (centre.avgProcessingMin / centre.activeCounters)));
 
     const newBooking = {
       bookingId: bookingId,
@@ -247,10 +316,10 @@ export const KisanSetuProvider = ({ children }) => {
       slot: chosenSlot,
       slotTime: chosenSlot,
       status: "BOOKED",
-      queuePosition: centre.queueDepth + 1,
-      queuePos: centre.queueDepth + 1,
-      estimatedWait: estWait,
-      estimatedWaitMin: estWait,
+      queuePosition: 1, // Will be assigned by recalculateQueuePositions
+      queuePos: 1,
+      estimatedWait: 5,
+      estimatedWaitMin: 5,
       actualWeightQtl: null,
       moisturePercent: null,
       grade: null,
@@ -259,6 +328,7 @@ export const KisanSetuProvider = ({ children }) => {
       paymentStatus: "NOT_INITIATED",
       paymentTxRef: null,
       createdAt: new Date().toISOString(),
+      slotBookedAt: new Date().toISOString(),
       bookedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       timelineHistory: [
         { status: "BOOKED", time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), desc: `Slot booked at ${centre.name} for ${chosenSlot}` }
@@ -504,6 +574,172 @@ export const KisanSetuProvider = ({ children }) => {
     });
   };
 
+  // Cancel a booking
+  const cancelBooking = (bookingId) => {
+    const target = bookings.find(b => b.bookingId === bookingId || b.id === bookingId);
+    if (!target) return { error: "NOT_FOUND" };
+
+    if (!isBookingCancellable(target)) {
+      addToast({
+        type: "error",
+        title: language === "hi" ? "रद्द नहीं किया जा सकता" : "Cannot Cancel",
+        message: language === "hi" ? "यह बुकिंग अब रद्द करने योग्य नहीं है।" : "This booking can no longer be cancelled."
+      });
+      return { error: "CANNOT_CANCEL" };
+    }
+
+    const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const nowIso = new Date().toISOString();
+    const isHi = language === "hi";
+
+    // 1. Release slot capacity
+    setSlots(prevSlots =>
+      prevSlots.map(s => {
+        if (s.time === target.slot || s.time === target.slotTime) {
+          const newBooked = Math.max(0, s.booked - 1);
+          return { ...s, booked: newBooked, status: newBooked >= s.capacity ? "FULL" : "AVAILABLE" };
+        }
+        return s;
+      })
+    );
+
+    // 2. Mark booking as CANCELLED, remove queue position
+    let updatedBookings = bookings.map(b => {
+      if (b.bookingId === bookingId || b.id === bookingId) {
+        const history = Array.isArray(b.timelineHistory) ? [...b.timelineHistory] : [];
+        history.push({
+          status: "CANCELLED",
+          time: nowTime,
+          desc: isHi ? "किसान द्वारा बुकिंग रद्द की गई। स्लॉट क्षमता जारी।" : "Booking cancelled by farmer. Slot capacity released."
+        });
+        return {
+          ...b,
+          status: "CANCELLED",
+          queuePosition: 0,
+          queuePos: 0,
+          estimatedWait: 0,
+          estimatedWaitMin: 0,
+          updatedAt: nowIso,
+          timelineHistory: history
+        };
+      }
+      return b;
+    });
+
+    // 3. Recalculate queue positions (shifts other farmers forward)
+    updatedBookings = recalculateQueuePositions(updatedBookings);
+    setBookings(updatedBookings);
+
+    // 4. Update centre metrics
+    setCentres(prev => recalculateCentreMetrics(prev, updatedBookings));
+
+    // 5. Notify & toast
+    addNotification({
+      type: "WARNING",
+      title: isHi ? "बुकिंग रद्द की गई" : "Booking Cancelled",
+      message: isHi ? `टोकन ${target.token}: स्लॉट बुकिंग रद्द कर दी गई है।` : `Token ${target.token}: Slot booking cancelled and capacity released.`,
+      time: isHi ? "अभी" : "Just now"
+    });
+
+    addToast({
+      type: "info",
+      title: isHi ? "बुकिंग रद्द" : "Booking Cancelled",
+      message: isHi ? "आपकी स्लॉट बुकिंग रद्द कर दी गई है और स्लॉट क्षमता जारी की गई है।" : "Your slot booking has been cancelled and capacity released."
+    });
+
+    return { success: true };
+  };
+
+  // Reschedule a booking to a new available slot
+  const rescheduleBooking = (bookingId, newSlotTime) => {
+    const target = bookings.find(b => b.bookingId === bookingId || b.id === bookingId);
+    if (!target) return { error: "NOT_FOUND" };
+
+    if (!isBookingCancellable(target)) {
+      addToast({
+        type: "error",
+        title: language === "hi" ? "पुनः निर्धारित नहीं हो सकता" : "Cannot Reschedule",
+        message: language === "hi" ? "यह बुकिंग अब पुनः निर्धारित करने योग्य नहीं है।" : "This booking can no longer be rescheduled."
+      });
+      return { error: "CANNOT_RESCHEDULE" };
+    }
+
+    const targetSlot = slots.find(s => s.time === newSlotTime);
+    if (!targetSlot || targetSlot.booked >= targetSlot.capacity || targetSlot.status === "FULL") {
+      addToast({
+        type: "error",
+        title: language === "hi" ? "स्लॉट अनुपलब्ध" : "Slot Unavailable",
+        message: language === "hi" ? "चुना गया स्लॉट पहले से ही भरा हुआ है।" : "Selected slot is already full."
+      });
+      return { error: "SLOT_FULL" };
+    }
+
+    const oldSlotTime = target.slot || target.slotTime;
+    const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const nowIso = new Date().toISOString();
+    const isHi = language === "hi";
+
+    // 1. Release old slot capacity, consume new slot capacity
+    setSlots(prevSlots =>
+      prevSlots.map(s => {
+        if (s.time === oldSlotTime && s.time === newSlotTime) return s;
+        if (s.time === oldSlotTime) {
+          const newB = Math.max(0, s.booked - 1);
+          return { ...s, booked: newB, status: newB >= s.capacity ? "FULL" : "AVAILABLE" };
+        }
+        if (s.time === newSlotTime) {
+          const newB = s.booked + 1;
+          return { ...s, booked: newB, status: newB >= s.capacity ? "FULL" : "AVAILABLE" };
+        }
+        return s;
+      })
+    );
+
+    // 2. Update booking slot and timeline
+    let updatedBookings = bookings.map(b => {
+      if (b.bookingId === bookingId || b.id === bookingId) {
+        const history = Array.isArray(b.timelineHistory) ? [...b.timelineHistory] : [];
+        history.push({
+          status: "BOOKED",
+          time: nowTime,
+          desc: isHi ? `स्लॉट बदलकर ${newSlotTime} किया गया (पूर्व स्लॉट: ${oldSlotTime})` : `Rescheduled from ${oldSlotTime} to ${newSlotTime}`
+        });
+        return {
+          ...b,
+          slot: newSlotTime,
+          slotTime: newSlotTime,
+          slotBookedAt: nowIso,
+          updatedAt: nowIso,
+          timelineHistory: history
+        };
+      }
+      return b;
+    });
+
+    // 3. Recalculate queue positions (shifts old slot queue forward, assigns new queue position in new slot)
+    updatedBookings = recalculateQueuePositions(updatedBookings);
+    setBookings(updatedBookings);
+
+    // 4. Update centre metrics
+    setCentres(prev => recalculateCentreMetrics(prev, updatedBookings));
+
+    // 5. Notify & toast
+    addNotification({
+      type: "SLOT_CONFIRMED",
+      title: isHi ? "स्लॉट पुनः निर्धारित" : "Booking Rescheduled",
+      message: isHi ? `टोकन ${target.token}: नया स्लॉट ${newSlotTime} निर्धारित किया गया।` : `Token ${target.token}: Rescheduled to new slot ${newSlotTime}.`,
+      time: isHi ? "अभी" : "Just now"
+    });
+
+    addToast({
+      type: "success",
+      title: isHi ? "स्लॉट पुनः निर्धारित" : "Reschedule Successful",
+      message: isHi ? `नया स्लॉट: ${newSlotTime}` : `Booking rescheduled to ${newSlotTime}.`
+    });
+
+    return { success: true, updatedBooking: updatedBookings.find(b => b.bookingId === bookingId) };
+  };
+
   return (
     <KisanSetuContext.Provider
       value={{
@@ -534,6 +770,9 @@ export const KisanSetuProvider = ({ children }) => {
         activeBooking,
         activeCentre,
         bookSlot,
+        cancelBooking,
+        rescheduleBooking,
+        isBookingCancellable,
         updateBookingStatus,
         updateCentreCapacity,
         updateSlotCapacity,

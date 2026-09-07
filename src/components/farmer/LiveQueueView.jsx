@@ -25,8 +25,8 @@ export const LiveQueueView = () => {
     );
   }
 
-  // Filter tokens at the active booking centre
-  const centreBookings = bookings.filter((t) => t.centreId === bookingCentre.id);
+  // Filter tokens at the active booking centre (excluding cancelled bookings)
+  const centreBookings = bookings.filter((t) => t.centreId === bookingCentre.id && t.status !== "CANCELLED");
 
   const getStatusLabel = (status) => {
     switch (status) {

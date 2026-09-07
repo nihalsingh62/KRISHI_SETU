@@ -96,6 +96,12 @@ export const FarmerCheckIn = () => {
 
             {/* Context-Appropriate Operational Action */}
             <div className="pt-2">
+              {searchedToken.status === "CANCELLED" && (
+                <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-bold text-center">
+                  ⚠️ This booking was cancelled by the farmer. Slot has been released and queue position removed.
+                </div>
+              )}
+
               {(searchedToken.status === "BOOKED" || searchedToken.status === "WAITING") && (
                 <button
                   onClick={() => handleAction("ARRIVED")}

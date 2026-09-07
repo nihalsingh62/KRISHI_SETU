@@ -100,7 +100,10 @@ export const SmartBooking = ({ onBookingSuccess }) => {
               </button>
               <button
                 type="button"
-                onClick={() => setDuplicateError(null)}
+                onClick={() => {
+                  setDuplicateError(null);
+                  if (setActiveFarmerTab) setActiveFarmerTab("dashboard");
+                }}
                 className="cursor-pointer px-3 py-2 border border-slate-300 text-slate-700 hover:bg-slate-100 font-bold text-xs rounded-xl transition-colors"
               >
                 {t("reschedule")}

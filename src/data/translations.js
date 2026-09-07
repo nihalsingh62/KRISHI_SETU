@@ -177,6 +177,19 @@ export const translations = {
     invalidMoistureMsg: "Moisture exceeds the permissible limit (max 14%).",
     invalidOtpMsg: "OTP must be exactly 6 digits.",
     invalidCredentialsMsg: "Invalid credentials. Please enter valid demo credentials.",
+    // Cancel & Reschedule
+    cancelBooking: "Cancel Booking",
+    rescheduleBooking: "Reschedule Slot",
+    confirmCancelTitle: "Cancel Booking",
+    confirmCancelPrompt: "Are you sure you want to cancel this booking?",
+    confirmCancelBtn: "Yes, Cancel Booking",
+    keepBookingBtn: "Keep Booking",
+    rescheduleTitle: "Reschedule Procurement Slot",
+    selectNewSlot: "Select a new available time slot:",
+    confirmRescheduleBtn: "Confirm Reschedule",
+    noAvailableSlots: "No other available slots at this time.",
+    currentSlot: "Current Slot",
+    statusCancelled: "Cancelled",
 
     // Operator
     opDashboard: "Procurement Centre Operations Room",
@@ -385,6 +398,20 @@ export const translations = {
     invalidMoistureMsg: "नमी अनुमेय सीमा (अधिकतम 14%) से अधिक है।",
     invalidOtpMsg: "ओटीपी ठीक 6 अंकों का होना चाहिए।",
     invalidCredentialsMsg: "अमान्य क्रेडेंशियल्स। कृपया सही डेमो विवरण दर्ज करें।",
+
+    // Cancel & Reschedule
+    cancelBooking: "बुकिंग रद्द करें",
+    rescheduleBooking: "स्लॉट पुनः निर्धारित करें",
+    confirmCancelTitle: "बुकिंग रद्द करें",
+    confirmCancelPrompt: "क्या आप वाकई इस बुकिंग को रद्द करना चाहते हैं?",
+    confirmCancelBtn: "हाँ, बुकिंग रद्द करें",
+    keepBookingBtn: "बुकिंग बनाए रखें",
+    rescheduleTitle: "खरीद स्लॉट पुनः निर्धारित करें",
+    selectNewSlot: "एक नया उपलब्ध समय स्लॉट चुनें:",
+    confirmRescheduleBtn: "स्लॉट बदलने की पुष्टि करें",
+    noAvailableSlots: "इस समय कोई अन्य उपलब्ध स्लॉट नहीं है।",
+    currentSlot: "वर्तमान स्लॉट",
+    statusCancelled: "रद्द किया गया",
 
     // Operator
     opDashboard: "खरीद केंद्र संचालन कक्ष",

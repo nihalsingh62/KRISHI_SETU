@@ -29,11 +29,13 @@ export const ProcurementHistory = () => {
 
   const filteredBookings = farmerBookings.filter((b) => {
     const isCompleted = ["PROCUREMENT_COMPLETE", "PROCUREMENT_COMPLETED", "PAYMENT_PROCESSING", "PAYMENT_COMPLETED"].includes(b.status);
-    const isRejected = ["REJECTED", "CANCELLED"].includes(b.status);
-    const isActive = !isCompleted && !isRejected;
+    const isCancelled = b.status === "CANCELLED";
+    const isRejected = b.status === "REJECTED";
+    const isActive = !isCompleted && !isCancelled && !isRejected;
 
     if (filter === "ACTIVE") return isActive;
     if (filter === "COMPLETED") return isCompleted;
+    if (filter === "CANCELLED") return isCancelled;
     if (filter === "REJECTED") return isRejected;
     return true;
   });
@@ -65,6 +67,7 @@ export const ProcurementHistory = () => {
       case "PROCUREMENT_COMPLETED": return t("statusProcurementComplete");
       case "PAYMENT_PROCESSING": return t("statusPaymentProcessing");
       case "PAYMENT_COMPLETED": return t("statusPaymentCompleted");
+      case "CANCELLED": return t("statusCancelled");
       case "REJECTED": return t("statusRejected");
       default: return status.replace(/_/g, " ");
     }
@@ -141,12 +144,20 @@ export const ProcurementHistory = () => {
             {t("completedFilter")} ({farmerBookings.filter(b => ["PROCUREMENT_COMPLETE", "PROCUREMENT_COMPLETED", "PAYMENT_PROCESSING", "PAYMENT_COMPLETED"].includes(b.status)).length})
           </button>
           <button
+            onClick={() => setFilter("CANCELLED")}
+            className={`cursor-pointer px-3 py-1.5 rounded-lg transition-colors ${
+              filter === "CANCELLED" ? "bg-white text-rose-700 shadow-xs" : "text-slate-600 hover:text-slate-900"
+            }`}
+          >
+            {t("statusCancelled")} ({farmerBookings.filter(b => b.status === "CANCELLED").length})
+          </button>
+          <button
             onClick={() => setFilter("REJECTED")}
             className={`cursor-pointer px-3 py-1.5 rounded-lg transition-colors ${
               filter === "REJECTED" ? "bg-white text-red-700 shadow-xs" : "text-slate-600 hover:text-slate-900"
             }`}
           >
-            {t("rejectedFilter")} ({farmerBookings.filter(b => ["REJECTED", "CANCELLED"].includes(b.status)).length})
+            {t("rejectedFilter")} ({farmerBookings.filter(b => b.status === "REJECTED").length})
           </button>
         </div>
       </div>
@@ -174,7 +185,8 @@ export const ProcurementHistory = () => {
             <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
               {filteredBookings.map((b) => {
                 const isDone = ["PROCUREMENT_COMPLETE", "PROCUREMENT_COMPLETED", "PAYMENT_COMPLETED"].includes(b.status);
-                const isRej = ["REJECTED", "CANCELLED"].includes(b.status);
+                const isCancelled = b.status === "CANCELLED";
+                const isRej = b.status === "REJECTED";
                 const centre = getCentreForBooking(b);
 
                 return (
@@ -205,6 +217,8 @@ export const ProcurementHistory = () => {
                       <span className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold inline-block ${
                         isDone
                           ? "bg-emerald-100 text-emerald-800"
+                          : isCancelled
+                          ? "bg-slate-100 text-slate-700 border border-slate-300"
                           : isRej
                           ? "bg-red-100 text-red-800"
                           : "bg-amber-100 text-amber-800"

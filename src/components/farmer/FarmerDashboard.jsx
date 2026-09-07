@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useKisanSetu } from "../../context/KisanSetuContext";
 import { ProcurementReceipt } from "./ProcurementReceipt";
 import {
@@ -16,11 +16,60 @@ import {
   CreditCard,
   Building2,
   RefreshCw,
-  BellRing
+  BellRing,
+  CalendarClock,
+  XCircle,
+  AlertTriangle,
+  Check
 } from "lucide-react";
 
 export const FarmerDashboard = ({ onNavigateTab }) => {
-  const { t, activeBooking, centres, activeCentreId } = useKisanSetu();
+  const {
+    t,
+    activeBooking,
+    centres,
+    activeCentreId,
+    slots,
+    cancelBooking,
+    rescheduleBooking,
+    isBookingCancellable
+  } = useKisanSetu();
+
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [showRescheduleModal, setShowRescheduleModal] = useState(false);
+  const [selectedNewSlot, setSelectedNewSlot] = useState("");
+  const [actionError, setActionError] = useState("");
+
+  const handleConfirmCancel = () => {
+    if (!activeBooking) return;
+    const res = cancelBooking(activeBooking.bookingId || activeBooking.id);
+    if (res.success) {
+      setShowCancelModal(false);
+      setActionError("");
+    } else {
+      setActionError(res.message || "Failed to cancel booking");
+    }
+  };
+
+  const handleOpenReschedule = () => {
+    setActionError("");
+    const available = slots.find(
+      (s) => s.status !== "FULL" && s.booked < s.capacity && s.time !== activeBooking.slot
+    );
+    setSelectedNewSlot(available ? available.time : "");
+    setShowRescheduleModal(true);
+  };
+
+  const handleConfirmReschedule = () => {
+    if (!activeBooking || !selectedNewSlot) return;
+    const res = rescheduleBooking(activeBooking.bookingId || activeBooking.id, selectedNewSlot);
+    if (res.success) {
+      setShowRescheduleModal(false);
+      setActionError("");
+    } else {
+      setActionError(res.message || "Failed to reschedule booking");
+    }
+  };
   const bookingCentre = (activeBooking && centres.find(c => c.id === activeBooking.centreId)) || centres.find(c => c.id === activeCentreId) || centres[0];
 
   if (!activeBooking) {
@@ -233,6 +282,207 @@ export const FarmerDashboard = ({ onNavigateTab }) => {
               <Truck className="w-4 h-4 text-blue-600" />
               <span>{t("procurementProgress")}</span>
             </button>
+
+            {isBookingCancellable(activeBooking) && (
+              <>
+                <button
+                  type="button"
+                  onClick={handleOpenReschedule}
+                  className="cursor-pointer flex-1 min-w-[140px] flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 font-bold text-xs transition-colors"
+                >
+                  <CalendarClock className="w-4 h-4 text-amber-700" />
+                  <span>{t("rescheduleBooking")}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActionError("");
+                    setShowCancelModal(true);
+                  }}
+                  className="cursor-pointer flex-1 min-w-[140px] flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-800 border border-rose-200 font-bold text-xs transition-colors"
+                >
+                  <XCircle className="w-4 h-4 text-rose-600" />
+                  <span>{t("cancelBooking")}</span>
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Cancel Confirmation Modal */}
+      {showCancelModal && activeBooking && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-slate-200 space-y-6 animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center gap-3 text-rose-600">
+              <div className="w-12 h-12 rounded-2xl bg-rose-100 flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-6 h-6 text-rose-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-extrabold text-slate-900">
+                  {t("confirmCancelTitle")}
+                </h3>
+                <p className="text-xs text-slate-500 font-mono">
+                  {t("token")}: {activeBooking.token} • {activeBooking.crop}
+                </p>
+              </div>
+            </div>
+
+            <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl">
+              <p className="text-sm font-semibold text-rose-900">
+                {t("confirmCancelPrompt")}
+              </p>
+              <p className="text-xs text-rose-700 mt-1.5">
+                Your allocated slot ({activeBooking.slot}) at {bookingCentre.name} will be released immediately and made available for other farmers. You can book another slot anytime.
+              </p>
+            </div>
+
+            {actionError && (
+              <p className="text-xs text-rose-600 font-bold">{actionError}</p>
+            )}
+
+            <div className="flex items-center justify-end gap-3 pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowCancelModal(false);
+                  setActionError("");
+                }}
+                className="cursor-pointer px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-100 font-bold text-xs transition-colors"
+              >
+                {t("keepBookingBtn")}
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmCancel}
+                className="cursor-pointer px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-md transition-colors"
+              >
+                {t("confirmCancelBtn")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reschedule Slot Modal */}
+      {showRescheduleModal && activeBooking && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-slate-200 space-y-6 animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center">
+                  <CalendarClock className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-extrabold text-slate-900">
+                    {t("rescheduleTitle")}
+                  </h3>
+                  <p className="text-xs text-slate-500 font-mono">
+                    {t("token")}: {activeBooking.token} • {activeBooking.crop} ({activeBooking.quantity} Qtl)
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setShowRescheduleModal(false);
+                  setActionError("");
+                }}
+                className="cursor-pointer p-2 text-slate-400 hover:text-slate-600 rounded-xl"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 text-xs">
+              <span className="text-[10px] uppercase font-bold text-slate-400 block mb-0.5">
+                {t("currentSlot")}
+              </span>
+              <span className="font-extrabold text-slate-800 text-sm">{activeBooking.slot}</span>
+              <span className="text-slate-500 ml-2">({activeBooking.date || "Today"})</span>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                {t("selectNewSlot")}
+              </label>
+              <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+                {slots
+                  .filter((s) => s.time !== activeBooking.slot)
+                  .map((s) => {
+                    const isAvailable = s.status !== "FULL" && s.booked < s.capacity;
+                    const isSelected = selectedNewSlot === s.time;
+                    const remaining = Math.max(0, s.capacity - s.booked);
+
+                    return (
+                      <button
+                        key={s.time}
+                        type="button"
+                        disabled={!isAvailable}
+                        onClick={() => setSelectedNewSlot(s.time)}
+                        className={`cursor-pointer w-full p-3 rounded-2xl border text-left flex items-center justify-between transition-all ${
+                          isSelected
+                            ? "bg-amber-50 border-amber-500 ring-2 ring-amber-500/20 shadow-xs"
+                            : isAvailable
+                            ? "bg-white border-slate-200 hover:border-slate-300"
+                            : "bg-slate-100 border-slate-200 opacity-60 cursor-not-allowed"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <Clock className={`w-4 h-4 ${isSelected ? "text-amber-600" : "text-slate-400"}`} />
+                          <div>
+                            <p className={`text-xs font-bold ${isSelected ? "text-amber-900" : "text-slate-800"}`}>
+                              {s.time}
+                            </p>
+                            <p className="text-[10px] text-slate-500">
+                              {remaining} {remaining === 1 ? "slot" : "slots"} left ({s.booked}/{s.capacity} booked)
+                            </p>
+                          </div>
+                        </div>
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                          isSelected
+                            ? "bg-amber-600 text-white"
+                            : isAvailable
+                            ? "bg-emerald-100 text-emerald-800"
+                            : "bg-red-100 text-red-800"
+                        }`}>
+                          {isSelected ? "Selected" : isAvailable ? "Available" : "Full"}
+                        </span>
+                      </button>
+                    );
+                  })}
+                {slots.filter((s) => s.time !== activeBooking.slot && s.status !== "FULL" && s.booked < s.capacity).length === 0 && (
+                  <div className="p-4 text-center text-xs text-slate-500 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                    {t("noAvailableSlots")}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {actionError && (
+              <p className="text-xs text-rose-600 font-bold">{actionError}</p>
+            )}
+
+            <div className="flex items-center justify-end gap-3 pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowRescheduleModal(false);
+                  setActionError("");
+                }}
+                className="cursor-pointer px-4 py-2.5 rounded-xl border border-slate-300 text-slate-700 hover:bg-slate-100 font-bold text-xs transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={!selectedNewSlot}
+                onClick={handleConfirmReschedule}
+                className="cursor-pointer px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-xs shadow-md transition-colors"
+              >
+                {t("confirmRescheduleBtn")}
+              </button>
+            </div>
           </div>
         </div>
       )}

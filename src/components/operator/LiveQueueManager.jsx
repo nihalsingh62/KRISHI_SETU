@@ -159,14 +159,25 @@ export const LiveQueueManager = () => {
                         </button>
                       ) : tok.status === "QUALITY_CHECK" ? (
                         <>
+                          {tok.moisturePercent > 14.0 && (
+                            <span className="text-[10px] font-extrabold text-red-600 mr-1.5 bg-red-50 border border-red-200 px-2 py-0.5 rounded-md">
+                              Moisture {tok.moisturePercent}% (&gt;14%)
+                            </span>
+                          )}
                           <button
+                            disabled={tok.moisturePercent > 14.0}
+                            title={tok.moisturePercent > 14.0 ? "Moisture exceeds permissible limit (<=14.0%). Approval disabled." : "Approve Quality"}
                             onClick={() => updateBookingStatus(tok.bookingId || tok.token, "APPROVED")}
-                            className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] shadow-xs"
+                            className={`px-3 py-1.5 rounded-lg font-bold text-[11px] shadow-xs ${
+                              tok.moisturePercent > 14.0
+                                ? "bg-slate-200 text-slate-400 cursor-not-allowed"
+                                : "bg-emerald-600 hover:bg-emerald-700 text-white"
+                            }`}
                           >
                             Approve
                           </button>
                           <button
-                            onClick={() => updateBookingStatus(tok.bookingId || tok.token, "REJECTED")}
+                            onClick={() => updateBookingStatus(tok.bookingId || tok.token, "REJECTED", { remarks: "Moisture exceeded permissible limit (<= 14.0%)" })}
                             className="px-2.5 py-1.5 rounded-lg bg-red-100 hover:bg-red-200 text-red-800 font-bold text-[11px] ml-1"
                           >
                             Reject

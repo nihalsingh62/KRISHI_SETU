@@ -27,6 +27,10 @@ export const AdminDashboard = () => {
   const avgWait = Math.round(centres.reduce((acc, c) => acc + (c.queueDepth * 4 + 10), 0) / centres.length);
   const criticalCentres = centres.filter((c) => c.status === "CRITICAL" || c.status === "HIGH_LOAD").length;
 
+  const attentionCentres = [...centres]
+    .sort((a, b) => b.loadPercent - a.loadPercent)
+    .slice(0, 2);
+
   return (
     <div className="space-y-6">
       {/* Admin Central Header */}
@@ -75,7 +79,7 @@ export const AdminDashboard = () => {
 
           <div className="bg-slate-800/80 p-3.5 rounded-2xl border border-slate-700">
             <span className="text-[10px] text-slate-400 font-semibold block">{t("overloadedCentres")}</span>
-            <span className="text-2xl font-extrabold text-red-400">{criticalCentres + 5}</span>
+            <span className="text-2xl font-extrabold text-red-400">{criticalCentres}</span>
           </div>
 
           <div className="bg-slate-800/80 p-3.5 rounded-2xl border border-slate-700">
@@ -92,35 +96,33 @@ export const AdminDashboard = () => {
         </h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="bg-white rounded-2xl p-5 border border-red-100 shadow-sm">
-            <div className="flex justify-between items-start mb-2">
-              <h4 className="font-extrabold text-slate-900">Main APMC City Yard</h4>
-              <span className="bg-red-100 text-red-800 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">Critical</span>
+          {attentionCentres.map((c) => (
+            <div key={c.id} className="bg-white rounded-2xl p-5 border border-red-100 shadow-sm">
+              <div className="flex justify-between items-start mb-2">
+                <div>
+                  <h4 className="font-extrabold text-slate-900">{c.name}</h4>
+                  <p className="text-[10px] text-slate-400">{c.code} • {c.location}</p>
+                </div>
+                <span className={`text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider ${
+                  c.status === "CRITICAL" || c.loadPercent >= 95
+                    ? "bg-red-100 text-red-800"
+                    : c.status === "HIGH_LOAD" || c.loadPercent >= 80
+                    ? "bg-amber-100 text-amber-800"
+                    : "bg-emerald-100 text-emerald-800"
+                }`}>
+                  {c.status}
+                </span>
+              </div>
+              <div className="text-xs text-slate-600 mb-4 space-y-1">
+                <p><strong>{c.loadPercent}%</strong> capacity load • <strong>{c.queueDepth}</strong> farmers in queue • <strong>{c.avgProcessingMin} min</strong> avg processing</p>
+              </div>
+              <div className="bg-slate-50 rounded-xl p-3 border border-slate-200">
+                <p className="text-[10px] font-bold uppercase text-slate-500 mb-1">Telemetry Status</p>
+                <p className="text-xs text-slate-800 font-medium">Active Counters: {c.activeCounters} • Weighbridges: {c.activeWeighbridges}</p>
+                <p className="text-[10px] text-indigo-600 font-bold mt-1">Daily Target Capacity: {c.capacity} Qtl</p>
+              </div>
             </div>
-            <div className="text-xs text-slate-600 mb-4 space-y-1">
-              <p><strong>96%</strong> capacity • <strong>52</strong> farmers waiting • <strong>81 min</strong> average wait</p>
-            </div>
-            <div className="bg-slate-50 rounded-xl p-3 border border-slate-200">
-              <p className="text-[10px] font-bold uppercase text-slate-500 mb-1">Suggested Action</p>
-              <p className="text-xs text-slate-800 font-medium">Redirect new bookings to Shivaji Grain Collection Centre.</p>
-              <p className="text-[10px] text-emerald-600 font-bold mt-1">Potential queue reduction: approx 22%</p>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl p-5 border border-red-100 shadow-sm">
-            <div className="flex justify-between items-start mb-2">
-              <h4 className="font-extrabold text-slate-900">Rampur Mandi Hub</h4>
-              <span className="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider">High Load</span>
-            </div>
-            <div className="text-xs text-slate-600 mb-4 space-y-1">
-              <p><strong>94%</strong> capacity • <strong>37</strong> farmers waiting • <strong>68 min</strong> average wait</p>
-            </div>
-            <div className="bg-slate-50 rounded-xl p-3 border border-slate-200">
-              <p className="text-[10px] font-bold uppercase text-slate-500 mb-1">Suggested Action</p>
-              <p className="text-xs text-slate-800 font-medium">Deploy 2 additional Quality Check operators.</p>
-              <p className="text-[10px] text-emerald-600 font-bold mt-1">Estimated wait reduction: 15 mins</p>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
 

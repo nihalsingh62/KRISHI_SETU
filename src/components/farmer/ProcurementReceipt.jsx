@@ -42,7 +42,7 @@ export const ProcurementReceipt = ({ token, centre }) => {
         </div>
         <div>
           <p className="text-[10px] uppercase font-bold text-slate-400 mb-0.5">Procurement Centre</p>
-          <p className="text-sm font-bold text-slate-800">{centre.name}</p>
+          <p className="text-sm font-bold text-slate-800">{centre?.name || token.centreName}</p>
         </div>
         
         <div>
@@ -76,8 +76,8 @@ export const ProcurementReceipt = ({ token, centre }) => {
             <IndianRupee className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-xs font-bold text-slate-800">Payment Status: <span className="text-blue-700">{token.paymentStatus === "COMPLETED" ? "COMPLETED" : "INITIATED"}</span></p>
-            <p className="text-[10px] text-slate-500">₹{token.totalAmount?.toLocaleString()} total value at MSP</p>
+            <p className="text-xs font-bold text-slate-800">Payment Status: <span className="text-blue-700">{token.paymentStatus}</span></p>
+            <p className="text-[10px] text-slate-500">Prototype payment flow • ₹{token.totalAmount?.toLocaleString()} total value at MSP</p>
           </div>
         </div>
         

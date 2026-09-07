@@ -14,7 +14,8 @@ import {
 } from "lucide-react";
 
 export const LiveQueueView = () => {
-  const { t, activeBooking, activeCentre, bookings } = useKisanSetu();
+  const { t, activeBooking, centres, activeCentreId, bookings } = useKisanSetu();
+  const bookingCentre = (activeBooking && centres.find(c => c.id === activeBooking.centreId)) || centres.find(c => c.id === activeCentreId) || centres[0];
 
   if (!activeBooking) {
     return (
@@ -24,8 +25,8 @@ export const LiveQueueView = () => {
     );
   }
 
-  // Filter tokens at the active centre
-  const centreBookings = bookings.filter((t) => t.centreId === activeCentre.id);
+  // Filter tokens at the active booking centre
+  const centreBookings = bookings.filter((t) => t.centreId === bookingCentre.id);
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -41,7 +42,7 @@ export const LiveQueueView = () => {
                 DIGITAL QUEUE TOKEN • KISANSETU
               </span>
               <h2 className="text-xl font-extrabold text-white">
-                {activeCentre.name}
+                {bookingCentre.name}
               </h2>
             </div>
           </div>
@@ -112,7 +113,7 @@ export const LiveQueueView = () => {
 
         <div className="space-y-2.5">
           {centreBookings.map((tok) => {
-            const isMe = tok.token === activeBooking.id;
+            const isMe = tok.bookingId === activeBooking.bookingId || tok.token === activeBooking.token || (activeBooking.farmerId && tok.farmerId === activeBooking.farmerId);
 
             return (
               <div

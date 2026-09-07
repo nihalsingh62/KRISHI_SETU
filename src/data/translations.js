@@ -14,7 +14,16 @@ export const translations = {
     howItWorks: "See How It Works",
     sihDisclaimer: "National Agricultural Procurement Portal",
 
-    // Farmer Portal
+    // Farmer Navigation Tabs
+    tabDashboard: "Dashboard",
+    tabBookSlot: "Book Procurement Slot",
+    tabQueue: "Token & Queue",
+    tabProcurement: "Procurement",
+    tabPayment: "Payment Tracking",
+    tabProfile: "Profile",
+    tabHistory: "Procurement History",
+
+    // Farmer Dashboard & Details
     goodMorning: "Namaste",
     activeBooking: "Today's Active Booking",
     myToken: "My Token",
@@ -29,7 +38,7 @@ export const translations = {
     navigateCentre: "Navigate to Centre",
     viewProcurement: "Procurement Details",
     paymentStatus: "Payment Status",
-    lowNetworkMode: "Low-Network Offline Mode",
+    lowNetworkMode: "Low-Bandwidth Mode",
     lowNetworkDesc: "Simplified view optimized for low rural connectivity",
     lastSynced: "Last synced",
     syncNow: "Sync Data Now",
@@ -43,15 +52,56 @@ export const translations = {
     whyRecommended: "Recommended because of lower wait times and open processing capacity.",
     availableSlots: "Available Time Slots",
     confirmBooking: "Confirm Booking & Generate Token",
+    duplicateBookingTitle: "Duplicate Booking Detected",
+    duplicateBookingMsg: "You already have an active booking for this slot.",
+    viewExistingBooking: "View Existing Booking",
 
     // Statuses
     statusBooked: "Slot Confirmed",
+    statusConfirmed: "Confirmed",
     statusArrived: "Farmer Checked-In at Gate",
+    statusWaiting: "Waiting in Queue",
+    statusCalled: "Called for Weighing",
     statusWeighing: "Weighbridge In Progress",
     statusQualityCheck: "Quality Inspection",
+    statusApproved: "Procurement Approved",
     statusProcurementComplete: "Procurement Completed",
     statusPaymentProcessing: "Payment Processing",
     statusPaymentCompleted: "Payment Completed",
+    statusRejected: "Procurement Rejected",
+
+    // Farmer Profile & Bank
+    profileTitle: "Verified Farmer Profile",
+    mobileNumber: "Mobile Number",
+    aadhaarLinked: "Aadhaar Linked",
+    village: "Village",
+    district: "District",
+    bankAccountDetails: "Bank Account Details",
+    beneficiaryAccount: "Beneficiary Account",
+    bankName: "Bank Name",
+    accountHolder: "Account Holder Name",
+    accountNumber: "Account Number",
+    confirmAccountNumber: "Confirm Account Number",
+    ifscCode: "IFSC Code",
+    saveDetails: "Save Details",
+    editBankDetails: "Edit Bank Details",
+    addBankAccount: "Add Bank Account",
+
+    // History & Receipts
+    procurementHistory: "Procurement History",
+    allFilter: "All",
+    activeFilter: "Active",
+    completedFilter: "Completed",
+    rejectedFilter: "Rejected",
+    viewDetails: "View Details",
+    noRecords: "No procurement records found",
+    prototypePaymentFlow: "Prototype payment flow (Simulated DBT Transfer)",
+
+    // Validations
+    invalidWeightMsg: "Weight must be a positive number greater than 0.",
+    invalidMoistureMsg: "Moisture exceeds the permissible limit (max 14%).",
+    invalidOtpMsg: "OTP must be exactly 6 digits.",
+    invalidCredentialsMsg: "Invalid credentials. Please enter valid demo credentials.",
 
     // Operator
     opDashboard: "Procurement Centre Operations Room",
@@ -86,7 +136,7 @@ export const translations = {
   hi: {
     appName: "किसानसेतु",
     tagline: "स्मार्ट खरीद। कम प्रतीक्षा। बेहतर पारदर्शिता।",
-    subtagline: "खरीद स्लॉट बुक करें, लाइव कतार ट्रैक करें, स्मार्ट प्रतीक्षा समय प्राप्त करें और भुगतान स्थिति की निगरानी करें।",
+    subtagline: "खरीद स्लॉट बुक करें, लाइव कतार ट्रैक करें, स्मार्ट प्रतीक्षा समय प्राप्त करें और वास्तविक समय भुगतान की निगरानी करें।",
     selectRole: "की भूमिका चुनकर आगे बढ़ें",
     farmerRole: "किसान पोर्टल",
     farmerDesc: "बुक करें → ट्रैक करें → पहुंचे → बेचें → भुगतान पाएं",
@@ -98,7 +148,16 @@ export const translations = {
     howItWorks: "यह कैसे काम करता है",
     sihDisclaimer: "राष्ट्रीय कृषि खरीद पोर्टल",
 
-    // Farmer Portal
+    // Farmer Navigation Tabs
+    tabDashboard: "डैशबोर्ड",
+    tabBookSlot: "स्लॉट बुक करें",
+    tabQueue: "टोकन और कतार",
+    tabProcurement: "खरीद प्रक्रिया",
+    tabPayment: "भुगतान ट्रैकिंग",
+    tabProfile: "प्रोफ़ाइल",
+    tabHistory: "खरीद इतिहास",
+
+    // Farmer Dashboard & Details
     goodMorning: "नमस्ते",
     activeBooking: "आज की सक्रिय खरीद बुकिंग",
     myToken: "मेरा टोकन",
@@ -113,7 +172,7 @@ export const translations = {
     navigateCentre: "केंद्र का मार्ग देखें",
     viewProcurement: "खरीद विवरण",
     paymentStatus: "भुगतान स्थिति",
-    lowNetworkMode: "धीमी नेटवर्क मोड (Low-Network)",
+    lowNetworkMode: "धीमी नेटवर्क मोड (Low-Bandwidth)",
     lowNetworkDesc: "कम कनेक्टिविटी वाले ग्रामीण क्षेत्रों के लिए सुव्यवस्थित दृश्य",
     lastSynced: "अंतिम सिंक समय",
     syncNow: "डेटा सिंक करें",
@@ -123,19 +182,60 @@ export const translations = {
     selectCommodity: "फसल चुनें",
     enterQuantity: "मात्रा दर्ज करें (क्विंटल में)",
     selectDate: "तारीख चुनें",
-    recommendedCentres: "अनुशंसित खरीद केंद्र (Smart Recommendation)",
+    recommendedCentres: "अनुशंसित खरीद केंद्र",
     whyRecommended: "कम प्रतीक्षा समय और उपलब्ध प्रसंस्करण क्षमता के आधार पर अनुशंसित।",
     availableSlots: "उपलब्ध समय स्लॉट",
     confirmBooking: "बुकिंग की पुष्टि करें और टोकन प्राप्त करें",
+    duplicateBookingTitle: "समान बुकिंग पहले से मौजूद",
+    duplicateBookingMsg: "आपके पास इस स्लॉट के लिए पहले से ही एक सक्रिय बुकिंग है।",
+    viewExistingBooking: "मौजूदा बुकिंग देखें",
 
     // Statuses
     statusBooked: "स्लॉट की पुष्टि हुई",
+    statusConfirmed: "पुष्टि हुई",
     statusArrived: "गेट पर किसान चेक-इन",
+    statusWaiting: "कतार में प्रतीक्षारत",
+    statusCalled: "तौल के लिए बुलाया गया",
     statusWeighing: "तौल (Weighbridge) जारी",
-    statusQualityCheck: "गुणवत्ता निरीक्षण (Quality Check)",
+    statusQualityCheck: "गुणवत्ता निरीक्षण",
+    statusApproved: "खरीद स्वीकृत",
     statusProcurementComplete: "खरीद पूर्ण हुई",
     statusPaymentProcessing: "भुगतान प्रक्रिया में",
     statusPaymentCompleted: "भुगतान सफल (खाते में हस्तांतरित)",
+    statusRejected: "खरीद अस्वीकृत",
+
+    // Farmer Profile & Bank
+    profileTitle: "सत्यापित किसान प्रोफ़ाइल",
+    mobileNumber: "मोबाइल नंबर",
+    aadhaarLinked: "आधार लिंक",
+    village: "ग्राम",
+    district: "ज़िला",
+    bankAccountDetails: "बैंक खाता विवरण",
+    beneficiaryAccount: "लाभार्थी खाता",
+    bankName: "बैंक का नाम",
+    accountHolder: "खाता धारक का नाम",
+    accountNumber: "खाता संख्या",
+    confirmAccountNumber: "खाता संख्या की पुष्टि करें",
+    ifscCode: "आईएफएससी कोड",
+    saveDetails: "विवरण सहेजें",
+    editBankDetails: "बैंक विवरण संपादित करें",
+    addBankAccount: "बैंक खाता जोड़ें",
+
+    // History & Receipts
+    procurementHistory: "खरीद इतिहास",
+    allFilter: "सभी",
+    activeFilter: "सक्रिय",
+    completedFilter: "पूर्ण",
+    rejectedFilter: "अस्वीकृत",
+    viewDetails: "विवरण देखें",
+    noRecords: "कोई खरीद रिकॉर्ड नहीं मिला",
+    prototypePaymentFlow: "प्रोटोटाइप भुगतान प्रवाह (सिम्युलेटेड डीबीटी)",
+
+    // Validations
+    invalidWeightMsg: "वजन शून्य से अधिक एक सकारात्मक संख्या होनी चाहिए।",
+    invalidMoistureMsg: "नमी अनुमेय सीमा (अधिकतम 14%) से अधिक है।",
+    invalidOtpMsg: "ओटीपी ठीक 6 अंकों का होना चाहिए।",
+    invalidCredentialsMsg: "अमान्य क्रेडेंशियल्स। कृपया सही डेमो विवरण दर्ज करें।",
 
     // Operator
     opDashboard: "खरीद केंद्र संचालन कक्ष",

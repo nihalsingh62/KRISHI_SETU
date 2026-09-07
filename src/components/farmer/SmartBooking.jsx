@@ -15,27 +15,40 @@ import {
 } from "lucide-react";
 
 export const SmartBooking = ({ onBookingSuccess }) => {
-  const { t, centres, slots, bookSlot } = useKisanSetu();
+  const { t, centres, slots, bookSlot, setActiveFarmerTab } = useKisanSetu();
 
   const [crop, setCommodity] = useState("Wheat");
-  const [quantity, setQuantity] = useState("42");
-  const [selectedCentreId, setSelectedCentreId] = useState("c3"); // Default to recommended Shivaji Grain (c3) or ABC (c1)
-  const [selectedSlot, setSelectedSlot] = useState("10:30 AM – 11:00 AM");
+  const [quantity, setQuantity] = useState("20");
+  const [selectedCentreId, setSelectedCentreId] = useState("c2"); // Rampur Mandi Hub (c2) default
+  const [selectedSlot, setSelectedSlot] = useState("02:00 PM – 03:00 PM");
   const [bookingConfirmed, setBookingConfirmed] = useState(false);
   const [createdToken, setCreatedToken] = useState(null);
+  const [duplicateError, setDuplicateError] = useState(null);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const newBooking = bookSlot({
+    setDuplicateError(null);
+    const result = bookSlot({
       commodity: crop,
+      crop: crop,
       quantityQtl: Number(quantity),
+      quantity: Number(quantity),
       centreId: selectedCentreId,
       date: "Today",
-      slotTime: selectedSlot
+      slotTime: selectedSlot,
+      slot: selectedSlot
     });
-    setCreatedToken(newBooking.token);
-    setBookingConfirmed(true);
-    if (onBookingSuccess) onBookingSuccess();
+    
+    if (result?.error === "DUPLICATE_BOOKING") {
+      setDuplicateError(result);
+      return;
+    }
+    
+    if (result) {
+      setCreatedToken(result.token);
+      setBookingConfirmed(true);
+      if (onBookingSuccess) onBookingSuccess();
+    }
   };
 
   return (
@@ -54,6 +67,40 @@ export const SmartBooking = ({ onBookingSuccess }) => {
             </p>
           </div>
         </div>
+
+        {duplicateError && (
+          <div className="mb-6 p-4 bg-amber-50 border-2 border-amber-300 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 animate-in fade-in duration-300">
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
+              <div>
+                <p className="text-sm font-bold text-amber-900">
+                  You already have an active booking for this slot.
+                </p>
+                <p className="text-xs text-amber-700">
+                  Token: <strong>{duplicateError.existingBooking?.token}</strong> ({duplicateError.existingBooking?.crop}, {duplicateError.existingBooking?.slot})
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-2 w-full sm:w-auto">
+              <button
+                type="button"
+                onClick={() => {
+                  if (setActiveFarmerTab) setActiveFarmerTab("queue");
+                }}
+                className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-xs transition-colors"
+              >
+                View Existing Booking
+              </button>
+              <button
+                type="button"
+                onClick={() => setDuplicateError(null)}
+                className="px-3 py-2 border border-slate-300 text-slate-700 hover:bg-slate-100 font-bold text-xs rounded-xl transition-colors"
+              >
+                Reschedule
+              </button>
+            </div>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Step 1: Crop & Quantity */}

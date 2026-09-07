@@ -3,7 +3,7 @@ import { useKisanSetu } from "../../context/KisanSetuContext";
 import { MapPin, AlertTriangle, CheckCircle2, Building2, Users, ArrowRight, Sparkles } from "lucide-react";
 
 export const CongestionMap = () => {
-  const { centres, setActiveCentreId, setCurrentRole } = useKisanSetu();
+  const { centres, setActiveCentreId, setActiveAdminTab } = useKisanSetu();
   const [selectedMapCentre, setSelectedMapCentre] = useState(centres[0]);
 
   // Positions on simulated map canvas
@@ -143,11 +143,11 @@ export const CongestionMap = () => {
               <button
                 onClick={() => {
                   setActiveCentreId(selectedMapCentre.id);
-                  setCurrentRole("operator");
+                  if (setActiveAdminTab) setActiveAdminTab("monitoring");
                 }}
                 className="w-full py-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs shadow-md flex items-center justify-center gap-2"
               >
-                <span>Jump to Operator Control Room</span>
+                <span>Inspect Centre Telemetry in Monitoring</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>

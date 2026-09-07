@@ -13,9 +13,16 @@ import {
 } from "lucide-react";
 
 export const LandingPage = () => {
-  const { login, registerFarmer, loginFarmer } = useKisanSetu();
+  const { login, registerFarmer, loginFarmer, registeredFarmers, centres, setActiveCentreId } = useKisanSetu();
   const [selectedRole, setSelectedRole] = useState(null); // 'farmer' | 'operator' | 'admin'
   
+  // Demo Authentication Constants
+  const DEMO_OTP = "123456";
+  const DEMO_OPERATOR_ID = "OP-1042";
+  const DEMO_OPERATOR_PASS = "password";
+  const DEMO_ADMIN_ID = "ADMIN-001";
+  const DEMO_ADMIN_PASS = "password";
+
   // Farmer specific states
   const [farmerFlowStep, setFarmerFlowStep] = useState('choice'); // 'choice' | 'register_init' | 'register_otp' | 'register_success' | 'login_init' | 'login_otp'
   const [farmerId, setFarmerId] = useState("");
@@ -30,6 +37,15 @@ export const LandingPage = () => {
   const [confirmAccountNumber, setConfirmAccountNumber] = useState("");
   const [ifsc, setIfsc] = useState("");
   const [otp, setOtp] = useState("");
+
+  // Operator specific states
+  const [operatorId, setOperatorId] = useState("OP-1042");
+  const [operatorPassword, setOperatorPassword] = useState("password");
+  const [operatorCentreId, setOperatorCentreId] = useState("c1");
+
+  // Admin specific states
+  const [adminId, setAdminId] = useState("ADMIN-001");
+  const [adminPassword, setAdminPassword] = useState("password");
   
   // Validation errors map
   const [errors, setErrors] = useState({});
@@ -49,6 +65,8 @@ export const LandingPage = () => {
   const loginFarmerIdRef = useRef(null);
   const loginMobileRef = useRef(null);
   const loginOtpRef = useRef(null);
+  const operatorIdRef = useRef(null);
+  const adminIdRef = useRef(null);
 
   const clearError = (field) => {
     if (errors[field]) {
@@ -144,6 +162,11 @@ export const LandingPage = () => {
       if (otpRef.current) otpRef.current.focus();
       return;
     }
+    if (otp !== DEMO_OTP) {
+      setErrors({ otp: `Invalid OTP. Enter demo OTP: ${DEMO_OTP}` });
+      if (otpRef.current) otpRef.current.focus();
+      return;
+    }
     setErrors({});
 
     // Success - create user
@@ -177,6 +200,15 @@ export const LandingPage = () => {
       newErrors.mobile = "Mobile number must be exactly 10 digits.";
     }
 
+    if (Object.keys(newErrors).length === 0) {
+      const exists = registeredFarmers.some(
+        f => f.id.toUpperCase() === farmerId.trim().toUpperCase() && f.mobile.trim() === mobileNumber.trim()
+      );
+      if (!exists) {
+        newErrors.farmerId = "Invalid credentials. No registered farmer found with this ID and Mobile Number.";
+      }
+    }
+
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       if (newErrors.farmerId && loginFarmerIdRef.current) loginFarmerIdRef.current.focus();
@@ -196,6 +228,11 @@ export const LandingPage = () => {
       if (loginOtpRef.current) loginOtpRef.current.focus();
       return;
     }
+    if (otp !== DEMO_OTP) {
+      setErrors({ otp: `Invalid OTP. Enter demo OTP: ${DEMO_OTP}` });
+      if (loginOtpRef.current) loginOtpRef.current.focus();
+      return;
+    }
 
     const success = loginFarmer(farmerId.trim().toUpperCase(), mobileNumber.trim());
     if (!success) {
@@ -206,13 +243,50 @@ export const LandingPage = () => {
     }
   };
 
-  const handleOperatorAdminLogin = (e) => {
+  const handleOperatorLogin = (e) => {
     e.preventDefault();
-    if (selectedRole === "operator") {
-      login("operator", { name: "Operator User", centre: "ABC Procurement Centre", type: "operator" });
-    } else if (selectedRole === "admin") {
-      login("admin", { name: "System Admin", type: "admin" });
+    const newErrors = {};
+
+    if (operatorId.trim().toUpperCase() !== DEMO_OPERATOR_ID || (operatorPassword !== DEMO_OPERATOR_PASS && operatorPassword !== "operator123")) {
+      newErrors.operator = "Invalid Operator credentials. Demo ID: OP-1042 / Password: password";
     }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      if (operatorIdRef.current) operatorIdRef.current.focus();
+      return;
+    }
+
+    const chosenCentre = centres.find(c => c.id === operatorCentreId) || centres[0];
+    setActiveCentreId(chosenCentre.id);
+    login("operator", { 
+      id: DEMO_OPERATOR_ID, 
+      name: "Operator User", 
+      centreId: chosenCentre.id, 
+      centre: chosenCentre.name, 
+      type: "operator" 
+    });
+  };
+
+  const handleAdminLogin = (e) => {
+    e.preventDefault();
+    const newErrors = {};
+
+    if (adminId.trim().toUpperCase() !== DEMO_ADMIN_ID || (adminPassword !== DEMO_ADMIN_PASS && adminPassword !== "admin123")) {
+      newErrors.admin = "Invalid Administrator credentials. Demo ID: ADMIN-001 / Password: password";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      if (adminIdRef.current) adminIdRef.current.focus();
+      return;
+    }
+
+    login("admin", { 
+      id: DEMO_ADMIN_ID, 
+      name: "System Administrator", 
+      type: "admin" 
+    });
   };
 
   return (
@@ -532,15 +606,30 @@ export const LandingPage = () => {
                         placeholder="_ _ _ _ _ _" 
                         value={otp} 
                         onChange={e => { 
-                          const val = e.target.value.replace(/\D/g, '').slice(0, 6);
+                          const raw = e.target.value;
+                          if (raw.length > 6) {
+                            setErrors({ otp: "OTP must be exactly 6 digits." });
+                            setOtp(raw.slice(0, 6));
+                            return;
+                          }
+                          const val = raw.replace(/\D/g, '');
                           setOtp(val); 
                           clearError('otp'); 
                         }} 
+                        onPaste={e => {
+                          const pasted = e.clipboardData.getData('text').trim();
+                          if (pasted.length > 6) {
+                            e.preventDefault();
+                            setErrors({ otp: "OTP must be exactly 6 digits." });
+                            setOtp(pasted.replace(/\D/g, '').slice(0, 6));
+                          }
+                        }}
                         className={`w-full rounded-xl p-3 text-center tracking-[1em] text-lg font-mono focus:ring-2 focus:ring-emerald-500 outline-none border transition-colors ${
                           errors.otp ? 'border-red-500 ring-1 ring-red-500 bg-red-50/30' : 'bg-slate-50 border-slate-200'
                         }`} 
                       />
                       {errors.otp && <p className="text-xs text-red-600 font-semibold mt-1 text-center">{errors.otp}</p>}
+                      <p className="text-[11px] text-emerald-700 font-semibold mt-1.5 text-center">Demo OTP: <strong className="font-mono text-emerald-900">123456</strong></p>
                     </div>
 
                     <div className="bg-blue-50 p-3 rounded-xl border border-blue-100 flex items-start gap-2 mt-2">
@@ -671,15 +760,30 @@ export const LandingPage = () => {
                         placeholder="_ _ _ _ _ _" 
                         value={otp} 
                         onChange={e => { 
-                          const val = e.target.value.replace(/\D/g, '').slice(0, 6);
+                          const raw = e.target.value;
+                          if (raw.length > 6) {
+                            setErrors({ otp: "OTP must be exactly 6 digits." });
+                            setOtp(raw.slice(0, 6));
+                            return;
+                          }
+                          const val = raw.replace(/\D/g, '');
                           setOtp(val); 
                           clearError('otp'); 
                         }} 
+                        onPaste={e => {
+                          const pasted = e.clipboardData.getData('text').trim();
+                          if (pasted.length > 6) {
+                            e.preventDefault();
+                            setErrors({ otp: "OTP must be exactly 6 digits." });
+                            setOtp(pasted.replace(/\D/g, '').slice(0, 6));
+                          }
+                        }}
                         className={`w-full rounded-xl p-3 text-center tracking-[1em] text-lg font-mono focus:ring-2 focus:ring-emerald-500 outline-none border transition-colors ${
                           errors.otp ? 'border-red-500 ring-1 ring-red-500 bg-red-50/30' : 'bg-slate-50 border-slate-200'
                         }`} 
                       />
                       {errors.otp && <p className="text-xs text-red-600 font-semibold mt-1 text-center">{errors.otp}</p>}
+                      <p className="text-[11px] text-emerald-700 font-semibold mt-1.5 text-center">Demo OTP: <strong className="font-mono text-emerald-900">123456</strong></p>
                     </div>
 
                     <button type="submit" className="w-full py-3.5 mt-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-md transition-colors">
@@ -692,29 +796,59 @@ export const LandingPage = () => {
 
             {/* OPERATOR FLOW */}
             {selectedRole === "operator" && (
-              <form onSubmit={handleOperatorAdminLogin} className="space-y-4 animate-in fade-in duration-300">
+              <form onSubmit={handleOperatorLogin} className="space-y-4 animate-in fade-in duration-300" noValidate>
                 <div className="mb-6">
                   <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
                     <Building2 className="w-5 h-5 text-blue-600"/> Operator Login
                   </h3>
-                  <p className="text-xs text-slate-500 mt-1">Please authenticate to continue.</p>
+                  <p className="text-xs text-slate-500 mt-1">Please authenticate with Operator credentials.</p>
                 </div>
+
+                {errors.operator && (
+                  <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 font-bold flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+                    <span>{errors.operator}</span>
+                  </div>
+                )}
+
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">Employee ID</label>
-                  <input type="text" placeholder="OP-XXXX" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none" required defaultValue="OP-1042" />
+                  <input 
+                    ref={operatorIdRef}
+                    type="text" 
+                    placeholder="OP-XXXX" 
+                    value={operatorId}
+                    onChange={e => { setOperatorId(e.target.value.toUpperCase()); clearError('operator'); }}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none font-mono" 
+                    required 
+                  />
+                  <span className="text-[10px] text-slate-400">Demo Employee ID: OP-1042</span>
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">Procurement Centre</label>
-                  <select className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                    <option>ABC Procurement Centre</option>
-                    <option>Rampur Mandi Hub</option>
+                  <select 
+                    value={operatorCentreId}
+                    onChange={e => setOperatorCentreId(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none font-medium"
+                  >
+                    {centres.map(c => (
+                      <option key={c.id} value={c.id}>{c.name} ({c.code})</option>
+                    ))}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Password / OTP</label>
-                  <input type="password" placeholder="••••••••" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none" required defaultValue="password" />
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Password</label>
+                  <input 
+                    type="password" 
+                    placeholder="••••••••" 
+                    value={operatorPassword}
+                    onChange={e => { setOperatorPassword(e.target.value); clearError('operator'); }}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none" 
+                    required 
+                  />
+                  <span className="text-[10px] text-slate-400">Demo Password: password</span>
                 </div>
-                <button type="submit" className="w-full py-3 mt-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-md transition-colors">
+                <button type="submit" className="w-full py-3.5 mt-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-md transition-colors">
                   Login to Centre
                 </button>
               </form>
@@ -722,22 +856,47 @@ export const LandingPage = () => {
 
             {/* ADMIN FLOW */}
             {selectedRole === "admin" && (
-              <form onSubmit={handleOperatorAdminLogin} className="space-y-4 animate-in fade-in duration-300">
+              <form onSubmit={handleAdminLogin} className="space-y-4 animate-in fade-in duration-300" noValidate>
                 <div className="mb-6">
                   <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
                     <ShieldCheck className="w-5 h-5 text-indigo-600"/> Administrator Login
                   </h3>
-                  <p className="text-xs text-slate-500 mt-1">Please authenticate to continue.</p>
+                  <p className="text-xs text-slate-500 mt-1">Please authenticate with Administrator credentials.</p>
                 </div>
+
+                {errors.admin && (
+                  <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-700 font-bold flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+                    <span>{errors.admin}</span>
+                  </div>
+                )}
+
                 <div>
                   <label className="block text-xs font-bold text-slate-700 mb-1">Administrator ID</label>
-                  <input type="text" placeholder="ADMIN-XXXX" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" required defaultValue="ADMIN-001" />
+                  <input 
+                    ref={adminIdRef}
+                    type="text" 
+                    placeholder="ADMIN-XXXX" 
+                    value={adminId}
+                    onChange={e => { setAdminId(e.target.value.toUpperCase()); clearError('admin'); }}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none font-mono" 
+                    required 
+                  />
+                  <span className="text-[10px] text-slate-400">Demo Administrator ID: ADMIN-001</span>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Password / OTP</label>
-                  <input type="password" placeholder="••••••••" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" required defaultValue="password" />
+                  <label className="block text-xs font-bold text-slate-700 mb-1">Password</label>
+                  <input 
+                    type="password" 
+                    placeholder="••••••••" 
+                    value={adminPassword}
+                    onChange={e => { setAdminPassword(e.target.value); clearError('admin'); }}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none" 
+                    required 
+                  />
+                  <span className="text-[10px] text-slate-400">Demo Password: password</span>
                 </div>
-                <button type="submit" className="w-full py-3 mt-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-md transition-colors">
+                <button type="submit" className="w-full py-3.5 mt-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-md transition-colors">
                   Access Dashboard
                 </button>
               </form>

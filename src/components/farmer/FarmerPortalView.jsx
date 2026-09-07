@@ -96,7 +96,7 @@ export const FarmerPortalView = () => {
           }`}
         >
           <LayoutDashboard className="w-4 h-4" />
-          <span>Dashboard</span>
+          <span>{t("tabDashboard") || "Dashboard"}</span>
         </button>
 
         <button
@@ -108,7 +108,7 @@ export const FarmerPortalView = () => {
           }`}
         >
           <Calendar className="w-4 h-4" />
-          <span>Book Procurement Slot</span>
+          <span>{t("tabBookSlot") || "Book Procurement Slot"}</span>
         </button>
 
         <button
@@ -120,7 +120,7 @@ export const FarmerPortalView = () => {
           }`}
         >
           <QrCode className="w-4 h-4" />
-          <span>Token & Queue</span>
+          <span>{t("tabQueue") || "Token & Queue"}</span>
         </button>
 
         <button
@@ -132,7 +132,7 @@ export const FarmerPortalView = () => {
           }`}
         >
           <Truck className="w-4 h-4" />
-          <span>Procurement</span>
+          <span>{t("tabProcurement") || "Procurement"}</span>
         </button>
 
         <button
@@ -144,7 +144,7 @@ export const FarmerPortalView = () => {
           }`}
         >
           <CreditCard className="w-4 h-4" />
-          <span>Payment Tracking</span>
+          <span>{t("tabPayment") || "Payment Tracking"}</span>
         </button>
 
         <button
@@ -156,7 +156,7 @@ export const FarmerPortalView = () => {
           }`}
         >
           <User className="w-4 h-4" />
-          <span>Profile</span>
+          <span>{t("tabProfile") || "Profile"}</span>
         </button>
       </div>
 

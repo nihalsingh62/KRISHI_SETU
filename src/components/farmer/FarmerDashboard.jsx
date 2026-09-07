@@ -20,7 +20,8 @@ import {
 } from "lucide-react";
 
 export const FarmerDashboard = ({ onNavigateTab }) => {
-  const { t, activeBooking, activeCentre, lowNetworkMode, setLowNetworkMode } = useKisanSetu();
+  const { t, activeBooking, centres, activeCentreId } = useKisanSetu();
+  const bookingCentre = (activeBooking && centres.find(c => c.id === activeBooking.centreId)) || centres.find(c => c.id === activeCentreId) || centres[0];
 
   if (!activeBooking) {
     return (
@@ -109,7 +110,7 @@ export const FarmerDashboard = ({ onNavigateTab }) => {
       </div>
 
       {isCompleted ? (
-        <ProcurementReceipt token={activeBooking} centre={activeCentre} />
+        <ProcurementReceipt token={activeBooking} centre={bookingCentre} />
       ) : (
         /* Main Active Token Card */
         <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-md relative overflow-hidden">
@@ -136,7 +137,7 @@ export const FarmerDashboard = ({ onNavigateTab }) => {
                 </div>
                 <p className="text-sm font-medium text-slate-500 mt-1 flex items-center gap-1.5">
                   <Building2 className="w-4 h-4 text-slate-400" />
-                  <span>{activeCentre.name}</span>
+                  <span>{bookingCentre.name}</span>
                 </p>
                 <p className="text-xs font-semibold text-slate-400 mt-0.5 ml-5.5">
                   Scheduled: {activeBooking.slot}

@@ -3,7 +3,7 @@ import { useKisanSetu } from "../../context/KisanSetuContext";
 import { Search, UserCheck, CheckCircle2, QrCode, PhoneCall, Scale, ShieldCheck, Check, X } from "lucide-react";
 
 export const FarmerCheckIn = () => {
-  const { bookings, activeCentre, updateBookingStatus } = useKisanSetu();
+  const { bookings, activeCentre, updateBookingStatus, formatBookingDate } = useKisanSetu();
   const [searchTokenId, setSearchTokenId] = useState("");
   const [searchedToken, setSearchedToken] = useState(() => {
     // Default to the first active waiting/booked booking for convenience if available
@@ -83,10 +83,14 @@ export const FarmerCheckIn = () => {
               </span>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 text-xs pt-3 border-t border-slate-200">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs pt-3 border-t border-slate-200">
               <div>
                 <span className="text-[10px] text-slate-400 block font-semibold">Commodity</span>
                 <strong className="text-slate-800">{searchedToken.crop} ({searchedToken.quantity} Qtl)</strong>
+              </div>
+              <div>
+                <span className="text-[10px] text-slate-400 block font-semibold">Scheduled Date</span>
+                <strong className="text-slate-800">{formatBookingDate ? formatBookingDate(searchedToken.date) : (searchedToken.date || "Today")}</strong>
               </div>
               <div>
                 <span className="text-[10px] text-slate-400 block font-semibold">Scheduled Slot</span>

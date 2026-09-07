@@ -1,6 +1,13 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { INITIAL_CENTRES, INITIAL_SLOTS, INITIAL_BOOKINGS, INITIAL_NOTIFICATIONS } from "../data/mockData";
 import { translations } from "../data/translations";
+import {
+  ADVANCE_BOOKING_DAYS,
+  getAdvanceBookingDates,
+  normalizeDate,
+  formatBookingDate,
+  isDateInAdvanceWindow
+} from "../data/dateUtils";
 
 const KisanSetuContext = createContext();
 
@@ -74,7 +81,7 @@ const recalculateQueuePositions = (tokenList) => {
   updated.forEach(tok => {
     if (activeQueueStatuses.includes(tok.status)) {
       const cId = tok.centreId || "c1";
-      const date = tok.date || "Today";
+      const date = normalizeDate(tok.date);
       const slot = tok.slot || tok.slotTime || "Default";
       const groupKey = `${cId}__${date}__${slot}`;
 
@@ -247,6 +254,33 @@ export const KisanSetuProvider = ({ children }) => {
   const activeBooking = getActiveBooking();
   const activeCentre = centres.find((c) => c.id === activeCentreId) || centres[0];
 
+  // Calculate remaining slot capacity per SAME CENTRE + SAME DATE + SAME TIME SLOT
+  const getSlotAvailability = (centreId, date, slotTime) => {
+    const normDate = normalizeDate(date);
+    const baseSlot = slots.find((s) => s.time === slotTime);
+    const capacity = baseSlot?.capacity || 10;
+
+    const bookedCount = bookings.filter(
+      (b) =>
+        b.centreId === centreId &&
+        normalizeDate(b.date) === normDate &&
+        (b.slot === slotTime || b.slotTime === slotTime) &&
+        b.status !== "CANCELLED"
+    ).length;
+
+    const remaining = Math.max(0, capacity - bookedCount);
+    const isFull = remaining <= 0;
+
+    return {
+      time: slotTime,
+      capacity,
+      booked: bookedCount,
+      remaining,
+      isFull,
+      status: isFull ? "FULL" : "AVAILABLE"
+    };
+  };
+
   // Helper to check if a booking can be cancelled / rescheduled (before scheduled slot arrival)
   const isBookingCancellable = (booking) => {
     if (!booking) return false;
@@ -255,10 +289,9 @@ export const KisanSetuProvider = ({ children }) => {
       return false;
     }
     // Cannot cancel past dates
-    if (booking.date && booking.date !== "Today") {
-      const todayStr = new Date().toISOString().split("T")[0];
-      if (booking.date < todayStr) return false;
-    }
+    const norm = normalizeDate(booking.date);
+    const todayNorm = normalizeDate("Today");
+    if (norm < todayNorm) return false;
     return true;
   };
 
@@ -270,8 +303,43 @@ export const KisanSetuProvider = ({ children }) => {
     const chosenQty = Number(quantityQtl || quantity || 40);
     const chosenSlot = slotTime || slot || "10:00 AM – 11:00 AM";
     const chosenDate = date || "Today";
+    const chosenCentreId = centreId || activeCentreId || "c1";
+    const centre = centres.find((c) => c.id === chosenCentreId) || centres[0];
+    const isHi = language === "hi";
 
-    // Active booking rule: A farmer must never have two active bookings.
+    // 1. Validate Advance Booking Window (Today + next 4 days; past dates disallowed)
+    const windowCheck = isDateInAdvanceWindow(chosenDate);
+    if (!windowCheck.valid) {
+      if (windowCheck.reason === "PAST_DATE") {
+        addToast({
+          type: "error",
+          title: isHi ? "अमान्य तिथि" : "Invalid Date",
+          message: isHi ? "पिछली तिथियों के लिए स्लॉट बुक नहीं किए जा सकते।" : "Cannot book slots for past dates."
+        });
+        return { error: "INVALID_DATE", message: "Cannot book slots for past dates." };
+      }
+      if (windowCheck.reason === "OUTSIDE_WINDOW") {
+        addToast({
+          type: "error",
+          title: isHi ? "अग्रिम सीमा समाप्त" : "Outside Advance Window",
+          message: isHi ? "बुकिंग केवल 4-दिवसीय अग्रिम अवधि के भीतर ही मान्य है।" : "Booking is only allowed within the 4-day advance window."
+        });
+        return { error: "OUTSIDE_ADVANCE_WINDOW", message: "Booking is only allowed within the 4-day advance window." };
+      }
+    }
+
+    // 2. Validate Slot Capacity (Strict ceiling: SAME CENTRE + SAME DATE + SAME TIME SLOT)
+    const availability = getSlotAvailability(chosenCentreId, chosenDate, chosenSlot);
+    if (availability.isFull) {
+      addToast({
+        type: "error",
+        title: isHi ? "स्लॉट पूर्ण" : "Slot Full",
+        message: isHi ? "चुना गया स्लॉट इस तिथि के लिए पहले से ही भरा हुआ है।" : "Selected slot is already full for this date."
+      });
+      return { error: "SLOT_FULL", message: "Selected slot is already full for this date." };
+    }
+
+    // 3. Active booking rule: A farmer must never have two active bookings.
     // Active statuses: BOOKED, CONFIRMED, ARRIVED, WAITING, CALLED, WEIGHING, QUALITY_CHECK, APPROVED.
     // Cancelled/completed historical bookings must NOT count as active bookings.
     const activeStatuses = ["BOOKED", "CONFIRMED", "ARRIVED", "WAITING", "CALLED", "WEIGHING", "QUALITY_CHECK", "APPROVED"];
@@ -296,7 +364,6 @@ export const KisanSetuProvider = ({ children }) => {
     }, 128);
     const nextTokenNum = `A${maxNum + 1}`;
 
-    const centre = centres.find((c) => c.id === centreId) || centres[0];
     const msp = chosenCrop === "Wheat" ? 2275 : chosenCrop === "Paddy" ? 2300 : 2090;
 
     const newBooking = {
@@ -355,7 +422,6 @@ export const KisanSetuProvider = ({ children }) => {
     setCentres((prev) => recalculateCentreMetrics(prev, updatedTokens));
 
     // Push notification
-    const isHi = language === "hi";
     addNotification({
       type: "SLOT_CONFIRMED",
       title: isHi ? "स्लॉट बुकिंग सफल" : "Booking Confirmed",
@@ -650,8 +716,8 @@ export const KisanSetuProvider = ({ children }) => {
     return { success: true };
   };
 
-  // Reschedule a booking to a new available slot
-  const rescheduleBooking = (bookingId, newSlotTime) => {
+  // Reschedule a booking to a new available date and/or slot
+  const rescheduleBooking = (bookingId, newDateOrSlot, maybeSlot) => {
     const target = bookings.find(b => b.bookingId === bookingId || b.id === bookingId);
     if (!target) return { error: "NOT_FOUND" };
 
@@ -664,22 +730,60 @@ export const KisanSetuProvider = ({ children }) => {
       return { error: "CANNOT_RESCHEDULE" };
     }
 
-    const targetSlot = slots.find(s => s.time === newSlotTime);
-    if (!targetSlot || targetSlot.booked >= targetSlot.capacity || targetSlot.status === "FULL") {
+    let newDate, newSlotTime;
+    if (maybeSlot) {
+      newDate = newDateOrSlot;
+      newSlotTime = maybeSlot;
+    } else {
+      if (newDateOrSlot.includes("AM") || newDateOrSlot.includes("PM") || newDateOrSlot.includes("–")) {
+        newSlotTime = newDateOrSlot;
+        newDate = target.date || "Today";
+      } else {
+        newDate = newDateOrSlot;
+        newSlotTime = target.slot || target.slotTime;
+      }
+    }
+
+    // 1. Validate Advance Booking Window (Today + next 4 days; past dates disallowed)
+    const windowCheck = isDateInAdvanceWindow(newDate);
+    if (!windowCheck.valid) {
+      const isHi = language === "hi";
+      if (windowCheck.reason === "PAST_DATE") {
+        addToast({
+          type: "error",
+          title: isHi ? "अमान्य तिथि" : "Invalid Date",
+          message: isHi ? "पिछली तिथियों के लिए स्लॉट बुक नहीं किए जा सकते।" : "Cannot book slots for past dates."
+        });
+        return { error: "INVALID_DATE" };
+      }
+      addToast({
+        type: "error",
+        title: isHi ? "अग्रिम सीमा समाप्त" : "Outside Advance Window",
+        message: isHi ? "बुकिंग केवल 4-दिवसीय अग्रिम अवधि के भीतर ही मान्य है।" : "Booking is only allowed within the 4-day advance window."
+      });
+      return { error: "OUTSIDE_ADVANCE_WINDOW" };
+    }
+
+    const oldSlotTime = target.slot || target.slotTime;
+    const oldDate = target.date || "Today";
+    const isSameDateAndSlot = normalizeDate(oldDate) === normalizeDate(newDate) && oldSlotTime === newSlotTime;
+
+    // 2. Validate Slot Capacity (Strict ceiling: SAME CENTRE + SAME DATE + SAME TIME SLOT)
+    const availability = getSlotAvailability(target.centreId, newDate, newSlotTime);
+    if (availability.isFull && !isSameDateAndSlot) {
       addToast({
         type: "error",
         title: language === "hi" ? "स्लॉट अनुपलब्ध" : "Slot Unavailable",
-        message: language === "hi" ? "चुना गया स्लॉट पहले से ही भरा हुआ है।" : "Selected slot is already full."
+        message: language === "hi" ? "चुना गया स्लॉट इस तिथि के लिए पहले से ही भरा हुआ है।" : "Selected slot is already full for this date."
       });
       return { error: "SLOT_FULL" };
     }
 
-    const oldSlotTime = target.slot || target.slotTime;
     const nowTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const nowIso = new Date().toISOString();
     const isHi = language === "hi";
 
-    // 1. Release old slot capacity, consume new slot capacity
+    // 3. Update slot capacity counter for slots
     setSlots(prevSlots =>
       prevSlots.map(s => {
         if (s.time === oldSlotTime && s.time === newSlotTime) return s;
@@ -695,17 +799,20 @@ export const KisanSetuProvider = ({ children }) => {
       })
     );
 
-    // 2. Update booking slot and timeline
+    // 4. Update booking slot, date, and timeline
     let updatedBookings = bookings.map(b => {
       if (b.bookingId === bookingId || b.id === bookingId) {
         const history = Array.isArray(b.timelineHistory) ? [...b.timelineHistory] : [];
         history.push({
           status: "BOOKED",
           time: nowTime,
-          desc: isHi ? `स्लॉट बदलकर ${newSlotTime} किया गया (पूर्व स्लॉट: ${oldSlotTime})` : `Rescheduled from ${oldSlotTime} to ${newSlotTime}`
+          desc: isHi 
+            ? `स्लॉट बदलकर ${formatBookingDate(newDate)}, ${newSlotTime} किया गया (पूर्व: ${formatBookingDate(oldDate)}, ${oldSlotTime})` 
+            : `Rescheduled to ${formatBookingDate(newDate)}, ${newSlotTime} (Prev: ${formatBookingDate(oldDate)}, ${oldSlotTime})`
         });
         return {
           ...b,
+          date: newDate,
           slot: newSlotTime,
           slotTime: newSlotTime,
           slotBookedAt: nowIso,
@@ -773,6 +880,12 @@ export const KisanSetuProvider = ({ children }) => {
         cancelBooking,
         rescheduleBooking,
         isBookingCancellable,
+        getSlotAvailability,
+        getAdvanceBookingDates,
+        normalizeDate,
+        formatBookingDate,
+        isDateInAdvanceWindow,
+        ADVANCE_BOOKING_DAYS,
         updateBookingStatus,
         updateCentreCapacity,
         updateSlotCapacity,

@@ -191,6 +191,16 @@ export const translations = {
     currentSlot: "Current Slot",
     statusCancelled: "Cancelled",
 
+    // Advance Date Booking
+    selectDate: "Select Procurement Date",
+    advanceBookingWindow: "Advance booking available for next 4 days",
+    availableCapacity: "Available",
+    slotFull: "FULL",
+    slotFullError: "Selected slot is already full for this date.",
+    pastDateError: "Cannot book slots for past dates.",
+    outsideWindowError: "Booking is only allowed within the 4-day advance window.",
+    scheduledDate: "Scheduled Date",
+
     // Operator
     opDashboard: "Procurement Centre Operations Room",
     todayCapacity: "Today's Target Capacity",
@@ -412,6 +422,16 @@ export const translations = {
     noAvailableSlots: "इस समय कोई अन्य उपलब्ध स्लॉट नहीं है।",
     currentSlot: "वर्तमान स्लॉट",
     statusCancelled: "रद्द किया गया",
+
+    // Advance Date Booking
+    selectDate: "खरीद तिथि चुनें",
+    advanceBookingWindow: "अगले 4 दिनों के लिए अग्रिम बुकिंग उपलब्ध है",
+    availableCapacity: "उपलब्ध",
+    slotFull: "पूर्ण",
+    slotFullError: "चुना गया स्लॉट इस तिथि के लिए पहले से ही भरा हुआ है।",
+    pastDateError: "पिछली तिथियों के लिए स्लॉट बुक नहीं किए जा सकते।",
+    outsideWindowError: "बुकिंग केवल 4-दिवसीय अग्रिम अवधि के भीतर ही मान्य है।",
+    scheduledDate: "निर्धारित तिथि",
 
     // Operator
     opDashboard: "खरीद केंद्र संचालन कक्ष",

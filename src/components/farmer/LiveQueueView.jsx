@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 
 export const LiveQueueView = () => {
-  const { t, activeBooking, centres, activeCentreId, bookings } = useKisanSetu();
+  const { t, activeBooking, centres, activeCentreId, bookings, normalizeDate, formatBookingDate } = useKisanSetu();
   const bookingCentre = (activeBooking && centres.find(c => c.id === activeBooking.centreId)) || centres.find(c => c.id === activeCentreId) || centres[0];
 
   if (!activeBooking) {
@@ -25,8 +25,13 @@ export const LiveQueueView = () => {
     );
   }
 
-  // Filter tokens at the active booking centre (excluding cancelled bookings)
-  const centreBookings = bookings.filter((t) => t.centreId === bookingCentre.id && t.status !== "CANCELLED");
+  // Filter tokens at the active booking centre on the same scheduled date (excluding cancelled bookings)
+  const normActiveDate = normalizeDate ? normalizeDate(activeBooking.date) : (activeBooking.date || "Today");
+  const centreBookings = bookings.filter((t) => {
+    if (t.centreId !== bookingCentre.id || t.status === "CANCELLED") return false;
+    const tNorm = normalizeDate ? normalizeDate(t.date) : (t.date || "Today");
+    return tNorm === normActiveDate;
+  });
 
   const getStatusLabel = (status) => {
     switch (status) {
@@ -95,6 +100,7 @@ export const LiveQueueView = () => {
           <div className="bg-slate-800/80 p-3 rounded-xl border border-slate-700">
             <span className="text-[10px] text-slate-400 block font-medium">{t("slotTime")}</span>
             <strong className="text-slate-100 font-bold text-xs">{activeBooking.slot}</strong>
+            <span className="text-[10px] text-emerald-400 block font-medium mt-0.5">{formatBookingDate ? formatBookingDate(activeBooking.date) : (activeBooking.date || "Today")}</span>
           </div>
 
           <div className="bg-slate-800/80 p-3 rounded-xl border border-slate-700">

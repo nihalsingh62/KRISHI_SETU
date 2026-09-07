@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 
 export const ProcurementHistory = () => {
-  const { t, bookings, authenticatedUser, centres } = useKisanSetu();
+  const { t, bookings, authenticatedUser, centres, formatBookingDate } = useKisanSetu();
   const [filter, setFilter] = useState("ALL"); // ALL | ACTIVE | COMPLETED | REJECTED
   const [selectedBooking, setSelectedBooking] = useState(null);
 
@@ -209,7 +209,7 @@ export const ProcurementHistory = () => {
                     </td>
 
                     <td className="p-3">
-                      <span className="font-medium text-slate-800 block">{b.date || "Today"}</span>
+                      <span className="font-medium text-slate-800 block">{formatBookingDate ? formatBookingDate(b.date) : (b.date || "Today")}</span>
                       <span className="text-[10px] text-slate-400">{b.slot || b.slotTime}</span>
                     </td>
 
@@ -270,7 +270,7 @@ export const ProcurementHistory = () => {
                     Procurement Details: {selectedBooking.token}
                   </h3>
                   <p className="text-xs text-slate-500 font-mono">
-                    Booking ID: {selectedBooking.bookingId || selectedBooking.id} • {selectedBooking.date || "Today"}
+                    Booking ID: {selectedBooking.bookingId || selectedBooking.id} • {formatBookingDate ? formatBookingDate(selectedBooking.date) : (selectedBooking.date || "Today")}
                   </p>
                 </div>
               </div>

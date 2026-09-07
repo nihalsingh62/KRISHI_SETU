@@ -32,13 +32,19 @@ export const FarmerDashboard = ({ onNavigateTab }) => {
     slots,
     cancelBooking,
     rescheduleBooking,
-    isBookingCancellable
+    isBookingCancellable,
+    getSlotAvailability,
+    getAdvanceBookingDates,
+    formatBookingDate
   } = useKisanSetu();
 
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showRescheduleModal, setShowRescheduleModal] = useState(false);
+  const [selectedRescheduleDate, setSelectedRescheduleDate] = useState("");
   const [selectedNewSlot, setSelectedNewSlot] = useState("");
   const [actionError, setActionError] = useState("");
+
+  const advanceDates = getAdvanceBookingDates ? getAdvanceBookingDates(4) : [];
 
   const handleConfirmCancel = () => {
     if (!activeBooking) return;
@@ -53,16 +59,21 @@ export const FarmerDashboard = ({ onNavigateTab }) => {
 
   const handleOpenReschedule = () => {
     setActionError("");
-    const available = slots.find(
-      (s) => s.status !== "FULL" && s.booked < s.capacity && s.time !== activeBooking.slot
-    );
+    const initialDate = activeBooking.date || (advanceDates[0] ? advanceDates[0].isoDate : "Today");
+    setSelectedRescheduleDate(initialDate);
+    // Find first available slot on initialDate that is not current slot
+    const available = slots.find((s) => {
+      const avail = getSlotAvailability ? getSlotAvailability(activeBooking.centreId || activeCentreId, initialDate, s.time) : { isFull: false };
+      const isCurrent = (activeBooking.date === initialDate || (!activeBooking.date && initialDate === advanceDates[0]?.isoDate)) && s.time === activeBooking.slot;
+      return !avail.isFull && !isCurrent;
+    });
     setSelectedNewSlot(available ? available.time : "");
     setShowRescheduleModal(true);
   };
 
   const handleConfirmReschedule = () => {
-    if (!activeBooking || !selectedNewSlot) return;
-    const res = rescheduleBooking(activeBooking.bookingId || activeBooking.id, selectedNewSlot);
+    if (!activeBooking || !selectedNewSlot || !selectedRescheduleDate) return;
+    const res = rescheduleBooking(activeBooking.bookingId || activeBooking.id, selectedRescheduleDate, selectedNewSlot);
     if (res.success) {
       setShowRescheduleModal(false);
       setActionError("");
@@ -154,7 +165,7 @@ export const FarmerDashboard = ({ onNavigateTab }) => {
               {isCompleted ? t("procurementCompleted") : t("activeBooking")}
             </h2>
             <p className="text-slate-300 text-xs sm:text-sm mt-1">
-              Slot for <strong>{activeBooking.crop} ({activeBooking.quantity} Quintals)</strong> at {activeBooking.slot}.
+              Slot for <strong>{activeBooking.crop} ({activeBooking.quantity} Quintals)</strong> on {formatBookingDate ? formatBookingDate(activeBooking.date) : (activeBooking.date || "Today")} at {activeBooking.slot}.
             </p>
           </div>
 
@@ -209,7 +220,7 @@ export const FarmerDashboard = ({ onNavigateTab }) => {
                   <span>{bookingCentre.name}</span>
                 </p>
                 <p className="text-xs font-semibold text-slate-400 mt-0.5 ml-5.5">
-                  {t("slotTime")}: {activeBooking.slot}
+                  {t("scheduledDate") || "Date"}: {formatBookingDate ? formatBookingDate(activeBooking.date) : (activeBooking.date || "Today")} • {t("slotTime")}: {activeBooking.slot}
                 </p>
               </div>
             </div>
@@ -399,7 +410,44 @@ export const FarmerDashboard = ({ onNavigateTab }) => {
                 {t("currentSlot")}
               </span>
               <span className="font-extrabold text-slate-800 text-sm">{activeBooking.slot}</span>
-              <span className="text-slate-500 ml-2">({activeBooking.date || "Today"})</span>
+              <span className="text-slate-500 ml-2">({formatBookingDate ? formatBookingDate(activeBooking.date) : (activeBooking.date || "Today")})</span>
+            </div>
+
+            {/* Advance Date Selection */}
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                {t("selectDate") || "Select Date"}
+              </label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {advanceDates.map((d) => {
+                  const isSelected = selectedRescheduleDate === d.isoDate;
+                  return (
+                    <button
+                      key={d.isoDate}
+                      type="button"
+                      onClick={() => {
+                        setSelectedRescheduleDate(d.isoDate);
+                        setSelectedNewSlot("");
+                      }}
+                      className={`cursor-pointer p-2.5 rounded-xl border text-left transition-all ${
+                        isSelected
+                          ? "bg-amber-50 border-amber-500 ring-2 ring-amber-500/20 shadow-xs"
+                          : "bg-white border-slate-200 hover:border-slate-300"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className={`text-[10px] font-extrabold uppercase ${isSelected ? "text-amber-700" : "text-slate-500"}`}>
+                          {d.relativeLabel}
+                        </span>
+                        <span className="text-[10px] text-slate-400">{d.weekday}</span>
+                      </div>
+                      <p className={`text-xs font-bold mt-0.5 ${isSelected ? "text-amber-900" : "text-slate-800"}`}>
+                        {d.displayDate}
+                      </p>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             <div>
@@ -407,55 +455,53 @@ export const FarmerDashboard = ({ onNavigateTab }) => {
                 {t("selectNewSlot")}
               </label>
               <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
-                {slots
-                  .filter((s) => s.time !== activeBooking.slot)
-                  .map((s) => {
-                    const isAvailable = s.status !== "FULL" && s.booked < s.capacity;
-                    const isSelected = selectedNewSlot === s.time;
-                    const remaining = Math.max(0, s.capacity - s.booked);
+                {slots.map((s) => {
+                  const avail = getSlotAvailability
+                    ? getSlotAvailability(activeBooking.centreId || activeCentreId, selectedRescheduleDate, s.time)
+                    : { capacity: s.capacity, booked: s.booked, remaining: Math.max(0, s.capacity - s.booked), isFull: s.booked >= s.capacity };
+                  const isCurrent = (activeBooking.date === selectedRescheduleDate || (!activeBooking.date && selectedRescheduleDate === advanceDates[0]?.isoDate)) && s.time === activeBooking.slot;
+                  const isAvailable = !avail.isFull && !isCurrent;
+                  const isSelected = selectedNewSlot === s.time;
 
-                    return (
-                      <button
-                        key={s.time}
-                        type="button"
-                        disabled={!isAvailable}
-                        onClick={() => setSelectedNewSlot(s.time)}
-                        className={`cursor-pointer w-full p-3 rounded-2xl border text-left flex items-center justify-between transition-all ${
-                          isSelected
-                            ? "bg-amber-50 border-amber-500 ring-2 ring-amber-500/20 shadow-xs"
-                            : isAvailable
-                            ? "bg-white border-slate-200 hover:border-slate-300"
-                            : "bg-slate-100 border-slate-200 opacity-60 cursor-not-allowed"
-                        }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <Clock className={`w-4 h-4 ${isSelected ? "text-amber-600" : "text-slate-400"}`} />
-                          <div>
-                            <p className={`text-xs font-bold ${isSelected ? "text-amber-900" : "text-slate-800"}`}>
-                              {s.time}
-                            </p>
-                            <p className="text-[10px] text-slate-500">
-                              {remaining} {remaining === 1 ? "slot" : "slots"} left ({s.booked}/{s.capacity} booked)
-                            </p>
-                          </div>
+                  return (
+                    <button
+                      key={s.time}
+                      type="button"
+                      disabled={!isAvailable}
+                      onClick={() => setSelectedNewSlot(s.time)}
+                      className={`cursor-pointer w-full p-3 rounded-2xl border text-left flex items-center justify-between transition-all ${
+                        isSelected
+                          ? "bg-amber-50 border-amber-500 ring-2 ring-amber-500/20 shadow-xs"
+                          : isAvailable
+                          ? "bg-white border-slate-200 hover:border-slate-300"
+                          : "bg-slate-100 border-slate-200 opacity-60 cursor-not-allowed"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Clock className={`w-4 h-4 ${isSelected ? "text-amber-600" : "text-slate-400"}`} />
+                        <div>
+                          <p className={`text-xs font-bold ${isSelected ? "text-amber-900" : "text-slate-800"}`}>
+                            {s.time} {isCurrent && <span className="text-[10px] text-slate-400 font-normal">({t("currentSlot")})</span>}
+                          </p>
+                          <p className="text-[10px] text-slate-500">
+                            {avail.isFull
+                              ? "0 slots left (Full)"
+                              : `${avail.remaining} ${avail.remaining === 1 ? "slot" : "slots"} left (${avail.capacity - avail.remaining}/${avail.capacity} booked)`}
+                          </p>
                         </div>
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                          isSelected
-                            ? "bg-amber-600 text-white"
-                            : isAvailable
-                            ? "bg-emerald-100 text-emerald-800"
-                            : "bg-red-100 text-red-800"
-                        }`}>
-                          {isSelected ? "Selected" : isAvailable ? "Available" : "Full"}
-                        </span>
-                      </button>
-                    );
-                  })}
-                {slots.filter((s) => s.time !== activeBooking.slot && s.status !== "FULL" && s.booked < s.capacity).length === 0 && (
-                  <div className="p-4 text-center text-xs text-slate-500 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                    {t("noAvailableSlots")}
-                  </div>
-                )}
+                      </div>
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                        isSelected
+                          ? "bg-amber-600 text-white"
+                          : isAvailable
+                          ? "bg-emerald-100 text-emerald-800"
+                          : "bg-red-100 text-red-800"
+                      }`}>
+                        {isSelected ? "Selected" : isAvailable ? "Available" : "Full"}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 

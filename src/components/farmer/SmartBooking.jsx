@@ -11,11 +11,26 @@ import {
   ChevronRight,
   ShieldCheck,
   Building2,
-  Check
+  Check,
+  Calendar
 } from "lucide-react";
 
 export const SmartBooking = ({ onBookingSuccess }) => {
-  const { t, centres, slots, bookSlot, setActiveFarmerTab, addToast } = useKisanSetu();
+  const {
+    t,
+    centres,
+    slots,
+    bookSlot,
+    setActiveFarmerTab,
+    addToast,
+    getSlotAvailability,
+    getAdvanceBookingDates,
+    formatBookingDate
+  } = useKisanSetu();
+
+  const advanceDates = getAdvanceBookingDates ? getAdvanceBookingDates(4) : [];
+  const [selectedDate, setSelectedDate] = useState(() => (advanceDates[0]?.isoDate || "Today"));
+  const selectedDateObj = advanceDates.find(d => d.isoDate === selectedDate) || advanceDates[0];
 
   const [crop, setCommodity] = useState("Wheat");
   const [quantity, setQuantity] = useState("20");
@@ -34,7 +49,7 @@ export const SmartBooking = ({ onBookingSuccess }) => {
       quantityQtl: Number(quantity),
       quantity: Number(quantity),
       centreId: selectedCentreId,
-      date: "Today",
+      date: selectedDate,
       slotTime: selectedSlot,
       slot: selectedSlot
     });
@@ -239,44 +254,88 @@ export const SmartBooking = ({ onBookingSuccess }) => {
             </div>
           </div>
 
-          {/* Step 3: Available Time Slots Picker */}
-          <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">
-              {t("availableSlots")}
-            </label>
+          {/* Step 3: Select Procurement Date & Time Slot */}
+          <div className="space-y-6">
+            <div>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-2.5">
+                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                  <Calendar className="w-4 h-4 text-emerald-600" />
+                  <span>{t("selectDate")}</span>
+                </label>
+                <span className="text-[11px] text-slate-500 font-medium">
+                  {t("advanceBookingWindow")}
+                </span>
+              </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {slots.map((s) => {
-                const isFull = s.status === "FULL";
-                const isSelected = selectedSlot === s.time;
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+                {advanceDates.map((d) => {
+                  const isSelected = selectedDate === d.isoDate;
+                  return (
+                    <button
+                      key={d.isoDate}
+                      type="button"
+                      onClick={() => setSelectedDate(d.isoDate)}
+                      className={`cursor-pointer p-3 rounded-2xl border text-center transition-all flex flex-col items-center justify-center ${
+                        isSelected
+                          ? "bg-emerald-600 text-white border-emerald-600 shadow-md ring-2 ring-emerald-600/20"
+                          : "bg-slate-50 text-slate-800 border-slate-200 hover:bg-slate-100 hover:border-slate-300"
+                      }`}
+                    >
+                      <span className={`text-[10px] font-bold uppercase tracking-wider ${isSelected ? "text-emerald-100" : "text-slate-400"}`}>
+                        {d.relativeLabel}
+                      </span>
+                      <span className="text-sm font-extrabold mt-0.5">
+                        {d.displayDate}
+                      </span>
+                      <span className={`text-[10px] font-medium mt-0.5 ${isSelected ? "text-emerald-200" : "text-slate-500"}`}>
+                        {d.weekday}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
-                return (
-                  <button
-                    key={s.time}
-                    type="button"
-                    disabled={isFull}
-                    onClick={() => setSelectedSlot(s.time)}
-                    className={`p-3 rounded-2xl border text-xs font-bold transition-all text-center flex flex-col justify-between ${
-                      isFull
-                        ? "bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed opacity-60"
-                        : isSelected
-                        ? "bg-slate-900 text-white border-slate-900 shadow-md"
-                        : "bg-white text-slate-800 border-slate-200 hover:border-slate-400"
-                    }`}
-                  >
-                    <span>{s.time}</span>
-                    <span className={`text-[10px] font-semibold mt-1 px-1.5 py-0.5 rounded ${
-                      isFull
-                        ? "bg-red-100 text-red-700"
-                        : isSelected
-                        ? "bg-emerald-500 text-white"
-                        : "bg-emerald-50 text-emerald-700"
-                    }`}>
-                      {isFull ? "FULL" : `${s.booked}/${s.capacity} booked`}
-                    </span>
-                  </button>
-                );
-              })}
+            <div>
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                <Clock className="w-4 h-4 text-emerald-600" />
+                <span>{t("availableSlots")} — {selectedDateObj ? `${selectedDateObj.displayFull} (${selectedDateObj.relativeLabel})` : selectedDate}</span>
+              </label>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {slots.map((s) => {
+                  const avail = getSlotAvailability ? getSlotAvailability(selectedCentreId, selectedDate, s.time) : { capacity: s.capacity, booked: s.booked, remaining: Math.max(0, s.capacity - s.booked), isFull: s.status === "FULL" };
+                  const isFull = avail.isFull;
+                  const isSelected = selectedSlot === s.time;
+
+                  return (
+                    <button
+                      key={s.time}
+                      type="button"
+                      disabled={isFull}
+                      onClick={() => setSelectedSlot(s.time)}
+                      className={`cursor-pointer p-3 rounded-2xl border text-xs font-bold transition-all text-center flex flex-col justify-between min-h-[74px] ${
+                        isFull
+                          ? "bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed opacity-60"
+                          : isSelected
+                          ? "bg-slate-900 text-white border-slate-900 shadow-md"
+                          : "bg-white text-slate-800 border-slate-200 hover:border-slate-400"
+                      }`}
+                    >
+                      <span>{s.time}</span>
+                      <span className={`text-[10px] font-semibold mt-1 px-1.5 py-0.5 rounded ${
+                        isFull
+                          ? "bg-red-100 text-red-700"
+                          : isSelected
+                          ? "bg-emerald-500 text-white"
+                          : "bg-emerald-50 text-emerald-700"
+                      }`}>
+                        {isFull ? t("slotFull") : `${t("availableCapacity")}: ${avail.remaining} / ${avail.capacity}`}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
 

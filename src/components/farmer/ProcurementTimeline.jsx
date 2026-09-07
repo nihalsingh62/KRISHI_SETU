@@ -14,20 +14,40 @@ import {
 } from "lucide-react";
 
 export const ProcurementTimeline = () => {
-  const { activeBooking, centres } = useKisanSetu();
+  const { t, activeBooking, centres } = useKisanSetu();
   const bookingCentre = activeBooking ? (centres.find(c => c.id === activeBooking.centreId) || { name: activeBooking.centreName || "Procurement Centre" }) : null;
 
   const STAGES = [
-    { key: "BOOKED", label: "Slot Booked", icon: Clock },
-    { key: "ARRIVED", label: "Farmer Checked-In at Gate", icon: Building2 },
-    { key: "CALLED", label: "Called for Weighing", icon: Clock },
-    { key: "WEIGHING", label: "Weighbridge Weighing", icon: Scale },
-    { key: "QUALITY_CHECK", label: "Quality & Moisture Inspection", icon: ShieldCheck },
-    { key: "APPROVED", label: "Procurement Approved", icon: CheckCircle2 },
-    { key: "PROCUREMENT_COMPLETED", label: "Procurement Completed", icon: FileText },
-    { key: "PAYMENT_PROCESSING", label: "Payment Processing", icon: CreditCard },
-    { key: "PAYMENT_COMPLETED", label: "Payment Transferred to Account", icon: CheckCircle2 }
+    { key: "BOOKED", label: t("statusBooked"), icon: Clock },
+    { key: "ARRIVED", label: t("statusArrived"), icon: Building2 },
+    { key: "CALLED", label: t("statusCalled"), icon: Clock },
+    { key: "WEIGHING", label: t("statusWeighing"), icon: Scale },
+    { key: "QUALITY_CHECK", label: t("statusQualityCheck"), icon: ShieldCheck },
+    { key: "APPROVED", label: t("statusApproved"), icon: CheckCircle2 },
+    { key: "PROCUREMENT_COMPLETED", label: t("statusProcurementComplete"), icon: FileText },
+    { key: "PAYMENT_PROCESSING", label: t("statusPaymentProcessing"), icon: CreditCard },
+    { key: "PAYMENT_COMPLETED", label: t("statusPaymentCompleted"), icon: CheckCircle2 }
   ];
+
+  const getStatusLabel = (status) => {
+    switch (status) {
+      case "BOOKED": return t("statusBooked");
+      case "CONFIRMED": return t("statusConfirmed");
+      case "ARRIVED": return t("statusArrived");
+      case "WAITING": return t("statusWaiting");
+      case "CALLED": return t("statusCalled");
+      case "WEIGHING": return t("statusWeighing");
+      case "QUALITY_CHECK": return t("statusQualityCheck");
+      case "APPROVED": return t("statusApproved");
+      case "COMPLETED":
+      case "PROCUREMENT_COMPLETE":
+      case "PROCUREMENT_COMPLETED": return t("statusProcurementComplete");
+      case "PAYMENT_PROCESSING": return t("statusPaymentProcessing");
+      case "PAYMENT_COMPLETED": return t("statusPaymentCompleted");
+      case "REJECTED": return t("statusRejected");
+      default: return status.replace(/_/g, " ");
+    }
+  };
 
   const getStageState = (stageKey) => {
     if (!activeBooking) return "PENDING";
@@ -66,22 +86,22 @@ export const ProcurementTimeline = () => {
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-xs font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
-                  Active Token: {activeBooking.token}
+                  {t("activeTokenLabel")}: {activeBooking.token}
                 </span>
                 <span className="text-xs text-slate-400 font-mono">
                   {bookingCentre.name}
                 </span>
               </div>
               <h2 className="text-xl font-extrabold text-slate-900">
-                Live Procurement Status
+                {t("liveProcurementStatus")}
               </h2>
               <p className="text-xs text-slate-500 mt-0.5">
-                Real-time progress tracking for <strong>{activeBooking.crop || activeBooking.commodity}</strong> ({activeBooking.quantity} Qtl).
+                {t("realTimeProgress")}: <strong>{activeBooking.crop || activeBooking.commodity}</strong> ({activeBooking.quantity} Qtl).
               </p>
             </div>
 
             <span className="text-xs font-bold px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full self-start sm:self-auto">
-              {activeBooking.status.replace(/_/g, " ")}
+              {getStatusLabel(activeBooking.status)}
             </span>
           </div>
 
@@ -124,19 +144,19 @@ export const ProcurementTimeline = () => {
                     {/* Recorded extra details */}
                     {st.key === "WEIGHING" && activeBooking.actualWeightQtl && (
                       <p className="text-xs text-blue-700 bg-blue-50 p-2.5 rounded-xl mt-1.5 font-medium border border-blue-100">
-                        ⚖️ Recorded Weight: <strong>{activeBooking.actualWeightQtl} Quintals</strong> (Declared: {activeBooking.quantity} Qtl)
+                        ⚖️ {t("recordedWeight")}: <strong>{activeBooking.actualWeightQtl} Quintals</strong> ({t("declaredWeight")}: {activeBooking.quantity} Qtl)
                       </p>
                     )}
 
                     {st.key === "QUALITY_CHECK" && activeBooking.moisturePercent && (
                       <p className="text-xs text-emerald-800 bg-emerald-50 p-2.5 rounded-xl mt-1.5 font-medium border border-emerald-100">
-                        🔬 Quality Test Passed: Moisture <strong>{activeBooking.moisturePercent}%</strong> | Grade: <strong>{activeBooking.grade}</strong>
+                        🔬 {t("qualityPassed")}: {t("receiptMoisture")} <strong>{activeBooking.moisturePercent}%</strong> | {t("receiptQualityGrade")}: <strong>{activeBooking.grade}</strong>
                       </p>
                     )}
 
                     {st.key === "PAYMENT_COMPLETED" && activeBooking.paymentTxRef && (
                       <p className="text-xs text-emerald-900 bg-emerald-100 p-2.5 rounded-xl mt-1.5 font-bold border border-emerald-300">
-                        🎉 Direct Bank Transfer Reference: <strong>{activeBooking.paymentTxRef}</strong>
+                        🎉 {t("dbtRef")}: <strong>{activeBooking.paymentTxRef}</strong>
                       </p>
                     )}
                   </div>
@@ -148,8 +168,8 @@ export const ProcurementTimeline = () => {
       ) : (
         <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm text-center">
           <Truck className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-          <h3 className="text-sm font-bold text-slate-700">No Active Procurement</h3>
-          <p className="text-xs text-slate-500 mt-0.5">You do not currently have a live procurement in progress. View your historical records below.</p>
+          <h3 className="text-sm font-bold text-slate-700">{t("noActiveProcurement")}</h3>
+          <p className="text-xs text-slate-500 mt-0.5">{t("noActiveProcurementDesc")}</p>
         </div>
       )}
 

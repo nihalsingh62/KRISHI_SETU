@@ -28,6 +28,26 @@ export const LiveQueueView = () => {
   // Filter tokens at the active booking centre
   const centreBookings = bookings.filter((t) => t.centreId === bookingCentre.id);
 
+  const getStatusLabel = (status) => {
+    switch (status) {
+      case "BOOKED": return t("statusBooked");
+      case "CONFIRMED": return t("statusConfirmed");
+      case "ARRIVED": return t("statusArrived");
+      case "WAITING": return t("statusWaiting");
+      case "CALLED": return t("statusCalled");
+      case "WEIGHING": return t("statusWeighing");
+      case "QUALITY_CHECK": return t("statusQualityCheck");
+      case "APPROVED": return t("statusApproved");
+      case "COMPLETED":
+      case "PROCUREMENT_COMPLETE":
+      case "PROCUREMENT_COMPLETED": return t("statusProcurementComplete");
+      case "PAYMENT_PROCESSING": return t("statusPaymentProcessing");
+      case "PAYMENT_COMPLETED": return t("statusPaymentCompleted");
+      case "REJECTED": return t("statusRejected");
+      default: return status.replace(/_/g, " ");
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Digital Queue Token Printable Ticket */}
@@ -39,7 +59,7 @@ export const LiveQueueView = () => {
             </div>
             <div>
               <span className="text-[10px] font-bold tracking-widest text-emerald-400 uppercase">
-                DIGITAL QUEUE TOKEN • KISANSETU
+                {t("digitalTokenTitle")}
               </span>
               <h2 className="text-xl font-extrabold text-white">
                 {bookingCentre.name}
@@ -50,9 +70,9 @@ export const LiveQueueView = () => {
           <div className="flex items-center gap-2">
             <button
               onClick={() => window.print()}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700"
+              className="cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition-colors"
             >
-              <Printer className="w-3.5 h-3.5" /> Print / Save Ticket
+              <Printer className="w-3.5 h-3.5" /> {t("printTicket")}
             </button>
           </div>
         </div>
@@ -66,29 +86,29 @@ export const LiveQueueView = () => {
             {activeBooking.token}
           </div>
           <span className="text-xs text-slate-300 mt-2 block font-medium">
-            {activeBooking.farmerName} • {activeBooking.crop} ({activeBooking.quantity} Quintals)
+            {activeBooking.farmerName} • {activeBooking.crop} ({activeBooking.quantity} {t("quantity")?.includes("क्विंटल") ? "क्विंटल" : "Quintals"})
           </span>
         </div>
 
         {/* Live Metrics Bar */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 text-xs">
           <div className="bg-slate-800/80 p-3 rounded-xl border border-slate-700">
-            <span className="text-[10px] text-slate-400 block font-medium">Scheduled Slot</span>
+            <span className="text-[10px] text-slate-400 block font-medium">{t("slotTime")}</span>
             <strong className="text-slate-100 font-bold text-xs">{activeBooking.slot}</strong>
           </div>
 
           <div className="bg-slate-800/80 p-3 rounded-xl border border-slate-700">
-            <span className="text-[10px] text-slate-400 block font-medium">Farmers Ahead</span>
+            <span className="text-[10px] text-slate-400 block font-medium">{t("queuePosition")}</span>
             <strong className="text-amber-400 font-extrabold text-sm">{activeBooking.queuePosition}</strong>
           </div>
 
           <div className="bg-slate-800/80 p-3 rounded-xl border border-slate-700">
-            <span className="text-[10px] text-slate-400 block font-medium">Est. Waiting</span>
-            <strong className="text-emerald-400 font-extrabold text-sm">{activeBooking.estimatedWait} min</strong>
+            <span className="text-[10px] text-slate-400 block font-medium">{t("estimatedWait")}</span>
+            <strong className="text-emerald-400 font-extrabold text-sm">{activeBooking.estimatedWait} {t("minutes")}</strong>
           </div>
 
           <div className="bg-slate-800/80 p-3 rounded-xl border border-slate-700">
-            <span className="text-[10px] text-slate-400 block font-medium">Serving Token</span>
+            <span className="text-[10px] text-slate-400 block font-medium">{t("servingToken")}</span>
             <strong className="text-indigo-300 font-bold text-xs font-mono">{centreBookings.find(b => ["WEIGHING", "CALLED", "QUALITY_CHECK"].includes(b.status))?.token || "Waiting"}</strong>
           </div>
         </div>
@@ -100,14 +120,14 @@ export const LiveQueueView = () => {
           <div>
             <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">
               <QrCode className="w-5 h-5 text-emerald-600" />
-              <span>Surrounding Live Queue Sequence</span>
+              <span>{t("surroundingQueueTitle")}</span>
             </h3>
             <p className="text-xs text-slate-500">
-              Real-time synchronization with Procurement Centre Operator actions.
+              {t("surroundingQueueDesc")}
             </p>
           </div>
           <span className="text-xs text-emerald-700 font-bold bg-emerald-50 px-2.5 py-1 rounded-full flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> Live Sync
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> {t("liveSync")}
           </span>
         </div>
 
@@ -133,14 +153,14 @@ export const LiveQueueView = () => {
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-extrabold text-slate-900">
-                        {tok.farmerName} {isMe && "(YOU)"}
+                        {tok.farmerName} {isMe && `(${t("you")})`}
                       </span>
                       <span className="text-[10px] text-slate-500 font-normal">
                         • {tok.crop} ({tok.quantity} Qtl)
                       </span>
                     </div>
                     <span className="text-[10px] text-slate-400 font-medium">
-                      Slot: {tok.slot}
+                      {t("slotTime")}: {tok.slot}
                     </span>
                   </div>
                 </div>
@@ -155,7 +175,7 @@ export const LiveQueueView = () => {
                       ? "bg-indigo-100 text-indigo-800"
                       : "bg-slate-200 text-slate-700"
                   }`}>
-                    {tok.status.replace(/_/g, " ")}
+                    {getStatusLabel(tok.status)}
                   </span>
                 </div>
               </div>

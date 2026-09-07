@@ -1,6 +1,7 @@
 import React from "react";
 import { KisanSetuProvider, useKisanSetu } from "./context/KisanSetuContext";
 import { HeaderNav } from "./components/common/HeaderNav";
+import { ToastContainer } from "./components/common/ToastContainer";
 import { LandingPage } from "./components/LandingPage";
 import { FarmerPortalView } from "./components/farmer/FarmerPortalView";
 import { OperatorDashboard } from "./components/operator/OperatorDashboard";
@@ -23,9 +24,10 @@ export default function App() {
   return (
     <KisanSetuProvider>
       <div className="min-h-screen bg-slate-50 font-['Plus_Jakarta_Sans',sans-serif] text-slate-800 antialiased selection:bg-emerald-500 selection:text-white">
+        <ToastContainer />
         <HeaderNav />
         <MainContent />
-              </div>
+      </div>
     </KisanSetuProvider>
   );
 }

@@ -9,11 +9,13 @@ import {
   CheckCircle,
   ArrowLeft,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Eye,
+  EyeOff
 } from "lucide-react";
 
 export const LandingPage = () => {
-  const { login, registerFarmer, loginFarmer, registeredFarmers, centres, setActiveCentreId } = useKisanSetu();
+  const { t, language, addToast, login, registerFarmer, loginFarmer, registeredFarmers, centres, setActiveCentreId } = useKisanSetu();
   const [selectedRole, setSelectedRole] = useState(null); // 'farmer' | 'operator' | 'admin'
   
   // Demo Authentication Constants
@@ -28,13 +30,16 @@ export const LandingPage = () => {
   const [farmerId, setFarmerId] = useState("");
   const [mobileNumber, setMobileNumber] = useState("");
   const [aadhaarNumber, setAadhaarNumber] = useState("");
+  const [showAadhaar, setShowAadhaar] = useState(false);
   const [farmerName, setFarmerName] = useState("");
   const [village, setVillage] = useState("");
   const [district, setDistrict] = useState("");
   const [bankName, setBankName] = useState("");
   const [accountHolder, setAccountHolder] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
+  const [showAccountNumber, setShowAccountNumber] = useState(false);
   const [confirmAccountNumber, setConfirmAccountNumber] = useState("");
+  const [showConfirmAccountNumber, setShowConfirmAccountNumber] = useState(false);
   const [ifsc, setIfsc] = useState("");
   const [otp, setOtp] = useState("");
 
@@ -186,6 +191,11 @@ export const LandingPage = () => {
     });
     setFarmerId(newFarmer.id);
     setFarmerFlowStep('register_success');
+    addToast({
+      type: "success",
+      title: language === "hi" ? "पंजीकरण सफल" : "Registration Successful",
+      message: language === "hi" ? `किसान आईडी: ${newFarmer.id} सफलतापूर्वक पंजीकृत।` : `Farmer ID: ${newFarmer.id} registered successfully.`
+    });
   };
 
   const handleFarmerLoginInit = (e) => {
@@ -253,6 +263,11 @@ export const LandingPage = () => {
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
+      addToast({
+        type: "error",
+        title: language === "hi" ? "लॉगिन विफल" : "Login Failed",
+        message: language === "hi" ? "अमान्य क्रेडेंशियल्स। ऑपरेटर आईडी या पासवर्ड गलत है।" : "Invalid Operator credentials. Check demo ID and password."
+      });
       if (operatorIdRef.current) operatorIdRef.current.focus();
       return;
     }
@@ -278,6 +293,11 @@ export const LandingPage = () => {
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
+      addToast({
+        type: "error",
+        title: language === "hi" ? "लॉगिन विफल" : "Login Failed",
+        message: language === "hi" ? "अमान्य क्रेडेंशियल्स। प्रशासक आईडी या पासवर्ड गलत है।" : "Invalid Administrator credentials. Check demo ID and password."
+      });
       if (adminIdRef.current) adminIdRef.current.focus();
       return;
     }
@@ -308,47 +328,47 @@ export const LandingPage = () => {
         {!selectedRole ? (
           <div className="space-y-4 mt-8">
             <div className="text-center mb-4">
-              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Select Portal</h3>
+              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">{t("selectRole")}</h3>
             </div>
             
             <button
               onClick={() => { setSelectedRole("farmer"); setErrors({}); }}
-              className="w-full group bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md hover:border-emerald-500 transition-all flex items-center text-left gap-4"
+              className="cursor-pointer w-full group bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md hover:border-emerald-500 transition-all flex items-center text-left gap-4"
             >
               <div className="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center group-hover:scale-110 transition-transform shrink-0">
                 <User className="w-6 h-6" />
               </div>
               <div className="flex-1">
-                <h4 className="text-lg font-bold text-slate-900">Farmer</h4>
-                <p className="text-xs text-slate-500">Book & Track Procurement</p>
+                <h4 className="text-lg font-bold text-slate-900">{t("farmerRole")}</h4>
+                <p className="text-xs text-slate-500">{t("farmerDesc")}</p>
               </div>
               <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-emerald-500 transition-colors" />
             </button>
 
             <button
               onClick={() => { setSelectedRole("operator"); setErrors({}); }}
-              className="w-full group bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-500 transition-all flex items-center text-left gap-4"
+              className="cursor-pointer w-full group bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-500 transition-all flex items-center text-left gap-4"
             >
               <div className="w-12 h-12 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center group-hover:scale-110 transition-transform shrink-0">
                 <Building2 className="w-6 h-6" />
               </div>
               <div className="flex-1">
-                <h4 className="text-lg font-bold text-slate-900">Procurement Centre Operator</h4>
-                <p className="text-xs text-slate-500">Manage Queue & Procurement</p>
+                <h4 className="text-lg font-bold text-slate-900">{t("operatorRole")}</h4>
+                <p className="text-xs text-slate-500">{t("operatorDesc")}</p>
               </div>
               <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-blue-500 transition-colors" />
             </button>
 
             <button
               onClick={() => { setSelectedRole("admin"); setErrors({}); }}
-              className="w-full group bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md hover:border-indigo-500 transition-all flex items-center text-left gap-4"
+              className="cursor-pointer w-full group bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md hover:border-indigo-500 transition-all flex items-center text-left gap-4"
             >
               <div className="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center group-hover:scale-110 transition-transform shrink-0">
                 <ShieldCheck className="w-6 h-6" />
               </div>
               <div className="flex-1">
-                <h4 className="text-lg font-bold text-slate-900">Department Administrator</h4>
-                <p className="text-xs text-slate-500">Monitor Procurement Network</p>
+                <h4 className="text-lg font-bold text-slate-900">{t("adminRole")}</h4>
+                <p className="text-xs text-slate-500">{t("adminDesc")}</p>
               </div>
               <ArrowRight className="w-5 h-5 text-slate-300 group-hover:text-indigo-500 transition-colors" />
             </button>
@@ -361,7 +381,7 @@ export const LandingPage = () => {
                 setFarmerFlowStep('choice');
                 setErrors({});
               }}
-              className="text-xs font-semibold text-slate-500 hover:text-slate-900 flex items-center gap-1 mb-6"
+              className="cursor-pointer text-xs font-semibold text-slate-500 hover:text-slate-900 flex items-center gap-1 mb-6"
             >
               <ArrowLeft className="w-3.5 h-3.5" /> Back to roles
             </button>
@@ -373,21 +393,21 @@ export const LandingPage = () => {
                   <div className="space-y-4">
                     <div className="mb-6">
                       <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-                        <User className="w-5 h-5 text-emerald-600"/> Farmer Portal
+                        <User className="w-5 h-5 text-emerald-600"/> {t("farmerRole")}
                       </h3>
                       <p className="text-xs text-slate-500 mt-1">Are you a new or returning user?</p>
                     </div>
                     <button 
                       onClick={() => { setFarmerFlowStep('register_init'); setErrors({}); }} 
-                      className="w-full py-3 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 font-bold transition-colors"
+                      className="cursor-pointer w-full py-3 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 font-bold transition-colors"
                     >
-                      New Farmer Registration
+                      {t("newFarmerRegistration")}
                     </button>
                     <button 
                       onClick={() => { setFarmerFlowStep('login_init'); setErrors({}); }} 
-                      className="w-full py-3 rounded-xl bg-slate-900 text-white hover:bg-slate-800 font-bold transition-colors"
+                      className="cursor-pointer w-full py-3 rounded-xl bg-slate-900 text-white hover:bg-slate-800 font-bold transition-colors"
                     >
-                      Login with Farmer ID
+                      {t("loginWithFarmerId")}
                     </button>
                   </div>
                 )}
@@ -416,22 +436,32 @@ export const LandingPage = () => {
 
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1">Aadhaar / VID Number</label>
-                      <input 
-                        ref={aadhaarRef}
-                        type="text" 
-                        inputMode="numeric"
-                        maxLength={12}
-                        placeholder="12 Digit Aadhaar" 
-                        value={aadhaarNumber} 
-                        onChange={e => { 
-                          const val = e.target.value.replace(/\D/g, '').slice(0, 12);
-                          setAadhaarNumber(val); 
-                          clearError('aadhaar'); 
-                        }} 
-                        className={`w-full rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none border transition-colors font-mono ${
-                          errors.aadhaar ? 'border-red-500 ring-1 ring-red-500 bg-red-50/30' : 'bg-slate-50 border-slate-200'
-                        }`} 
-                      />
+                      <div className="relative">
+                        <input 
+                          ref={aadhaarRef}
+                          type={showAadhaar ? "text" : "password"} 
+                          inputMode="numeric"
+                          maxLength={12}
+                          placeholder="12 Digit Aadhaar" 
+                          value={aadhaarNumber} 
+                          onChange={e => { 
+                            const val = e.target.value.replace(/\D/g, '').slice(0, 12);
+                            setAadhaarNumber(val); 
+                            clearError('aadhaar'); 
+                          }} 
+                          className={`w-full rounded-xl p-3 pr-10 text-sm focus:ring-2 focus:ring-emerald-500 outline-none border transition-colors font-mono ${
+                            errors.aadhaar ? 'border-red-500 ring-1 ring-red-500 bg-red-50/30' : 'bg-slate-50 border-slate-200'
+                          }`} 
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowAadhaar(!showAadhaar)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer p-1"
+                          aria-label={showAadhaar ? "Hide Aadhaar number" : "Show Aadhaar number"}
+                        >
+                          {showAadhaar ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
                       {errors.aadhaar && <p className="text-xs text-red-600 font-semibold mt-1 flex items-center gap-1"><AlertCircle className="w-3.5 h-3.5" />{errors.aadhaar}</p>}
                     </div>
 
@@ -523,43 +553,63 @@ export const LandingPage = () => {
 
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1">Account Number</label>
-                      <input 
-                        ref={accountNumberRef}
-                        type="password" 
-                        inputMode="numeric"
-                        maxLength={18}
-                        placeholder="9 to 18 digits" 
-                        value={accountNumber} 
-                        onChange={e => { 
-                          const val = e.target.value.replace(/\D/g, '').slice(0, 18);
-                          setAccountNumber(val); 
-                          clearError('accountNumber'); 
-                        }} 
-                        className={`w-full rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none border transition-colors font-mono ${
-                          errors.accountNumber ? 'border-red-500 ring-1 ring-red-500 bg-red-50/30' : 'bg-slate-50 border-slate-200'
-                        }`} 
-                      />
+                      <div className="relative">
+                        <input 
+                          ref={accountNumberRef}
+                          type={showAccountNumber ? "text" : "password"} 
+                          inputMode="numeric"
+                          maxLength={18}
+                          placeholder="9 to 18 digits" 
+                          value={accountNumber} 
+                          onChange={e => { 
+                            const val = e.target.value.replace(/\D/g, '').slice(0, 18);
+                            setAccountNumber(val); 
+                            clearError('accountNumber'); 
+                          }} 
+                          className={`w-full rounded-xl p-3 pr-10 text-sm focus:ring-2 focus:ring-emerald-500 outline-none border transition-colors font-mono ${
+                            errors.accountNumber ? 'border-red-500 ring-1 ring-red-500 bg-red-50/30' : 'bg-slate-50 border-slate-200'
+                          }`} 
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowAccountNumber(!showAccountNumber)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer p-1"
+                          aria-label={showAccountNumber ? "Hide Account Number" : "Show Account Number"}
+                        >
+                          {showAccountNumber ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
                       {errors.accountNumber && <p className="text-xs text-red-600 font-semibold mt-1">{errors.accountNumber}</p>}
                     </div>
 
                     <div>
                       <label className="block text-xs font-bold text-slate-700 mb-1">Confirm Account Number</label>
-                      <input 
-                        ref={confirmAccountNumberRef}
-                        type="password" 
-                        inputMode="numeric"
-                        maxLength={18}
-                        placeholder="Re-enter account number" 
-                        value={confirmAccountNumber} 
-                        onChange={e => { 
-                          const val = e.target.value.replace(/\D/g, '').slice(0, 18);
-                          setConfirmAccountNumber(val); 
-                          clearError('confirmAccountNumber'); 
-                        }} 
-                        className={`w-full rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none border transition-colors font-mono ${
-                          errors.confirmAccountNumber ? 'border-red-500 ring-1 ring-red-500 bg-red-50/30' : 'bg-slate-50 border-slate-200'
-                        }`} 
-                      />
+                      <div className="relative">
+                        <input 
+                          ref={confirmAccountNumberRef}
+                          type={showConfirmAccountNumber ? "text" : "password"} 
+                          inputMode="numeric"
+                          maxLength={18}
+                          placeholder="Re-enter account number" 
+                          value={confirmAccountNumber} 
+                          onChange={e => { 
+                            const val = e.target.value.replace(/\D/g, '').slice(0, 18);
+                            setConfirmAccountNumber(val); 
+                            clearError('confirmAccountNumber'); 
+                          }} 
+                          className={`w-full rounded-xl p-3 pr-10 text-sm focus:ring-2 focus:ring-emerald-500 outline-none border transition-colors font-mono ${
+                            errors.confirmAccountNumber ? 'border-red-500 ring-1 ring-red-500 bg-red-50/30' : 'bg-slate-50 border-slate-200'
+                          }`} 
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmAccountNumber(!showConfirmAccountNumber)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer p-1"
+                          aria-label={showConfirmAccountNumber ? "Hide Confirm Account Number" : "Show Confirm Account Number"}
+                        >
+                          {showConfirmAccountNumber ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
                       {errors.confirmAccountNumber && <p className="text-xs text-red-600 font-semibold mt-1">{errors.confirmAccountNumber}</p>}
                     </div>
 

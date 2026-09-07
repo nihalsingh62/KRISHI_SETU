@@ -285,11 +285,14 @@ export const KisanSetuProvider = ({ children }) => {
     setCentres((prev) => recalculateCentreMetrics(prev, updatedTokens));
 
     // Push notification
+    const isHi = language === "hi";
     addNotification({
       type: "SLOT_CONFIRMED",
-      title: "Booking Confirmed",
-      message: `Token ${nextTokenNum} issued for ${chosenCrop} (${chosenQty} Qtl) at ${centre.name}.`,
-      time: "Just now"
+      title: isHi ? "स्लॉट बुकिंग सफल" : "Booking Confirmed",
+      message: isHi
+        ? `टोकन ${nextTokenNum} जारी किया गया: ${chosenCrop} (${chosenQty} क्विंटल) केंद्र: ${centre.name}।`
+        : `Token ${nextTokenNum} issued for ${chosenCrop} (${chosenQty} Qtl) at ${centre.name}.`,
+      time: isHi ? "अभी" : "Just now"
     });
 
     return newBooking;
@@ -339,51 +342,52 @@ export const KisanSetuProvider = ({ children }) => {
       const history = Array.isArray(tok.timelineHistory) ? [...tok.timelineHistory] : [];
       let updatedObj = { ...tok, status: normalizedStatus, updatedAt: nowIso };
 
+      const isHi = language === "hi";
       if (normalizedStatus === "ARRIVED") {
-        history.push({ status: "ARRIVED", time: nowTime, desc: "Checked-in at Gate 1" });
-        notifyMsg = `Token ${updatedObj.token}: Farmer checked-in at gate.`;
+        history.push({ status: "ARRIVED", time: nowTime, desc: isHi ? "गेट 1 पर चेक-इन किया गया" : "Checked-in at Gate 1" });
+        notifyMsg = isHi ? `टोकन ${updatedObj.token}: किसान गेट पर उपस्थित हुआ।` : `Token ${updatedObj.token}: Farmer checked-in at gate.`;
       } else if (normalizedStatus === "CALLED") {
-        history.push({ status: "CALLED", time: nowTime, desc: "Called for weighing" });
-        notifyMsg = `Token ${updatedObj.token}: Proceed to Weighbridge.`;
+        history.push({ status: "CALLED", time: nowTime, desc: isHi ? "वजन के लिए बुलाया गया" : "Called for weighing" });
+        notifyMsg = isHi ? `टोकन ${updatedObj.token}: कृपया वेईब्रिज पर जाएं।` : `Token ${updatedObj.token}: Proceed to Weighbridge.`;
       } else if (normalizedStatus === "WEIGHING") {
         const rawWeight = extraData.actualWeightQtl !== undefined ? extraData.actualWeightQtl : (tok.actualWeightQtl || tok.quantityQtl || tok.quantity || 42);
         const weight = Math.max(0.1, Number(rawWeight));
         updatedObj.actualWeightQtl = weight;
         updatedObj.totalAmount = Math.max(0, Math.round(weight * (tok.mspPerQtl || 2275)));
-        history.push({ status: "WEIGHING", time: nowTime, desc: `Vehicle on Weighbridge. Recorded: ${weight} Qtl` });
-        notifyMsg = `Token ${updatedObj.token}: Weighbridge weighing completed (${weight} Qtl).`;
+        history.push({ status: "WEIGHING", time: nowTime, desc: isHi ? `वाहन वेईब्रिज पर। दर्ज वजन: ${weight} क्विंटल` : `Vehicle on Weighbridge. Recorded: ${weight} Qtl` });
+        notifyMsg = isHi ? `टोकन ${updatedObj.token}: वेईब्रिज वजन पूरा हुआ (${weight} क्विंटल)।` : `Token ${updatedObj.token}: Weighbridge weighing completed (${weight} Qtl).`;
       } else if (normalizedStatus === "QUALITY_CHECK") {
         const moisture = extraData.moisturePercent !== undefined ? Number(extraData.moisturePercent) : (tok.moisturePercent || 11.8);
         const grade = extraData.grade || tok.grade || (moisture > 14.0 ? "Failed" : "Grade A");
         updatedObj.moisturePercent = moisture;
         updatedObj.grade = grade;
         updatedObj.remarks = extraData.remarks || tok.remarks || "";
-        history.push({ status: "QUALITY_CHECK", time: nowTime, desc: `Quality Check (${moisture}% Moisture, ${grade})${extraData.remarks ? ' - ' + extraData.remarks : ''}` });
-        notifyMsg = `Token ${updatedObj.token}: Quality inspection (${moisture}% moisture, ${grade}).`;
+        history.push({ status: "QUALITY_CHECK", time: nowTime, desc: isHi ? `गुणवत्ता जांच (${moisture}% नमी, ${grade})` : `Quality Check (${moisture}% Moisture, ${grade})${extraData.remarks ? ' - ' + extraData.remarks : ''}` });
+        notifyMsg = isHi ? `टोकन ${updatedObj.token}: गुणवत्ता निरीक्षण (${moisture}% नमी, ${grade})।` : `Token ${updatedObj.token}: Quality inspection (${moisture}% moisture, ${grade}).`;
       } else if (normalizedStatus === "APPROVED") {
-        history.push({ status: "APPROVED", time: nowTime, desc: "Quality and quantity approved by Centre Inspector" });
-        notifyMsg = `Token ${updatedObj.token}: Quality approved. Ready for completion.`;
+        history.push({ status: "APPROVED", time: nowTime, desc: isHi ? "केंद्र निरीक्षक द्वारा गुणवत्ता और मात्रा स्वीकृत" : "Quality and quantity approved by Centre Inspector" });
+        notifyMsg = isHi ? `टोकन ${updatedObj.token}: गुणवत्ता स्वीकृत हुई। पूर्ण करने के लिए तैयार।` : `Token ${updatedObj.token}: Quality approved. Ready for completion.`;
       } else if (normalizedStatus === "PROCUREMENT_COMPLETED") {
         const rawWeight = extraData.actualWeightQtl !== undefined ? extraData.actualWeightQtl : (tok.actualWeightQtl || tok.quantityQtl || tok.quantity || 42);
         const weight = Math.max(0.1, Number(rawWeight));
         updatedObj.actualWeightQtl = weight;
         updatedObj.totalAmount = Math.max(0, Math.round(weight * (tok.mspPerQtl || 2275)));
         updatedObj.paymentStatus = "PROCESSING";
-        history.push({ status: "PROCUREMENT_COMPLETED", time: nowTime, desc: "Procurement completed & digital receipt generated" });
-        notifyMsg = `Token ${updatedObj.token}: Procurement complete! Payment initiated.`;
+        history.push({ status: "PROCUREMENT_COMPLETED", time: nowTime, desc: isHi ? "खरीद पूर्ण हुई और डिजिटल रसीद जारी की गई" : "Procurement completed & digital receipt generated" });
+        notifyMsg = isHi ? `टोकन ${updatedObj.token}: खरीद पूर्ण हुई! भुगतान प्रक्रिया शुरू हुई।` : `Token ${updatedObj.token}: Procurement complete! Payment initiated.`;
       } else if (normalizedStatus === "PAYMENT_INITIATED" || normalizedStatus === "PAYMENT_PROCESSING") {
         updatedObj.paymentStatus = "PROCESSING";
-        history.push({ status: "PAYMENT_PROCESSING", time: nowTime, desc: "PFMS / Bank Transfer Verification in progress" });
-        notifyMsg = `Token ${updatedObj.token}: Direct payment processing underway.`;
+        history.push({ status: "PAYMENT_PROCESSING", time: nowTime, desc: isHi ? "बैंक ट्रांसफर सत्यापन प्रक्रियाधीन" : "PFMS / Bank Transfer Verification in progress" });
+        notifyMsg = isHi ? `टोकन ${updatedObj.token}: प्रत्यक्ष भुगतान प्रक्रिया जारी है।` : `Token ${updatedObj.token}: Direct payment processing underway.`;
       } else if (normalizedStatus === "PAYMENT_COMPLETED") {
         const txRef = extraData.paymentTxRef || tok.paymentTxRef || `DEMO-TRX-${Math.floor(10000 + Math.random() * 90000)}`;
         updatedObj.paymentStatus = "COMPLETED";
         updatedObj.paymentTxRef = txRef;
-        history.push({ status: "PAYMENT_COMPLETED", time: nowTime, desc: `Direct Bank Transfer Successful (Ref: ${txRef})` });
-        notifyMsg = `Token ${updatedObj.token}: ₹${updatedObj.totalAmount.toLocaleString()} credited to bank account (Ref: ${txRef}).`;
+        history.push({ status: "PAYMENT_COMPLETED", time: nowTime, desc: isHi ? `प्रत्यक्ष बैंक हस्तांतरण सफल (संदर्भ: ${txRef})` : `Direct Bank Transfer Successful (Ref: ${txRef})` });
+        notifyMsg = isHi ? `टोकन ${updatedObj.token}: ₹${updatedObj.totalAmount.toLocaleString()} बैंक खाते में स्थानांतरित (संदर्भ: ${txRef})।` : `Token ${updatedObj.token}: ₹${updatedObj.totalAmount.toLocaleString()} credited to bank account (Ref: ${txRef}).`;
       } else if (normalizedStatus === "REJECTED") {
-        history.push({ status: "REJECTED", time: nowTime, desc: `Procurement rejected: ${extraData.remarks || 'Failed quality check'}` });
-        notifyMsg = `Token ${updatedObj.token}: Procurement rejected.`;
+        history.push({ status: "REJECTED", time: nowTime, desc: isHi ? "खरीद अस्वीकृत: गुणवत्ता मानक पूरे नहीं हुए" : `Procurement rejected: ${extraData.remarks || 'Failed quality check'}` });
+        notifyMsg = isHi ? `टोकन ${updatedObj.token}: खरीद अस्वीकृत की गई।` : `Token ${updatedObj.token}: Procurement rejected.`;
       }
 
       updatedObj.timelineHistory = history;
@@ -397,11 +401,12 @@ export const KisanSetuProvider = ({ children }) => {
     setCentres((prev) => recalculateCentreMetrics(prev, finalizedTokens));
 
     if (notifyMsg && targetBooking) {
+      const isHi = language === "hi";
       addNotification({
         type: normalizedStatus,
-        title: `Status Update (${targetBooking.token})`,
+        title: isHi ? `स्थिति अपडेट (${targetBooking.token})` : `Status Update (${targetBooking.token})`,
         message: notifyMsg,
-        time: "Just now"
+        time: isHi ? "अभी" : "Just now"
       });
     }
     return true;
@@ -437,8 +442,48 @@ export const KisanSetuProvider = ({ children }) => {
     );
   };
 
+  // Temporary top-right toasts
+  const [toasts, setToasts] = useState([]);
+
+  const addToast = ({ type = "info", title, message, duration = 4000 }) => {
+    setToasts((prev) => {
+      // Prevent duplicate notifications for the same event
+      const isDuplicate = prev.some(
+        (t) => t.title === title && t.message === message && t.type === type
+      );
+      if (isDuplicate) return prev;
+      const id = Date.now() + Math.random();
+      const newToast = { id, type, title, message, duration };
+      if (duration > 0) {
+        setTimeout(() => {
+          setToasts((current) => current.filter((t) => t.id !== id));
+        }, duration);
+      }
+      return [...prev, newToast];
+    });
+  };
+
+  const removeToast = (id) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  };
+
   const addNotification = (notif) => {
     setNotifications((prev) => [{ id: Date.now(), read: false, ...notif }, ...prev]);
+    if (notif.title || notif.message) {
+      let toastType = "info";
+      if (notif.type === "SLOT_CONFIRMED" || notif.type === "PROCUREMENT_APPROVED" || notif.type === "PAYMENT_COMPLETED") {
+        toastType = "success";
+      } else if (notif.type === "ALERT" || notif.type === "ERROR") {
+        toastType = "error";
+      } else if (notif.type === "WARNING") {
+        toastType = "warning";
+      }
+      addToast({
+        type: toastType,
+        title: notif.title,
+        message: notif.message
+      });
+    }
   };
 
   // Used for updating a farmer's bank details profile
@@ -452,6 +497,11 @@ export const KisanSetuProvider = ({ children }) => {
     if (authenticatedUser && authenticatedUser.id === farmerId) {
       setAuthenticatedUser(prev => ({ ...prev, bankDetails: newBankDetails }));
     }
+    addToast({
+      type: "success",
+      title: language === "hi" ? "बैंक विवरण अपडेट हुआ" : "Bank Details Updated",
+      message: language === "hi" ? "बैंक खाते का विवरण सफलतापूर्वक सहेजा गया।" : "Bank details saved successfully."
+    });
   };
 
   return (
@@ -476,6 +526,9 @@ export const KisanSetuProvider = ({ children }) => {
         slots,
         bookings,
         notifications,
+        toasts,
+        addToast,
+        removeToast,
         activeCentreId,
         setActiveCentreId,
         activeBooking,

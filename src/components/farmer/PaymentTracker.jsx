@@ -1,14 +1,16 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useKisanSetu } from "../../context/KisanSetuContext";
 import confetti from "canvas-confetti";
-import { CreditCard, CheckCircle2, Building, ShieldCheck, ArrowRight, Download, Plus, Edit2, AlertCircle } from "lucide-react";
+import { CreditCard, CheckCircle2, Building, ShieldCheck, ArrowRight, Download, Plus, Edit2, AlertCircle, Eye, EyeOff } from "lucide-react";
 
 export const PaymentTracker = () => {
-  const { activeBooking, authenticatedUser, updateFarmerBankDetails } = useKisanSetu();
+  const { t, activeBooking, authenticatedUser, updateFarmerBankDetails } = useKisanSetu();
   const bankDetails = authenticatedUser?.bankDetails || null;
   const [isAddingBank, setIsAddingBank] = useState(false);
   const [errors, setErrors] = useState({});
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [showAccount, setShowAccount] = useState(false);
+  const [showConfirmAccount, setShowConfirmAccount] = useState(false);
 
   const [formData, setFormData] = useState({
     bankName: "",
@@ -26,6 +28,14 @@ export const PaymentTracker = () => {
 
   const isCompleted = activeBooking?.paymentStatus === "COMPLETED";
   const isProcessing = activeBooking?.paymentStatus === "PROCESSING";
+
+  const getPaymentStatusLabel = (status) => {
+    switch (status) {
+      case "COMPLETED": return t("statusPaymentCompleted");
+      case "PROCESSING": return t("statusPaymentProcessing");
+      default: return status || "NOT_INITIATED";
+    }
+  };
 
   useEffect(() => {
     if (isCompleted) {
@@ -116,10 +126,10 @@ export const PaymentTracker = () => {
           <div>
             <h2 className="text-xl font-extrabold text-slate-900 flex items-center gap-2">
               <CreditCard className="w-6 h-6 text-emerald-600" />
-              <span>Direct Bank Payment Status</span>
+              <span>{t("directBankPaymentStatus")}</span>
             </h2>
             <p className="text-xs text-slate-500 mt-0.5">
-              Direct Benefit Transfer (DBT) to Farmer Bank Account • Prototype payment flow
+              {t("dbtSubtext")}
             </p>
           </div>
 
@@ -130,14 +140,14 @@ export const PaymentTracker = () => {
               ? "bg-blue-100 text-blue-800"
               : "bg-slate-100 text-slate-700"
           }`}>
-            {activeBooking?.paymentStatus || "NOT_INITIATED"}
+            {getPaymentStatusLabel(activeBooking?.paymentStatus)}
           </span>
         </div>
 
         {savedSuccess && (
           <div className="mb-4 p-4 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center gap-3 text-emerald-800 text-xs font-bold animate-in fade-in duration-300">
             <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-            <span>Bank details successfully updated!</span>
+            <span>{t("bankDetailsUpdated")}</span>
           </div>
         )}
 
@@ -147,7 +157,7 @@ export const PaymentTracker = () => {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-800">
               <div>
                 <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider block">
-                  Total Calculated Payable Amount
+                  {t("totalCalculatedPayable")}
                 </span>
                 <div className="text-3xl sm:text-5xl font-extrabold text-emerald-400 mt-1">
                   ₹{activeBooking.totalAmount ? activeBooking.totalAmount.toLocaleString() : '0'}
@@ -155,27 +165,27 @@ export const PaymentTracker = () => {
               </div>
 
               <div className="text-left sm:text-right text-xs text-slate-300">
-                <span>Quantity Procured: <strong>{activeBooking.actualWeightQtl || activeBooking.quantity} Quintals</strong></span>
+                <span>{t("quantityProcured")}: <strong>{activeBooking.actualWeightQtl || activeBooking.quantity} {t("quantity")?.includes("क्विंटल") ? "क्विंटल" : "Quintals"}</strong></span>
                 <br />
-                <span>Government MSP Rate: <strong>₹{activeBooking.mspPerQtl} / Qtl</strong></span>
+                <span>{t("govMspRate")}: <strong>₹{activeBooking.mspPerQtl} / Qtl</strong></span>
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-6 text-xs text-slate-300">
               {/* Beneficiary Account Card */}
               <div className="bg-slate-800/80 p-4 rounded-2xl border border-slate-700 relative">
-                <span className="text-[10px] text-slate-400 block uppercase font-bold">Beneficiary Account</span>
+                <span className="text-[10px] text-slate-400 block uppercase font-bold">{t("beneficiaryAccount")}</span>
                 
                 {!bankDetails || !bankDetails.accountNumber ? (
                   <div className="mt-2">
-                    <span className="text-red-400 font-bold block mb-2 text-xs">No bank account linked</span>
+                    <span className="text-red-400 font-bold block mb-2 text-xs">{t("noBankAccountLinked")}</span>
                     {!isAddingBank && (
                       <button
                         onClick={() => { setIsAddingBank(true); setErrors({}); }}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg transition-colors text-[11px]"
+                        className="cursor-pointer flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg transition-colors text-[11px]"
                       >
                         <Plus className="w-3.5 h-3.5" />
-                        Add Bank Account
+                        {t("addBankAccount")}
                       </button>
                     )}
                   </div>
@@ -184,18 +194,18 @@ export const PaymentTracker = () => {
                     <span className="font-bold text-white text-sm block">{bankDetails.bankName}</span>
                     <span className="text-slate-300 text-xs font-mono">A/C {maskAccount(bankDetails.accountNumber)}</span>
                     <span className="text-slate-400 text-[11px] block mt-0.5">
-                      Account Holder: {bankDetails.accountHolder || bankDetails.holderName || authenticatedUser?.name}
+                      {t("accountHolder")}: {bankDetails.accountHolder || bankDetails.holderName || authenticatedUser?.name}
                     </span>
-                    <span className="text-slate-400 text-[11px] block">IFSC: {bankDetails.ifsc}</span>
-                    <span className="text-[10px] text-amber-400 block mt-1">✓ Prototype Verified Beneficiary</span>
+                    <span className="text-slate-400 text-[11px] block">{t("ifscCode")}: {bankDetails.ifsc}</span>
+                    <span className="text-[10px] text-amber-400 block mt-1">✓ {t("prototypeVerified")}</span>
                     
                     {!isAddingBank && (
                       <button
                         onClick={() => { setIsAddingBank(true); setErrors({}); }}
-                        className="absolute top-4 right-4 flex items-center gap-1 text-emerald-400 hover:text-emerald-300 transition-colors"
+                        className="cursor-pointer absolute top-4 right-4 flex items-center gap-1 text-emerald-400 hover:text-emerald-300 transition-colors"
                       >
                         <Edit2 className="w-3.5 h-3.5" />
-                        <span className="text-[10px] font-bold uppercase tracking-wider">Edit Bank Details</span>
+                        <span className="text-[10px] font-bold uppercase tracking-wider">{t("editBankDetails")}</span>
                       </button>
                     )}
                   </div>
@@ -204,35 +214,35 @@ export const PaymentTracker = () => {
 
               {/* Transaction Reference */}
               <div className="bg-slate-800/80 p-4 rounded-2xl border border-slate-700">
-                <span className="text-[10px] text-slate-400 block uppercase font-bold">Transaction Reference</span>
+                <span className="text-[10px] text-slate-400 block uppercase font-bold">{t("transactionRef")}</span>
                 <span className="font-bold font-mono text-amber-400 text-sm block mt-0.5">
                   {activeBooking.paymentTxRef || "PENDING_VERIFICATION"}
                 </span>
-                <span className="text-slate-400 text-[11px] block mt-1">Prototype payment flow (Simulated DBT Transfer)</span>
-                <span className="text-[10px] text-slate-500">Status: {activeBooking.paymentStatus}</span>
+                <span className="text-slate-400 text-[11px] block mt-1">{t("prototypePaymentFlow")}</span>
+                <span className="text-[10px] text-slate-500">{t("paymentStatus")}: {getPaymentStatusLabel(activeBooking.paymentStatus)}</span>
               </div>
             </div>
           </div>
         ) : (
           <div className="bg-slate-50 rounded-3xl p-6 border border-slate-200 mb-6">
             <p className="text-slate-600 font-medium text-sm mb-4">
-              No active procurement payment in progress. Once your grain is weighed and approved at the centre, DBT payment will be initiated here.
+              {t("noActivePayment")}
             </p>
             
             {/* Beneficiary Account Card when no active booking */}
             <div className="bg-white p-5 rounded-2xl border border-slate-200 max-w-lg relative">
-              <span className="text-[10px] text-slate-400 block uppercase font-bold">Beneficiary Account</span>
+              <span className="text-[10px] text-slate-400 block uppercase font-bold">{t("beneficiaryAccount")}</span>
               
               {!bankDetails || !bankDetails.accountNumber ? (
                 <div className="mt-2">
-                  <span className="text-red-500 font-bold block mb-2 text-xs">No bank account linked</span>
+                  <span className="text-red-500 font-bold block mb-2 text-xs">{t("noBankAccountLinked")}</span>
                   {!isAddingBank && (
                     <button
                       onClick={() => { setIsAddingBank(true); setErrors({}); }}
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg transition-colors text-xs"
+                      className="cursor-pointer flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg transition-colors text-xs"
                     >
                       <Plus className="w-3.5 h-3.5" />
-                      Add Bank Account
+                      {t("addBankAccount")}
                     </button>
                   )}
                 </div>
@@ -241,17 +251,17 @@ export const PaymentTracker = () => {
                   <span className="font-bold text-slate-900 text-base block">{bankDetails.bankName}</span>
                   <span className="text-slate-600 text-sm font-mono font-semibold">A/C {maskAccount(bankDetails.accountNumber)}</span>
                   <p className="text-slate-500 text-xs mt-0.5">
-                    Account Holder: <strong>{bankDetails.accountHolder || bankDetails.holderName || authenticatedUser?.name}</strong>
+                    {t("accountHolder")}: <strong>{bankDetails.accountHolder || bankDetails.holderName || authenticatedUser?.name}</strong>
                   </p>
-                  <p className="text-slate-500 text-xs font-mono">IFSC: {bankDetails.ifsc}</p>
+                  <p className="text-slate-500 text-xs font-mono">{t("ifscCode")}: {bankDetails.ifsc}</p>
                   
                   {!isAddingBank && (
                     <button
                       onClick={() => { setIsAddingBank(true); setErrors({}); }}
-                      className="absolute top-4 right-4 flex items-center gap-1 text-emerald-600 hover:text-emerald-700 transition-colors"
+                      className="cursor-pointer absolute top-4 right-4 flex items-center gap-1 text-emerald-600 hover:text-emerald-700 transition-colors"
                     >
                       <Edit2 className="w-3.5 h-3.5" />
-                      <span className="text-[10px] font-bold uppercase tracking-wider">Edit Bank Details</span>
+                      <span className="text-[10px] font-bold uppercase tracking-wider">{t("editBankDetails")}</span>
                     </button>
                   )}
                 </div>
@@ -264,12 +274,12 @@ export const PaymentTracker = () => {
         {isAddingBank && (
           <div className="bg-slate-50 rounded-2xl p-6 border-2 border-emerald-500/40">
             <h4 className="text-sm font-bold text-slate-900 mb-4">
-              {bankDetails && bankDetails.accountNumber ? "Edit Beneficiary Account Details" : "Link Beneficiary Bank Account"}
+              {bankDetails && bankDetails.accountNumber ? t("editBeneficiaryAccount") : t("linkBeneficiaryAccount")}
             </h4>
             <form onSubmit={handleSaveBank} className="space-y-4" noValidate>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-[10px] text-slate-600 uppercase font-bold block mb-1">Bank Name *</label>
+                  <label className="text-[10px] text-slate-600 uppercase font-bold block mb-1">{t("bankName")} *</label>
                   <input 
                     ref={bankNameRef}
                     type="text"
@@ -292,7 +302,7 @@ export const PaymentTracker = () => {
                 </div>
 
                 <div>
-                  <label className="text-[10px] text-slate-600 uppercase font-bold block mb-1">Account Holder Name *</label>
+                  <label className="text-[10px] text-slate-600 uppercase font-bold block mb-1">{t("accountHolder")} *</label>
                   <input 
                     ref={holderNameRef}
                     type="text"
@@ -315,23 +325,33 @@ export const PaymentTracker = () => {
                 </div>
 
                 <div>
-                  <label className="text-[10px] text-slate-600 uppercase font-bold block mb-1">Account Number (9–18 Digits) *</label>
-                  <input 
-                    ref={accountNumberRef}
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={18}
-                    className={`w-full bg-white border rounded-xl px-3 py-2.5 text-xs font-mono text-slate-900 focus:outline-none transition-colors ${
-                      errors.accountNumber ? 'border-red-500 ring-1 ring-red-500 bg-red-50/20' : 'border-slate-300 focus:border-emerald-500'
-                    }`}
-                    placeholder="Enter 9–18 digit account number"
-                    value={formData.accountNumber}
-                    onChange={(e) => {
-                      const val = e.target.value.replace(/\D/g, '').slice(0, 18);
-                      setFormData({...formData, accountNumber: val});
-                      setErrors({...errors, accountNumber: null});
-                    }}
-                  />
+                  <label className="text-[10px] text-slate-600 uppercase font-bold block mb-1">{t("accountNumber")} (9–18 Digits) *</label>
+                  <div className="relative">
+                    <input 
+                      ref={accountNumberRef}
+                      type={showAccount ? "text" : "password"}
+                      inputMode="numeric"
+                      maxLength={18}
+                      className={`w-full bg-white border rounded-xl px-3 pr-10 py-2.5 text-xs font-mono text-slate-900 focus:outline-none transition-colors ${
+                        errors.accountNumber ? 'border-red-500 ring-1 ring-red-500 bg-red-50/20' : 'border-slate-300 focus:border-emerald-500'
+                      }`}
+                      placeholder="Enter 9–18 digit account number"
+                      value={formData.accountNumber}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, '').slice(0, 18);
+                        setFormData({...formData, accountNumber: val});
+                        setErrors({...errors, accountNumber: null});
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowAccount(!showAccount)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer p-1"
+                      aria-label={showAccount ? "Hide account number" : "Show account number"}
+                    >
+                      {showAccount ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                   {errors.accountNumber && (
                     <p className="text-[11px] text-red-600 font-semibold mt-1 flex items-center gap-1">
                       <AlertCircle className="w-3 h-3" />{errors.accountNumber}
@@ -340,23 +360,33 @@ export const PaymentTracker = () => {
                 </div>
 
                 <div>
-                  <label className="text-[10px] text-slate-600 uppercase font-bold block mb-1">Confirm Account Number *</label>
-                  <input 
-                    ref={confirmAccountNumberRef}
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={18}
-                    className={`w-full bg-white border rounded-xl px-3 py-2.5 text-xs font-mono text-slate-900 focus:outline-none transition-colors ${
-                      errors.confirmAccountNumber ? 'border-red-500 ring-1 ring-red-500 bg-red-50/20' : 'border-slate-300 focus:border-emerald-500'
-                    }`}
-                    placeholder="Re-enter account number"
-                    value={formData.confirmAccountNumber}
-                    onChange={(e) => {
-                      const val = e.target.value.replace(/\D/g, '').slice(0, 18);
-                      setFormData({...formData, confirmAccountNumber: val});
-                      setErrors({...errors, confirmAccountNumber: null});
-                    }}
-                  />
+                  <label className="text-[10px] text-slate-600 uppercase font-bold block mb-1">{t("confirmAccountNumber")} *</label>
+                  <div className="relative">
+                    <input 
+                      ref={confirmAccountNumberRef}
+                      type={showConfirmAccount ? "text" : "password"}
+                      inputMode="numeric"
+                      maxLength={18}
+                      className={`w-full bg-white border rounded-xl px-3 pr-10 py-2.5 text-xs font-mono text-slate-900 focus:outline-none transition-colors ${
+                        errors.confirmAccountNumber ? 'border-red-500 ring-1 ring-red-500 bg-red-50/20' : 'border-slate-300 focus:border-emerald-500'
+                      }`}
+                      placeholder="Re-enter account number"
+                      value={formData.confirmAccountNumber}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(/\D/g, '').slice(0, 18);
+                        setFormData({...formData, confirmAccountNumber: val});
+                        setErrors({...errors, confirmAccountNumber: null});
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmAccount(!showConfirmAccount)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer p-1"
+                      aria-label={showConfirmAccount ? "Hide confirm account number" : "Show confirm account number"}
+                    >
+                      {showConfirmAccount ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                   {errors.confirmAccountNumber && (
                     <p className="text-[11px] text-red-600 font-semibold mt-1 flex items-center gap-1">
                       <AlertCircle className="w-3 h-3" />{errors.confirmAccountNumber}
@@ -365,7 +395,7 @@ export const PaymentTracker = () => {
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="text-[10px] text-slate-600 uppercase font-bold block mb-1">IFSC Code (11 characters) *</label>
+                  <label className="text-[10px] text-slate-600 uppercase font-bold block mb-1">{t("ifscCode")} (11 characters) *</label>
                   <input 
                     ref={ifscRef}
                     type="text"
@@ -393,15 +423,15 @@ export const PaymentTracker = () => {
                 <button 
                   type="button" 
                   onClick={() => { setIsAddingBank(false); setErrors({}); }}
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 transition-colors"
+                  className="cursor-pointer px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:text-slate-900 transition-colors"
                 >
-                  Cancel
+                  {t("cancel")}
                 </button>
                 <button 
                   type="submit"
-                  className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition-colors"
+                  className="cursor-pointer px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition-colors"
                 >
-                  Save Bank Details
+                  {t("saveBankDetails")}
                 </button>
               </div>
             </form>

@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 
 export const SmartBooking = ({ onBookingSuccess }) => {
-  const { t, centres, slots, bookSlot, setActiveFarmerTab } = useKisanSetu();
+  const { t, centres, slots, bookSlot, setActiveFarmerTab, addToast } = useKisanSetu();
 
   const [crop, setCommodity] = useState("Wheat");
   const [quantity, setQuantity] = useState("20");
@@ -41,6 +41,13 @@ export const SmartBooking = ({ onBookingSuccess }) => {
     
     if (result?.error === "DUPLICATE_BOOKING") {
       setDuplicateError(result);
+      if (addToast) {
+        addToast({
+          type: "warning",
+          title: t("duplicateBookingTitle"),
+          message: t("duplicateBookingMsg")
+        });
+      }
       return;
     }
     
@@ -63,7 +70,7 @@ export const SmartBooking = ({ onBookingSuccess }) => {
               {t("bookSlotTitle")}
             </h2>
             <p className="text-xs text-slate-500">
-              Select crop, quantity, and smart recommended procurement centre.
+              {t("whyRecommended")}
             </p>
           </div>
         </div>
@@ -74,10 +81,10 @@ export const SmartBooking = ({ onBookingSuccess }) => {
               <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
               <div>
                 <p className="text-sm font-bold text-amber-900">
-                  You already have an active booking for this slot.
+                  {t("duplicateBookingTitle")}: {t("duplicateBookingMsg")}
                 </p>
                 <p className="text-xs text-amber-700">
-                  Token: <strong>{duplicateError.existingBooking?.token}</strong> ({duplicateError.existingBooking?.crop}, {duplicateError.existingBooking?.slot})
+                  {t("myToken")}: <strong>{duplicateError.existingBooking?.token}</strong> ({duplicateError.existingBooking?.crop}, {duplicateError.existingBooking?.slot})
                 </p>
               </div>
             </div>
@@ -87,16 +94,16 @@ export const SmartBooking = ({ onBookingSuccess }) => {
                 onClick={() => {
                   if (setActiveFarmerTab) setActiveFarmerTab("queue");
                 }}
-                className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-xs transition-colors"
+                className="cursor-pointer px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl shadow-xs transition-colors"
               >
-                View Existing Booking
+                {t("viewExistingBooking")}
               </button>
               <button
                 type="button"
                 onClick={() => setDuplicateError(null)}
-                className="px-3 py-2 border border-slate-300 text-slate-700 hover:bg-slate-100 font-bold text-xs rounded-xl transition-colors"
+                className="cursor-pointer px-3 py-2 border border-slate-300 text-slate-700 hover:bg-slate-100 font-bold text-xs rounded-xl transition-colors"
               >
-                Reschedule
+                {t("reschedule")}
               </button>
             </div>
           </div>

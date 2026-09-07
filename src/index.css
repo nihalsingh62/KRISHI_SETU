@@ -6,6 +6,28 @@
   }
 }
 
+/* Ensure all interactive/clickable elements have pointer cursor while text inputs remain text */
+button:not(:disabled),
+[role="button"]:not(:disabled),
+a[href],
+select:not(:disabled),
+summary,
+input[type="checkbox"],
+input[type="radio"],
+.cursor-pointer {
+  cursor: pointer;
+}
+
+button:disabled,
+[role="button"][aria-disabled="true"] {
+  cursor: not-allowed;
+}
+
+input:not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="checkbox"]):not([type="radio"]),
+textarea {
+  cursor: text;
+}
+
 /* Custom subtle scrollbar */
 ::-webkit-scrollbar {
   width: 6px;

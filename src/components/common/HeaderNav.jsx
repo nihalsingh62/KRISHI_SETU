@@ -75,7 +75,7 @@ export const HeaderNav = () => {
               if (currentRole === "operator" && setActiveOperatorTab) setActiveOperatorTab("dashboard");
               if (currentRole === "admin" && setActiveAdminTab) setActiveAdminTab("dashboard");
             }}
-            className="flex items-center gap-2.5 text-left group"
+            className="cursor-pointer flex items-center gap-2.5 text-left group"
           >
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-md shadow-emerald-600/20 group-hover:scale-105 transition-transform">
               <Wheat className="w-6 h-6" />
@@ -83,7 +83,7 @@ export const HeaderNav = () => {
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="font-extrabold text-xl tracking-tight bg-gradient-to-r from-emerald-700 via-teal-800 to-slate-900 bg-clip-text text-transparent">
-                  KisanSetu
+                  {t("appName") || "KisanSetu"}
                 </span>
               </div>
               <p className="text-[10px] font-medium text-slate-500 tracking-wide uppercase group-hover:text-emerald-600 transition-colors">
@@ -96,9 +96,9 @@ export const HeaderNav = () => {
           <div className="hidden md:flex items-center">
             {isAuthenticated && (
               <span className="px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-bold uppercase tracking-wider border border-slate-200">
-                {currentRole === "farmer" && "Farmer Portal"}
-                {currentRole === "operator" && "Procurement Centre"}
-                {currentRole === "admin" && "Department Dashboard"}
+                {currentRole === "farmer" && (t("farmerRole") || "Farmer Portal")}
+                {currentRole === "operator" && (t("operatorRole") || "Procurement Centre")}
+                {currentRole === "admin" && (t("adminRole") || "Department Dashboard")}
               </span>
             )}
           </div>
@@ -110,7 +110,7 @@ export const HeaderNav = () => {
             <div className="relative">
               <button
                 onClick={() => togglePopover("network")}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${lowNetworkMode
+                className={`cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all ${lowNetworkMode
                   ? "bg-amber-50 text-amber-800 border-amber-300 font-bold"
                   : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100"
                   }`}
@@ -118,7 +118,7 @@ export const HeaderNav = () => {
                 {lowNetworkMode ? (
                   <>
                     <WifiOff className="w-3.5 h-3.5 text-amber-600" />
-                    <span className="hidden sm:inline">Low-bandwidth mode</span>
+                    <span className="hidden sm:inline">{t("lowNetworkMode") || "Low-bandwidth mode"}</span>
                   </>
                 ) : (
                   <>
@@ -135,13 +135,13 @@ export const HeaderNav = () => {
                     <p className="text-[10px] text-slate-500 mt-0.5">
                       Status: {lowNetworkMode ? "Offline UI Active" : "Connected"}<br />
                       Network quality: {lowNetworkMode ? "Poor" : "Good"}<br />
-                      Last synced: {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      {t("lastSynced")}: {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </p>
                   </div>
                   <div className="px-2 pt-2">
                     <button
                       onClick={() => { setLowNetworkMode(!lowNetworkMode); setActivePopover(null); }}
-                      className="w-full text-left px-3 py-2 text-xs font-semibold rounded-lg hover:bg-slate-50 transition-colors"
+                      className="cursor-pointer w-full text-left px-3 py-2 text-xs font-semibold rounded-lg hover:bg-slate-50 transition-colors"
                     >
                       {lowNetworkMode ? "Disable Low-Bandwidth Mode" : "Enable Low-Bandwidth Mode"}
                     </button>
@@ -154,14 +154,14 @@ export const HeaderNav = () => {
             <div className="flex items-center bg-slate-100 rounded-lg p-0.5 border border-slate-200 text-xs">
               <button
                 onClick={() => setLanguage("en")}
-                className={`px-2 py-1 rounded-md font-bold transition-all ${language === "en" ? "bg-white text-emerald-700 shadow-xs" : "text-slate-600"
+                className={`cursor-pointer px-2 py-1 rounded-md font-bold transition-all ${language === "en" ? "bg-white text-emerald-700 shadow-xs" : "text-slate-600"
                   }`}
               >
                 EN
               </button>
               <button
                 onClick={() => setLanguage("hi")}
-                className={`px-2 py-1 rounded-md font-bold transition-all ${language === "hi" ? "bg-white text-emerald-700 shadow-xs" : "text-slate-600"
+                className={`cursor-pointer px-2 py-1 rounded-md font-bold transition-all ${language === "hi" ? "bg-white text-emerald-700 shadow-xs" : "text-slate-600"
                   }`}
               >
                 हिंदी
@@ -173,7 +173,7 @@ export const HeaderNav = () => {
               <div className="relative">
                 <button
                   onClick={() => togglePopover("notifications")}
-                  className="relative p-2 text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-100 transition-colors"
+                  className="cursor-pointer relative p-2 text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-100 transition-colors"
                 >
                   <Bell className="w-5 h-5" />
                   {unreadCount > 0 && (
@@ -219,7 +219,7 @@ export const HeaderNav = () => {
               <div className="relative hidden md:block">
                 <button
                   onClick={() => togglePopover("user")}
-                  className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-full hover:bg-slate-100 transition-colors border border-transparent hover:border-slate-200"
+                  className="cursor-pointer flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-full hover:bg-slate-100 transition-colors border border-transparent hover:border-slate-200"
                 >
                   <div className="w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center">
                     <User className="w-4 h-4" />
@@ -240,9 +240,9 @@ export const HeaderNav = () => {
                           setActivePopover(null);
                           if (setActiveFarmerTab) setActiveFarmerTab("profile");
                         }}
-                        className="w-full text-left px-4 py-2.5 text-xs font-medium text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-2"
+                        className="cursor-pointer w-full text-left px-4 py-2.5 text-xs font-medium text-slate-700 hover:bg-slate-50 transition-colors flex items-center gap-2"
                       >
-                        <User className="w-4 h-4" /> Profile
+                        <User className="w-4 h-4" /> {t("tabProfile") || "Profile"}
                       </button>
                     )}
                     <button
@@ -250,7 +250,7 @@ export const HeaderNav = () => {
                         setActivePopover(null);
                         logout();
                       }}
-                      className="w-full text-left px-4 py-2.5 text-xs font-medium text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2"
+                      className="cursor-pointer w-full text-left px-4 py-2.5 text-xs font-medium text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2"
                     >
                       <LogOut className="w-4 h-4" /> Logout
                     </button>
@@ -262,7 +262,7 @@ export const HeaderNav = () => {
             {/* Mobile Hamburger Menu button */}
             <button
               onClick={() => togglePopover("mobile")}
-              className="md:hidden p-2 text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-100"
+              className="cursor-pointer md:hidden p-2 text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-100"
             >
               {activePopover === "mobile" ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>

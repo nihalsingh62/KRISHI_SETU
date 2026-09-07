@@ -44,6 +44,26 @@ export const FarmerDashboard = ({ onNavigateTab }) => {
   }
 
   const isCompleted = ["COMPLETED", "PROCUREMENT_COMPLETE", "PROCUREMENT_COMPLETED", "PAYMENT_INITIATED", "PAYMENT_PROCESSING", "PAYMENT_COMPLETED"].includes(activeBooking.status);
+
+  const getStatusLabel = (status) => {
+    switch (status) {
+      case "BOOKED": return t("statusBooked");
+      case "CONFIRMED": return t("statusConfirmed");
+      case "ARRIVED": return t("statusArrived");
+      case "WAITING": return t("statusWaiting");
+      case "CALLED": return t("statusCalled");
+      case "WEIGHING": return t("statusWeighing");
+      case "QUALITY_CHECK": return t("statusQualityCheck");
+      case "APPROVED": return t("statusApproved");
+      case "COMPLETED":
+      case "PROCUREMENT_COMPLETE":
+      case "PROCUREMENT_COMPLETED": return t("statusProcurementComplete");
+      case "PAYMENT_PROCESSING": return t("statusPaymentProcessing");
+      case "PAYMENT_COMPLETED": return t("statusPaymentCompleted");
+      case "REJECTED": return t("statusRejected");
+      default: return status.replace(/_/g, " ");
+    }
+  };
   
   // Determine contextual instruction based on status
   let instructionMsg = "";
@@ -51,21 +71,21 @@ export const FarmerDashboard = ({ onNavigateTab }) => {
   let Icon = BellRing;
 
   if (activeBooking.status === "BOOKED") {
-    instructionMsg = "You are not at the centre. Please arrive 15 minutes before your slot time.";
+    instructionMsg = t("instructionBooked");
     instructionColor = "bg-slate-50 border-slate-200 text-slate-800";
   } else if (activeBooking.status === "WAITING" || activeBooking.status === "ARRIVED") {
     if (activeBooking.queuePosition <= 3) {
-      instructionMsg = `You are #${activeBooking.queuePosition} in queue. Please be ready for your turn.`;
+      instructionMsg = t("instructionWaitingNear");
       instructionColor = "bg-amber-50 border-amber-200 text-amber-800";
     } else {
-      instructionMsg = `You are #${activeBooking.queuePosition} in queue. Please wait in the designated parking area.`;
+      instructionMsg = t("instructionWaitingFar");
       instructionColor = "bg-blue-50 border-blue-200 text-blue-800";
     }
   } else if (activeBooking.status === "WEIGHING") {
-    instructionMsg = "You have been called for weighing. Please proceed to the active Weighbridge.";
+    instructionMsg = t("instructionWeighing");
     instructionColor = "bg-indigo-50 border-indigo-200 text-indigo-800";
   } else if (activeBooking.status === "QUALITY_CHECK") {
-    instructionMsg = "Quality inspection in progress. Please wait near the QC lab.";
+    instructionMsg = t("instructionQC");
     instructionColor = "bg-indigo-50 border-indigo-200 text-indigo-800";
   }
 
@@ -78,11 +98,11 @@ export const FarmerDashboard = ({ onNavigateTab }) => {
             <div className="flex items-center gap-2 text-emerald-300 text-xs font-semibold uppercase tracking-wider mb-1">
               <span>🌾 {t("goodMorning")}, {activeBooking.farmerName}</span>
               <span className="bg-emerald-500/30 text-emerald-200 px-2 py-0.5 rounded text-[10px]">
-                Identity Verified
+                {t("identityVerified")}
               </span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
-              {isCompleted ? "Procurement Completed" : t("activeBooking")}
+              {isCompleted ? t("procurementCompleted") : t("activeBooking")}
             </h2>
             <p className="text-slate-300 text-xs sm:text-sm mt-1">
               Slot for <strong>{activeBooking.crop} ({activeBooking.quantity} Quintals)</strong> at {activeBooking.slot}.
@@ -93,7 +113,7 @@ export const FarmerDashboard = ({ onNavigateTab }) => {
             {!isCompleted && (
               <button
                 onClick={() => onNavigateTab("queue")}
-                className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-sm shadow-md transition-all"
+                className="cursor-pointer flex items-center gap-2 px-5 py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-sm shadow-md transition-all"
               >
                 <QrCode className="w-4 h-4" />
                 <span>{t("viewLiveQueue")}</span>
@@ -101,9 +121,9 @@ export const FarmerDashboard = ({ onNavigateTab }) => {
             )}
             <button
               onClick={() => onNavigateTab("booking")}
-              className="px-4 py-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs border border-white/20 transition-all"
+              className="cursor-pointer px-4 py-3 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs border border-white/20 transition-all"
             >
-              + Book New Slot
+              + {t("bookNewSlot")}
             </button>
           </div>
         </div>
@@ -117,7 +137,7 @@ export const FarmerDashboard = ({ onNavigateTab }) => {
           <div className="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-slate-100">
             <div className="flex items-center gap-4">
               <div className="w-20 h-20 rounded-2xl bg-emerald-100 border-2 border-emerald-500/30 text-emerald-800 flex flex-col items-center justify-center font-extrabold shadow-inner">
-                <span className="text-[10px] text-emerald-600 uppercase font-semibold mb-1 tracking-wider">YOUR TOKEN</span>
+                <span className="text-[10px] text-emerald-600 uppercase font-semibold mb-1 tracking-wider text-center">{t("yourToken")}</span>
                 <span className="text-2xl font-mono text-emerald-900 leading-none">{activeBooking.token}</span>
               </div>
               <div>
@@ -132,7 +152,7 @@ export const FarmerDashboard = ({ onNavigateTab }) => {
                       ? "bg-blue-100 text-blue-800"
                       : "bg-amber-100 text-amber-800"
                   }`}>
-                    {activeBooking.status.replace(/_/g, " ")}
+                    {getStatusLabel(activeBooking.status)}
                   </span>
                 </div>
                 <p className="text-sm font-medium text-slate-500 mt-1 flex items-center gap-1.5">
@@ -140,7 +160,7 @@ export const FarmerDashboard = ({ onNavigateTab }) => {
                   <span>{bookingCentre.name}</span>
                 </p>
                 <p className="text-xs font-semibold text-slate-400 mt-0.5 ml-5.5">
-                  Scheduled: {activeBooking.slot}
+                  {t("slotTime")}: {activeBooking.slot}
                 </p>
               </div>
             </div>
@@ -151,7 +171,7 @@ export const FarmerDashboard = ({ onNavigateTab }) => {
             <div className={`mt-6 p-4 rounded-xl border flex items-start gap-3 ${instructionColor}`}>
               <Icon className="w-5 h-5 shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm font-bold">Current Instruction</p>
+                <p className="text-sm font-bold">{t("currentInstruction")}</p>
                 <p className="text-xs mt-0.5 font-medium">{instructionMsg}</p>
               </div>
             </div>
@@ -161,37 +181,37 @@ export const FarmerDashboard = ({ onNavigateTab }) => {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6">
             <div className="bg-slate-50 rounded-2xl p-5 border border-slate-200">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block mb-1">
-                QUEUE POSITION
+                {t("queuePosition")}
               </span>
               <div className="flex items-baseline gap-2">
                 <span className="text-4xl font-extrabold text-slate-900">
                   #{activeBooking.queuePosition}
                 </span>
-                <span className="text-xs text-slate-500 font-bold">({activeBooking.queuePosition - 1} farmers ahead)</span>
+                <span className="text-xs text-slate-500 font-bold">({activeBooking.queuePosition - 1} {t("farmersAhead")})</span>
               </div>
             </div>
 
             <div className="bg-emerald-50 rounded-2xl p-5 border border-emerald-200">
               <span className="text-xs font-bold uppercase tracking-wider text-emerald-800 block mb-1">
-                ESTIMATED WAIT
+                {t("estimatedWait")}
               </span>
               <div className="flex items-baseline gap-2">
                 <span className="text-4xl font-extrabold text-emerald-700">
                   {activeBooking.estimatedWait}
                 </span>
-                <span className="text-xs text-emerald-800 font-bold">minutes</span>
+                <span className="text-xs text-emerald-800 font-bold">{t("minutes")}</span>
               </div>
             </div>
 
             <div className="bg-slate-50 rounded-2xl p-5 border border-slate-200">
               <span className="text-xs font-bold uppercase tracking-wider text-slate-500 block mb-1">
-                CURRENTLY SERVING
+                {t("servingToken")}
               </span>
               <div className="flex items-baseline gap-2">
                 <span className="text-4xl font-extrabold text-indigo-700 font-mono">
                   A118
                 </span>
-                <span className="text-xs text-slate-500 font-bold">• Counter 1</span>
+                <span className="text-xs text-slate-500 font-bold">• {t("counter")} 1</span>
               </div>
             </div>
           </div>
@@ -200,18 +220,18 @@ export const FarmerDashboard = ({ onNavigateTab }) => {
           <div className="mt-6 flex flex-wrap gap-3 pt-4 border-t border-slate-100">
             <button
               onClick={() => onNavigateTab("queue")}
-              className="flex-1 min-w-[140px] flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-colors"
+              className="cursor-pointer flex-1 min-w-[140px] flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-colors"
             >
               <QrCode className="w-4 h-4 text-emerald-400" />
-              <span>Track Live Queue</span>
+              <span>{t("viewLiveQueue")}</span>
             </button>
 
             <button
               onClick={() => onNavigateTab("timeline")}
-              className="flex-1 min-w-[140px] flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition-colors"
+              className="cursor-pointer flex-1 min-w-[140px] flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition-colors"
             >
               <Truck className="w-4 h-4 text-blue-600" />
-              <span>Procurement Progress</span>
+              <span>{t("procurementProgress")}</span>
             </button>
           </div>
         </div>

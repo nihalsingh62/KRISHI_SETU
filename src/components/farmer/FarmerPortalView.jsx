@@ -27,30 +27,29 @@ export const FarmerPortalView = () => {
           <div className="flex items-center justify-between border-b border-amber-300 pb-3">
             <div className="flex items-center gap-2">
               <WifiOff className="w-6 h-6 text-amber-700 animate-pulse" />
-              <h2 className="text-xl font-extrabold">Low-Bandwidth Mode</h2>
+              <h2 className="text-xl font-extrabold">{t("lowNetworkMode")}</h2>
             </div>
           </div>
 
           <p className="text-xs font-semibold">
-            You are viewing a lightweight, text-first version of the app to save data. 
-            Your booking is saved locally and will sync when connectivity returns.
+            {t("lowNetworkDesc")}. Your booking is saved locally and will sync when connectivity returns.
           </p>
 
           <div className="bg-white rounded-2xl p-6 border border-amber-300 space-y-3">
             <div className="flex justify-between items-center text-xs">
-              <span className="text-slate-500 font-bold uppercase">Last Synced</span>
+              <span className="text-slate-500 font-bold uppercase">{t("lastSynced")}</span>
               <span className="font-mono text-slate-800">{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
             </div>
 
             {!activeBooking ? (
               <div className="text-center py-6 bg-slate-100 rounded-2xl border border-slate-200">
-                <p className="text-sm font-bold text-slate-700">No Active Booking</p>
-                <p className="text-xs text-slate-500 mt-1">You do not currently have any scheduled slots.</p>
+                <p className="text-sm font-bold text-slate-700">{t("noActiveBooking")}</p>
+                <p className="text-xs text-slate-500 mt-1">{t("noActiveBookingDesc")}</p>
                 <button
                   onClick={() => setActiveFarmerTab("booking")}
-                  className="mt-3 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs"
+                  className="cursor-pointer mt-3 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs"
                 >
-                  Book New Slot
+                  {t("bookNewSlot")}
                 </button>
               </div>
             ) : (
@@ -67,11 +66,11 @@ export const FarmerPortalView = () => {
 
                 <div className="grid grid-cols-2 gap-3 text-xs font-bold pt-2">
                   <div className="bg-amber-100 p-3 rounded-xl">
-                    <span className="text-[10px] text-amber-800 block">Queue Position</span>
+                    <span className="text-[10px] text-amber-800 block">{t("queuePosition")}</span>
                     <span className="text-xl text-slate-900">#{activeBooking.queuePosition || 1}</span>
                   </div>
                   <div className="bg-emerald-100 p-3 rounded-xl">
-                    <span className="text-[10px] text-emerald-800 block">Est. Wait</span>
+                    <span className="text-[10px] text-emerald-800 block">{t("estimatedWait")}</span>
                     <span className="text-xl text-slate-900">{activeBooking.estimatedWait || 5} min</span>
                   </div>
                 </div>
@@ -89,7 +88,7 @@ export const FarmerPortalView = () => {
       <div className="flex items-center gap-2 border-b border-slate-200 pb-2 overflow-x-auto">
         <button
           onClick={() => setActiveFarmerTab("dashboard")}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
+          className={`cursor-pointer flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
             activeFarmerTab === "dashboard"
               ? "bg-emerald-700 text-white shadow-sm"
               : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
@@ -101,7 +100,7 @@ export const FarmerPortalView = () => {
 
         <button
           onClick={() => setActiveFarmerTab("booking")}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
+          className={`cursor-pointer flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
             activeFarmerTab === "booking"
               ? "bg-emerald-700 text-white shadow-sm"
               : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
@@ -113,7 +112,7 @@ export const FarmerPortalView = () => {
 
         <button
           onClick={() => setActiveFarmerTab("queue")}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
+          className={`cursor-pointer flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
             activeFarmerTab === "queue"
               ? "bg-emerald-700 text-white shadow-sm"
               : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
@@ -125,7 +124,7 @@ export const FarmerPortalView = () => {
 
         <button
           onClick={() => setActiveFarmerTab("timeline")}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
+          className={`cursor-pointer flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
             activeFarmerTab === "timeline"
               ? "bg-emerald-700 text-white shadow-sm"
               : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
@@ -137,7 +136,7 @@ export const FarmerPortalView = () => {
 
         <button
           onClick={() => setActiveFarmerTab("payment")}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
+          className={`cursor-pointer flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
             activeFarmerTab === "payment"
               ? "bg-emerald-700 text-white shadow-sm"
               : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
@@ -149,7 +148,7 @@ export const FarmerPortalView = () => {
 
         <button
           onClick={() => setActiveFarmerTab("profile")}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
+          className={`cursor-pointer flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
             activeFarmerTab === "profile"
               ? "bg-emerald-700 text-white shadow-sm"
               : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"

@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useKisanSetu } from "../../context/KisanSetuContext";
-import { User, CreditCard, Save, CheckCircle2, AlertCircle } from "lucide-react";
+import { User, CreditCard, Save, CheckCircle2, AlertCircle, Eye, EyeOff } from "lucide-react";
 
 export const FarmerProfile = () => {
-  const { authenticatedUser, updateFarmerBankDetails } = useKisanSetu();
+  const { t, authenticatedUser, updateFarmerBankDetails } = useKisanSetu();
   const [isEditing, setIsEditing] = useState(false);
   const [saved, setSaved] = useState(false);
   const [errors, setErrors] = useState({});
+  const [showAccount, setShowAccount] = useState(false);
+  const [showConfirmAccount, setShowConfirmAccount] = useState(false);
 
   const [formData, setFormData] = useState({
     bankName: "",
@@ -98,7 +100,7 @@ export const FarmerProfile = () => {
         <div className="relative z-10 flex flex-col md:flex-row justify-between md:items-end gap-6">
           <div>
             <span className="bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-[10px] font-extrabold px-3 py-1 rounded-full tracking-widest uppercase mb-4 inline-block">
-              Verified Farmer Profile
+              {t("profileTitle")}
             </span>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-white mb-1">
               {authenticatedUser.name}
@@ -109,28 +111,28 @@ export const FarmerProfile = () => {
             
             <div className="grid grid-cols-2 gap-x-12 gap-y-4">
               <div>
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Mobile Number</p>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">{t("mobileNumber")}</p>
                 <p className="text-sm font-semibold font-mono">
                   {authenticatedUser.mobile ? `${authenticatedUser.mobile.slice(0, 2)}******${authenticatedUser.mobile.slice(-2)}` : "N/A"}
                 </p>
               </div>
               <div>
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Aadhaar Linked</p>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">{t("aadhaarLinked")}</p>
                 <p className="text-sm font-mono font-semibold">
                   XXXX XXXX {authenticatedUser.aadhaar?.slice(-4) || "****"}
                 </p>
               </div>
               <div>
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Village</p>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">{t("village")}</p>
                 <p className="text-sm font-semibold">{authenticatedUser.village || "N/A"}</p>
               </div>
               <div>
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">District</p>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">{t("district")}</p>
                 <p className="text-sm font-semibold">{authenticatedUser.district || "N/A"}</p>
               </div>
               <div>
-                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Preferred Language</p>
-                <p className="text-sm font-semibold">English / Hindi</p>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">{t("preferredLanguage")}</p>
+                <p className="text-sm font-semibold">English / हिन्दी</p>
               </div>
             </div>
           </div>
@@ -142,22 +144,22 @@ export const FarmerProfile = () => {
         <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
           <h3 className="text-xl font-extrabold text-slate-900 flex items-center gap-2">
             <CreditCard className="w-6 h-6 text-emerald-600" />
-            <span>Bank Account Details</span>
+            <span>{t("bankAccountDetails")}</span>
           </h3>
           {!isEditing && (
             <button
               onClick={() => { setIsEditing(true); setErrors({}); }}
-              className="text-sm font-bold text-emerald-600 hover:text-emerald-700 bg-emerald-50 px-4 py-2 rounded-xl transition-colors"
+              className="cursor-pointer text-sm font-bold text-emerald-600 hover:text-emerald-700 bg-emerald-50 px-4 py-2 rounded-xl transition-colors"
             >
-              {authenticatedUser.bankDetails ? "Edit Bank Details" : "+ Add Bank Account"}
+              {authenticatedUser.bankDetails ? t("editBankDetails") : `+ ${t("addBankAccount")}`}
             </button>
           )}
         </div>
 
         {saved && (
           <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center gap-3 text-emerald-800 animate-in fade-in duration-300">
-            <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-            <span className="text-sm font-bold">Bank details successfully updated!</span>
+            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+            <span className="text-sm font-bold">{t("bankDetailsUpdated")}</span>
           </div>
         )}
 
@@ -165,7 +167,7 @@ export const FarmerProfile = () => {
           <form onSubmit={handleSubmit} className="space-y-4 max-w-2xl" noValidate>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">Bank Name *</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">{t("bankName")} *</label>
                 <input
                   ref={bankNameRef}
                   type="text"
@@ -181,7 +183,7 @@ export const FarmerProfile = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">Account Holder Name *</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">{t("accountHolder")} *</label>
                 <input
                   ref={holderNameRef}
                   type="text"
@@ -197,49 +199,69 @@ export const FarmerProfile = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">Account Number (9-18 digits) *</label>
-                <input
-                  ref={accountNumberRef}
-                  type="text"
-                  inputMode="numeric"
-                  maxLength={18}
-                  value={formData.accountNumber}
-                  onChange={e => { 
-                    const val = e.target.value.replace(/\D/g, '').slice(0, 18);
-                    setFormData({ ...formData, accountNumber: val }); 
-                    setErrors({ ...errors, accountNumber: null }); 
-                  }}
-                  className={`w-full rounded-xl p-3 outline-none text-sm font-medium font-mono border transition-colors ${
-                    errors.accountNumber ? 'border-red-500 ring-1 ring-red-500 bg-red-50/30' : 'bg-slate-50 border-slate-200 focus:ring-2 focus:ring-emerald-500'
-                  }`}
-                  required
-                />
+                <label className="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">{t("accountNumber")} (9-18 digits) *</label>
+                <div className="relative">
+                  <input
+                    ref={accountNumberRef}
+                    type={showAccount ? "text" : "password"}
+                    inputMode="numeric"
+                    maxLength={18}
+                    value={formData.accountNumber}
+                    onChange={e => { 
+                      const val = e.target.value.replace(/\D/g, '').slice(0, 18);
+                      setFormData({ ...formData, accountNumber: val }); 
+                      setErrors({ ...errors, accountNumber: null }); 
+                    }}
+                    className={`w-full rounded-xl p-3 pr-10 outline-none text-sm font-medium font-mono border transition-colors ${
+                      errors.accountNumber ? 'border-red-500 ring-1 ring-red-500 bg-red-50/30' : 'bg-slate-50 border-slate-200 focus:ring-2 focus:ring-emerald-500'
+                    }`}
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowAccount(!showAccount)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer p-1"
+                    aria-label={showAccount ? "Hide account number" : "Show account number"}
+                  >
+                    {showAccount ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
                 {errors.accountNumber && <p className="text-xs text-red-600 font-semibold mt-1 flex items-center gap-1"><AlertCircle className="w-3.5 h-3.5" />{errors.accountNumber}</p>}
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">Confirm Account Number *</label>
-                <input
-                  ref={confirmAccountNumberRef}
-                  type="text"
-                  inputMode="numeric"
-                  maxLength={18}
-                  value={formData.confirmAccountNumber}
-                  onChange={e => { 
-                    const val = e.target.value.replace(/\D/g, '').slice(0, 18);
-                    setFormData({ ...formData, confirmAccountNumber: val }); 
-                    setErrors({ ...errors, confirmAccountNumber: null }); 
-                  }}
-                  className={`w-full rounded-xl p-3 outline-none text-sm font-medium font-mono border transition-colors ${
-                    errors.confirmAccountNumber ? 'border-red-500 ring-1 ring-red-500 bg-red-50/30' : 'bg-slate-50 border-slate-200 focus:ring-2 focus:ring-emerald-500'
-                  }`}
-                  required
-                />
+                <label className="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">{t("confirmAccountNumber")} *</label>
+                <div className="relative">
+                  <input
+                    ref={confirmAccountNumberRef}
+                    type={showConfirmAccount ? "text" : "password"}
+                    inputMode="numeric"
+                    maxLength={18}
+                    value={formData.confirmAccountNumber}
+                    onChange={e => { 
+                      const val = e.target.value.replace(/\D/g, '').slice(0, 18);
+                      setFormData({ ...formData, confirmAccountNumber: val }); 
+                      setErrors({ ...errors, confirmAccountNumber: null }); 
+                    }}
+                    className={`w-full rounded-xl p-3 pr-10 outline-none text-sm font-medium font-mono border transition-colors ${
+                      errors.confirmAccountNumber ? 'border-red-500 ring-1 ring-red-500 bg-red-50/30' : 'bg-slate-50 border-slate-200 focus:ring-2 focus:ring-emerald-500'
+                    }`}
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmAccount(!showConfirmAccount)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none cursor-pointer p-1"
+                    aria-label={showConfirmAccount ? "Hide confirm account number" : "Show confirm account number"}
+                  >
+                    {showConfirmAccount ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
                 {errors.confirmAccountNumber && <p className="text-xs text-red-600 font-semibold mt-1 flex items-center gap-1"><AlertCircle className="w-3.5 h-3.5" />{errors.confirmAccountNumber}</p>}
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">IFSC Code (11 characters) *</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1 uppercase tracking-wider">{t("ifscCode")} (11 characters) *</label>
                 <input
                   ref={ifscRef}
                   type="text"
@@ -264,15 +286,15 @@ export const FarmerProfile = () => {
               <button
                 type="button"
                 onClick={() => { setIsEditing(false); setErrors({}); }}
-                className="px-6 py-3 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-colors text-xs"
+                className="cursor-pointer px-6 py-3 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-colors text-xs"
               >
-                Cancel
+                {t("cancel")}
               </button>
               <button
                 type="submit"
-                className="px-6 py-3 rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 transition-colors flex items-center gap-2 shadow-md text-xs"
+                className="cursor-pointer px-6 py-3 rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 transition-colors flex items-center gap-2 shadow-md text-xs"
               >
-                <Save className="w-4 h-4" /> Save Details
+                <Save className="w-4 h-4" /> {t("saveDetails")}
               </button>
             </div>
           </form>
@@ -281,33 +303,33 @@ export const FarmerProfile = () => {
             {authenticatedUser.bankDetails ? (
               <>
                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Bank Name</p>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">{t("bankName")}</p>
                   <p className="text-sm font-bold text-slate-900">{authenticatedUser.bankDetails.bankName}</p>
                 </div>
                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Account Holder</p>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">{t("accountHolder")}</p>
                   <p className="text-sm font-bold text-slate-900">{authenticatedUser.bankDetails.accountHolder || authenticatedUser.bankDetails.holderName}</p>
                 </div>
                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Account Number</p>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">{t("accountNumber")}</p>
                   <p className="text-sm font-mono font-bold text-slate-900">
                     XXXX XXXX {authenticatedUser.bankDetails.accountNumber?.slice(-4) || "****"}
                   </p>
                 </div>
                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">IFSC Code</p>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">{t("ifscCode")}</p>
                   <p className="text-sm font-mono font-bold text-slate-900">{authenticatedUser.bankDetails.ifsc}</p>
                 </div>
               </>
             ) : (
               <div className="col-span-full p-8 text-center bg-slate-50 rounded-2xl border border-slate-200 border-dashed">
                 <CreditCard className="w-8 h-8 text-slate-300 mx-auto mb-3" />
-                <p className="text-slate-500 font-medium text-sm mb-4">No bank details added yet.</p>
+                <p className="text-slate-500 font-medium text-sm mb-4">{t("noBankDetailsAdded")}</p>
                 <button
                   onClick={() => setIsEditing(true)}
-                  className="text-emerald-600 font-bold text-sm hover:underline"
+                  className="cursor-pointer text-emerald-600 font-bold text-sm hover:underline"
                 >
-                  + Add Bank Details
+                  + {t("addBankAccount")}
                 </button>
               </div>
             )}

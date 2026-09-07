@@ -1,7 +1,9 @@
 import React from "react";
+import { useKisanSetu } from "../../context/KisanSetuContext";
 import { CheckCircle2, FileText, IndianRupee, ShieldCheck } from "lucide-react";
 
 export const ProcurementReceipt = ({ token, centre }) => {
+  const { t } = useKisanSetu();
   if (!token) return null;
 
   return (
@@ -15,57 +17,57 @@ export const ProcurementReceipt = ({ token, centre }) => {
           <CheckCircle2 className="w-7 h-7" />
         </div>
         <div>
-          <h3 className="text-xl font-extrabold text-slate-900">Procurement Completed</h3>
+          <h3 className="text-xl font-extrabold text-slate-900">{t("procurementCompleted")}</h3>
           <p className="text-xs text-slate-500 font-medium">Digital Receipt generated securely</p>
         </div>
       </div>
 
-            <div className="bg-slate-50 rounded-2xl p-5 border border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="bg-slate-50 rounded-2xl p-5 border border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <p className="text-[10px] uppercase font-bold text-slate-400 mb-0.5">Farmer Name</p>
+          <p className="text-[10px] uppercase font-bold text-slate-400 mb-0.5">{t("receiptFarmerName")}</p>
           <p className="text-base font-extrabold text-slate-900">{token.farmerName}</p>
         </div>
         <div>
-          <p className="text-[10px] uppercase font-bold text-slate-400 mb-0.5">Token Number</p>
+          <p className="text-[10px] uppercase font-bold text-slate-400 mb-0.5">{t("receiptTokenNumber")}</p>
           <p className="text-lg font-mono font-extrabold text-slate-900">{token.token}</p>
         </div>
         <div>
-          <p className="text-[10px] uppercase font-bold text-slate-400 mb-0.5">Booking / Lot ID</p>
+          <p className="text-[10px] uppercase font-bold text-slate-400 mb-0.5">{t("receiptBookingId")}</p>
           <p className="text-sm font-mono font-bold text-slate-700">
             {token.bookingId || `KS-${(token.crop || 'WHT').substring(0,3).toUpperCase()}-2026-${token.token}`}
           </p>
         </div>
 
         <div>
-          <p className="text-[10px] uppercase font-bold text-slate-400 mb-0.5">Commodity</p>
+          <p className="text-[10px] uppercase font-bold text-slate-400 mb-0.5">{t("commodity")}</p>
           <p className="text-sm font-bold text-slate-800">{token.crop}</p>
         </div>
         <div>
-          <p className="text-[10px] uppercase font-bold text-slate-400 mb-0.5">Procurement Centre</p>
+          <p className="text-[10px] uppercase font-bold text-slate-400 mb-0.5">{t("procurementCentre")}</p>
           <p className="text-sm font-bold text-slate-800">{centre?.name || token.centreName}</p>
         </div>
         
         <div>
-          <p className="text-[10px] uppercase font-bold text-slate-400 mb-0.5">Procurement Status</p>
+          <p className="text-[10px] uppercase font-bold text-slate-400 mb-0.5">{t("paymentStatus")}</p>
           <p className="text-sm font-bold text-slate-800">{token.status.replace(/_/g, " ")}</p>
         </div>
       </div>
 
       <div className="mt-4 bg-emerald-50 rounded-2xl p-5 border border-emerald-100 grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div>
-          <p className="text-[10px] uppercase font-bold text-emerald-800 mb-0.5">Booked Qty</p>
+          <p className="text-[10px] uppercase font-bold text-emerald-800 mb-0.5">{t("receiptBookedQty")}</p>
           <p className="text-sm font-bold text-emerald-950">{token.quantity} Qtl</p>
         </div>
         <div>
-          <p className="text-[10px] uppercase font-bold text-emerald-800 mb-0.5">Accepted Qty</p>
+          <p className="text-[10px] uppercase font-bold text-emerald-800 mb-0.5">{t("receiptAcceptedQty")}</p>
           <p className="text-sm font-bold text-emerald-950">{token.actualWeightQtl || token.quantity} Qtl</p>
         </div>
         <div>
-          <p className="text-[10px] uppercase font-bold text-emerald-800 mb-0.5">Moisture</p>
+          <p className="text-[10px] uppercase font-bold text-emerald-800 mb-0.5">{t("receiptMoisture")}</p>
           <p className="text-sm font-bold text-emerald-950">{token.moisturePercent || 12.0}%</p>
         </div>
         <div>
-          <p className="text-[10px] uppercase font-bold text-emerald-800 mb-0.5">Quality Grade</p>
+          <p className="text-[10px] uppercase font-bold text-emerald-800 mb-0.5">{t("receiptQualityGrade")}</p>
           <p className="text-sm font-bold text-emerald-950">{token.grade || "FAQ"}</p>
         </div>
       </div>
@@ -76,14 +78,17 @@ export const ProcurementReceipt = ({ token, centre }) => {
             <IndianRupee className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-xs font-bold text-slate-800">Payment Status: <span className="text-blue-700">{token.paymentStatus}</span></p>
-            <p className="text-[10px] text-slate-500">Prototype payment flow • ₹{token.totalAmount?.toLocaleString()} total value at MSP</p>
+            <p className="text-xs font-bold text-slate-800">{t("paymentStatus")}: <span className="text-blue-700">{token.paymentStatus}</span></p>
+            <p className="text-[10px] text-slate-500">{t("prototypePaymentFlow")} • ₹{token.totalAmount?.toLocaleString()} total value at MSP</p>
           </div>
         </div>
         
-        <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-colors">
+        <button 
+          onClick={() => window.print()}
+          className="cursor-pointer flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-colors"
+        >
           <FileText className="w-3.5 h-3.5" />
-          Download PDF
+          {t("downloadPdf")}
         </button>
       </div>
     </div>

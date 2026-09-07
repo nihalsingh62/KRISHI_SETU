@@ -13,6 +13,9 @@ export const translations = {
     enterApp: "Enter KisanSetu Platform",
     howItWorks: "See How It Works",
     sihDisclaimer: "National Agricultural Procurement Portal",
+    newFarmerRegistration: "New Farmer Registration",
+    loginWithFarmerId: "Login with Farmer ID",
+    aadhaarNumber: "Aadhaar / VID Number",
 
     // Farmer Navigation Tabs
     tabDashboard: "Dashboard",
@@ -42,6 +45,30 @@ export const translations = {
     lowNetworkDesc: "Simplified view optimized for low rural connectivity",
     lastSynced: "Last synced",
     syncNow: "Sync Data Now",
+    noActiveBooking: "No Active Booking",
+    noActiveBookingDesc: "You don't have any upcoming slot booked. Book a new slot to get started with the procurement process.",
+    bookNewSlot: "Book New Slot",
+    identityVerified: "Identity Verified",
+    procurementCompleted: "Procurement Completed",
+    yourToken: "YOUR TOKEN",
+    currentInstruction: "Current Instruction",
+    instructionBooked: "You are not at the centre. Please arrive 15 minutes before your slot time.",
+    instructionWaitingNear: "You are in the queue. Please be ready for your turn.",
+    instructionWaitingFar: "You are in the queue. Please wait in the designated parking area.",
+    instructionWeighing: "You have been called for weighing. Please proceed to the active Weighbridge.",
+    instructionQC: "Quality inspection in progress. Please wait near the QC lab.",
+    farmersAhead: "farmers ahead",
+    minutes: "minutes",
+    counter: "Counter",
+    procurementProgress: "Procurement Progress",
+
+    // Live Queue Ticket & View
+    printTicket: "Print / Save Ticket",
+    digitalTokenTitle: "DIGITAL QUEUE TOKEN • KISANSETU",
+    surroundingQueueTitle: "Surrounding Live Queue Sequence",
+    surroundingQueueDesc: "Real-time synchronization with Procurement Centre Operator actions.",
+    liveSync: "Live Sync",
+    you: "YOU",
 
     // Booking & Recommendation
     bookSlotTitle: "Book Procurement Slot",
@@ -55,6 +82,7 @@ export const translations = {
     duplicateBookingTitle: "Duplicate Booking Detected",
     duplicateBookingMsg: "You already have an active booking for this slot.",
     viewExistingBooking: "View Existing Booking",
+    reschedule: "Reschedule",
 
     // Statuses
     statusBooked: "Slot Confirmed",
@@ -70,12 +98,24 @@ export const translations = {
     statusPaymentCompleted: "Payment Completed",
     statusRejected: "Procurement Rejected",
 
+    // Timeline
+    liveProcurementStatus: "Live Procurement Status",
+    realTimeProgress: "Real-time progress tracking",
+    activeTokenLabel: "Active Token",
+    noActiveProcurement: "No Active Procurement",
+    noActiveProcurementDesc: "You do not currently have a live procurement in progress. View your historical records below.",
+    recordedWeight: "Recorded Weight",
+    declaredWeight: "Declared",
+    qualityPassed: "Quality Test Passed",
+    dbtRef: "Direct Bank Transfer Reference",
+
     // Farmer Profile & Bank
     profileTitle: "Verified Farmer Profile",
     mobileNumber: "Mobile Number",
     aadhaarLinked: "Aadhaar Linked",
     village: "Village",
     district: "District",
+    preferredLanguage: "Preferred Language",
     bankAccountDetails: "Bank Account Details",
     beneficiaryAccount: "Beneficiary Account",
     bankName: "Bank Name",
@@ -86,16 +126,51 @@ export const translations = {
     saveDetails: "Save Details",
     editBankDetails: "Edit Bank Details",
     addBankAccount: "Add Bank Account",
+    bankDetailsUpdated: "Bank details successfully updated!",
+    noBankDetailsAdded: "No bank details added yet.",
 
     // History & Receipts
     procurementHistory: "Procurement History",
+    procurementHistoryDesc: "Complete record of all active, past completed, and rejected procurement bookings.",
     allFilter: "All",
     activeFilter: "Active",
     completedFilter: "Completed",
     rejectedFilter: "Rejected",
     viewDetails: "View Details",
     noRecords: "No procurement records found",
+    tokenAndId: "Token & ID",
+    cropAndQty: "Crop & Qty",
+    dateAndSlot: "Date & Slot",
+    action: "Action",
+    lifecycleTimeline: "Lifecycle Timeline",
+    officialReceipt: "Official Procurement Receipt",
+    closeDetails: "Close Details",
     prototypePaymentFlow: "Prototype payment flow (Simulated DBT Transfer)",
+
+    // Payment Tracker
+    directBankPaymentStatus: "Direct Bank Payment Status",
+    dbtSubtext: "Direct Benefit Transfer (DBT) to Farmer Bank Account • Prototype payment flow",
+    totalCalculatedPayable: "Total Calculated Payable Amount",
+    quantityProcured: "Quantity Procured",
+    govMspRate: "Government MSP Rate",
+    noBankAccountLinked: "No bank account linked",
+    prototypeVerified: "Prototype Verified Beneficiary",
+    transactionRef: "Transaction Reference",
+    noActivePayment: "No active procurement payment in progress. Once your grain is weighed and approved at the centre, DBT payment will be initiated here.",
+    cancel: "Cancel",
+    saveBankDetails: "Save Bank Details",
+    editBeneficiaryAccount: "Edit Beneficiary Account Details",
+    linkBeneficiaryAccount: "Link Beneficiary Bank Account",
+
+    // Receipt
+    receiptFarmerName: "Farmer Name",
+    receiptTokenNumber: "Token Number",
+    receiptBookingId: "Booking / Lot ID",
+    receiptBookedQty: "Booked Qty",
+    receiptAcceptedQty: "Accepted Qty",
+    receiptMoisture: "Moisture",
+    receiptQualityGrade: "Quality Grade",
+    downloadPdf: "Download PDF",
 
     // Validations
     invalidWeightMsg: "Weight must be a positive number greater than 0.",
@@ -118,7 +193,6 @@ export const translations = {
     passQuality: "Quality Approval",
     completeProcurement: "Complete Procurement",
     markNoShow: "Mark No-Show",
-    reschedule: "Reschedule Slot",
 
     // Admin
     adminDashboard: "KisanSetu Central Administration",
@@ -147,6 +221,9 @@ export const translations = {
     enterApp: "किसानसेतु प्लेटफॉर्म खोलें",
     howItWorks: "यह कैसे काम करता है",
     sihDisclaimer: "राष्ट्रीय कृषि खरीद पोर्टल",
+    newFarmerRegistration: "नया किसान पंजीकरण",
+    loginWithFarmerId: "किसान आईडी से लॉगिन",
+    aadhaarNumber: "आधार / वीआईडी संख्या",
 
     // Farmer Navigation Tabs
     tabDashboard: "डैशबोर्ड",
@@ -176,6 +253,30 @@ export const translations = {
     lowNetworkDesc: "कम कनेक्टिविटी वाले ग्रामीण क्षेत्रों के लिए सुव्यवस्थित दृश्य",
     lastSynced: "अंतिम सिंक समय",
     syncNow: "डेटा सिंक करें",
+    noActiveBooking: "कोई सक्रिय बुकिंग नहीं",
+    noActiveBookingDesc: "आपके पास कोई आगामी स्लॉट बुक नहीं है। खरीद प्रक्रिया शुरू करने के लिए एक नया स्लॉट बुक करें।",
+    bookNewSlot: "नया स्लॉट बुक करें",
+    identityVerified: "पहचान सत्यापित",
+    procurementCompleted: "खरीद पूर्ण हुई",
+    yourToken: "आपका टोकन",
+    currentInstruction: "वर्तमान निर्देश",
+    instructionBooked: "आप अभी खरीद केंद्र पर नहीं हैं। कृपया अपने स्लॉट समय से 15 मिनट पहले पहुंचें।",
+    instructionWaitingNear: "आप कतार में हैं। कृपया अपनी बारी के लिए तैयार रहें।",
+    instructionWaitingFar: "आप कतार में हैं। कृपया निर्दिष्ट पार्किंग क्षेत्र में प्रतीक्षा करें।",
+    instructionWeighing: "आपको तौल के लिए बुलाया गया है। कृपया सक्रिय वेईब्रिज पर जाएं।",
+    instructionQC: "गुणवत्ता निरीक्षण जारी है। कृपया क्यूसी लैब के पास प्रतीक्षा करें।",
+    farmersAhead: "किसान आगे",
+    minutes: "मिनट",
+    counter: "काउंटर",
+    procurementProgress: "खरीद प्रगति",
+
+    // Live Queue Ticket & View
+    printTicket: "टिकट प्रिंट / सहेजें",
+    digitalTokenTitle: "डिजिटल कतार टोकन • किसानसेतु",
+    surroundingQueueTitle: "लाइव कतार क्रम",
+    surroundingQueueDesc: "खरीद केंद्र संचालक की कार्रवाइयों के साथ वास्तविक समय समन्वय।",
+    liveSync: "लाइव सिंक",
+    you: "आप",
 
     // Booking & Recommendation
     bookSlotTitle: "उपज बिक्री स्लॉट बुक करें",
@@ -189,6 +290,7 @@ export const translations = {
     duplicateBookingTitle: "समान बुकिंग पहले से मौजूद",
     duplicateBookingMsg: "आपके पास इस स्लॉट के लिए पहले से ही एक सक्रिय बुकिंग है।",
     viewExistingBooking: "मौजूदा बुकिंग देखें",
+    reschedule: "पुनर्निर्धारित करें",
 
     // Statuses
     statusBooked: "स्लॉट की पुष्टि हुई",
@@ -204,12 +306,24 @@ export const translations = {
     statusPaymentCompleted: "भुगतान सफल (खाते में हस्तांतरित)",
     statusRejected: "खरीद अस्वीकृत",
 
+    // Timeline
+    liveProcurementStatus: "लाइव खरीद स्थिति",
+    realTimeProgress: "वास्तविक समय प्रगति ट्रैकिंग",
+    activeTokenLabel: "सक्रिय टोकन",
+    noActiveProcurement: "कोई सक्रिय खरीद नहीं",
+    noActiveProcurementDesc: "आपके पास वर्तमान में कोई लाइव खरीद प्रक्रिया में नहीं है। नीचे अपने पुराने रिकॉर्ड देखें।",
+    recordedWeight: "दर्ज वजन",
+    declaredWeight: "घोषित",
+    qualityPassed: "गुणवत्ता परीक्षण उत्तीर्ण",
+    dbtRef: "डायरेक्ट बैंक ट्रांसफर संदर्भ",
+
     // Farmer Profile & Bank
     profileTitle: "सत्यापित किसान प्रोफ़ाइल",
     mobileNumber: "मोबाइल नंबर",
     aadhaarLinked: "आधार लिंक",
     village: "ग्राम",
     district: "ज़िला",
+    preferredLanguage: "पसंदीदा भाषा",
     bankAccountDetails: "बैंक खाता विवरण",
     beneficiaryAccount: "लाभार्थी खाता",
     bankName: "बैंक का नाम",
@@ -220,16 +334,51 @@ export const translations = {
     saveDetails: "विवरण सहेजें",
     editBankDetails: "बैंक विवरण संपादित करें",
     addBankAccount: "बैंक खाता जोड़ें",
+    bankDetailsUpdated: "बैंक विवरण सफलतापूर्वक अपडेट किया गया!",
+    noBankDetailsAdded: "अभी तक कोई बैंक विवरण नहीं जोड़ा गया है।",
 
     // History & Receipts
     procurementHistory: "खरीद इतिहास",
+    procurementHistoryDesc: "सभी सक्रिय, पूर्ण और अस्वीकृत खरीद बुकिंग का पूरा रिकॉर्ड।",
     allFilter: "सभी",
     activeFilter: "सक्रिय",
     completedFilter: "पूर्ण",
     rejectedFilter: "अस्वीकृत",
     viewDetails: "विवरण देखें",
     noRecords: "कोई खरीद रिकॉर्ड नहीं मिला",
+    tokenAndId: "टोकन और आईडी",
+    cropAndQty: "फसल और मात्रा",
+    dateAndSlot: "तारीख और स्लॉट",
+    action: "कार्रवाई",
+    lifecycleTimeline: "प्रक्रिया की समयरेखा",
+    officialReceipt: "आधिकारिक खरीद रसीद",
+    closeDetails: "विवरण बंद करें",
     prototypePaymentFlow: "प्रोटोटाइप भुगतान प्रवाह (सिम्युलेटेड डीबीटी)",
+
+    // Payment Tracker
+    directBankPaymentStatus: "प्रत्यक्ष बैंक भुगतान स्थिति",
+    dbtSubtext: "किसान के बैंक खाते में प्रत्यक्ष लाभ अंतरण (डीबीटी) • प्रोटोटाइप भुगतान प्रवाह",
+    totalCalculatedPayable: "कुल परिकलित देय राशि",
+    quantityProcured: "खरीदी गई मात्रा",
+    govMspRate: "सरकारी एमएसपी दर",
+    noBankAccountLinked: "कोई बैंक खाता लिंक नहीं है",
+    prototypeVerified: "प्रोटोटाइप सत्यापित लाभार्थी",
+    transactionRef: "लेन-देन संदर्भ",
+    noActivePayment: "कोई सक्रिय खरीद भुगतान प्रगति पर नहीं है। जब केंद्र पर आपकी उपज तौल और स्वीकृत हो जाएगी, तो यहां डीबीटी भुगतान शुरू किया जाएगा।",
+    cancel: "रद्द करें",
+    saveBankDetails: "बैंक विवरण सहेजें",
+    editBeneficiaryAccount: "लाभार्थी खाता विवरण संपादित करें",
+    linkBeneficiaryAccount: "लाभार्थी बैंक खाता लिंक करें",
+
+    // Receipt
+    receiptFarmerName: "किसान का नाम",
+    receiptTokenNumber: "टोकन संख्या",
+    receiptBookingId: "बुकिंग / लॉट आईडी",
+    receiptBookedQty: "बुक की गई मात्रा",
+    receiptAcceptedQty: "स्वीकृत मात्रा",
+    receiptMoisture: "नमी",
+    receiptQualityGrade: "गुणवत्ता ग्रेड",
+    downloadPdf: "पीडीएफ डाउनलोड करें",
 
     // Validations
     invalidWeightMsg: "वजन शून्य से अधिक एक सकारात्मक संख्या होनी चाहिए।",
@@ -252,7 +401,6 @@ export const translations = {
     passQuality: "गुणवत्ता पास करें",
     completeProcurement: "खरीद पूरी करें",
     markNoShow: "अनुपस्थित (No-Show) दर्ज करें",
-    reschedule: "पुनर्निर्धारित करें",
 
     // Admin
     adminDashboard: "किसानसेतु केंद्रीय प्रशासन",

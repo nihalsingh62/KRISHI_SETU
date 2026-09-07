@@ -201,6 +201,22 @@ export const translations = {
     outsideWindowError: "Booking is only allowed within the 4-day advance window.",
     scheduledDate: "Scheduled Date",
 
+    // Forgot Farmer ID
+    forgotFarmerId: "Forgot Farmer ID?",
+    forgotFarmerIdDesc: "Recover your KisanSetu Farmer ID using your registered mobile number.",
+    enterRegisteredMobile: "Enter your registered mobile number.",
+    sendOtp: "Send OTP",
+    verifyOtp: "Verify OTP",
+    yourFarmerId: "Your Farmer ID",
+    backToLogin: "Back to Login",
+    noFarmerFoundWithMobile: "No farmer account found for this mobile number.",
+    otpVerifiedSuccess: "OTP verified successfully.",
+    farmerIdRecoveredSuccess: "Farmer ID recovered successfully.",
+    otpSentToMobile: "OTP sent to registered mobile",
+    useThisIdToLogin: "Use this Farmer ID along with your registered mobile number to log in.",
+    registeredMobile: "Registered Mobile Number",
+    enterOtpDemoHint: "Demo OTP: 123456",
+
     // Operator
     opDashboard: "Procurement Centre Operations Room",
     todayCapacity: "Today's Target Capacity",
@@ -432,6 +448,22 @@ export const translations = {
     pastDateError: "पिछली तिथियों के लिए स्लॉट बुक नहीं किए जा सकते।",
     outsideWindowError: "बुकिंग केवल 4-दिवसीय अग्रिम अवधि के भीतर ही मान्य है।",
     scheduledDate: "निर्धारित तिथि",
+
+    // Forgot Farmer ID
+    forgotFarmerId: "किसान आईडी भूल गए?",
+    forgotFarmerIdDesc: "अपने पंजीकृत मोबाइल नंबर का उपयोग करके अपनी किसान आईडी प्राप्त करें।",
+    enterRegisteredMobile: "अपना पंजीकृत मोबाइल नंबर दर्ज करें।",
+    sendOtp: "ओटीपी भेजें",
+    verifyOtp: "ओटीपी सत्यापित करें",
+    yourFarmerId: "आपकी किसान आईडी",
+    backToLogin: "लॉगिन पर वापस जाएं",
+    noFarmerFoundWithMobile: "इस मोबाइल नंबर के लिए कोई किसान खाता नहीं मिला।",
+    otpVerifiedSuccess: "ओटीपी सफलतापूर्वक सत्यापित हो गया।",
+    farmerIdRecoveredSuccess: "किसान आईडी सफलतापूर्वक प्राप्त हो गई।",
+    otpSentToMobile: "पंजीकृत मोबाइल पर ओटीपी भेजा गया",
+    useThisIdToLogin: "लॉगिन करने के लिए इस किसान आईडी और अपने पंजीकृत मोबाइल नंबर का उपयोग करें।",
+    registeredMobile: "पंजीकृत मोबाइल नंबर",
+    enterOtpDemoHint: "डेमो ओटीपी: 123456",
 
     // Operator
     opDashboard: "खरीद केंद्र संचालन कक्ष",

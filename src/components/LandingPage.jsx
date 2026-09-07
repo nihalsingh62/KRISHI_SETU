@@ -26,7 +26,7 @@ export const LandingPage = () => {
   const DEMO_ADMIN_PASS = "password";
 
   // Farmer specific states
-  const [farmerFlowStep, setFarmerFlowStep] = useState('choice'); // 'choice' | 'register_init' | 'register_otp' | 'register_success' | 'login_init' | 'login_otp'
+  const [farmerFlowStep, setFarmerFlowStep] = useState('choice'); // 'choice' | 'register_init' | 'register_otp' | 'register_success' | 'login_init' | 'login_otp' | 'forgot_init' | 'forgot_otp' | 'forgot_success'
   const [farmerId, setFarmerId] = useState("");
   const [mobileNumber, setMobileNumber] = useState("");
   const [aadhaarNumber, setAadhaarNumber] = useState("");
@@ -42,6 +42,11 @@ export const LandingPage = () => {
   const [showConfirmAccountNumber, setShowConfirmAccountNumber] = useState(false);
   const [ifsc, setIfsc] = useState("");
   const [otp, setOtp] = useState("");
+
+  // Forgot Farmer ID states
+  const [forgotMobile, setForgotMobile] = useState("");
+  const [forgotOtp, setForgotOtp] = useState("");
+  const [recoveredFarmer, setRecoveredFarmer] = useState(null);
 
   // Operator specific states
   const [operatorId, setOperatorId] = useState("OP-1042");
@@ -70,6 +75,8 @@ export const LandingPage = () => {
   const loginFarmerIdRef = useRef(null);
   const loginMobileRef = useRef(null);
   const loginOtpRef = useRef(null);
+  const forgotMobileRef = useRef(null);
+  const forgotOtpRef = useRef(null);
   const operatorIdRef = useRef(null);
   const adminIdRef = useRef(null);
 
@@ -251,6 +258,106 @@ export const LandingPage = () => {
     } else {
       setErrors({});
     }
+  };
+
+  const handleOpenForgotFarmerId = () => {
+    setErrors({});
+    setForgotMobile(mobileNumber || "");
+    setForgotOtp("");
+    setRecoveredFarmer(null);
+    setFarmerFlowStep('forgot_init');
+    setTimeout(() => {
+      if (forgotMobileRef.current) forgotMobileRef.current.focus();
+    }, 50);
+  };
+
+  const handleForgotInit = (e) => {
+    e.preventDefault();
+    const newErrors = {};
+
+    if (!/^\d{10}$/.test(forgotMobile)) {
+      newErrors.forgotMobile = language === "hi" ? "कृपया 10 अंकों का वैध मोबाइल नंबर दर्ज करें।" : "Mobile number must be exactly 10 digits.";
+    } else {
+      const matching = registeredFarmers.find(
+        f => f.mobile && f.mobile.trim() === forgotMobile.trim()
+      );
+      if (!matching) {
+        newErrors.forgotMobile = t("noFarmerFoundWithMobile") || "No farmer account found for this mobile number.";
+        addToast({
+          type: "error",
+          title: language === "hi" ? "खाता नहीं मिला" : "Account Not Found",
+          message: t("noFarmerFoundWithMobile") || "No farmer account found for this mobile number."
+        });
+      }
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      if (forgotMobileRef.current) forgotMobileRef.current.focus();
+      return;
+    }
+
+    setErrors({});
+    setForgotOtp("");
+    setFarmerFlowStep('forgot_otp');
+    addToast({
+      type: "info",
+      title: language === "hi" ? "ओटीपी भेजा गया" : "OTP Sent",
+      message: language === "hi" ? "सत्यापन के लिए पंजीकृत मोबाइल पर 6-अंकीय ओटीपी भेजा गया।" : "6-digit OTP sent to your registered mobile for verification."
+    });
+    setTimeout(() => {
+      if (forgotOtpRef.current) forgotOtpRef.current.focus();
+    }, 50);
+  };
+
+  const handleForgotVerifyOTP = (e) => {
+    e.preventDefault();
+    if (!/^\d{6}$/.test(forgotOtp)) {
+      setErrors({ forgotOtp: language === "hi" ? "ओटीपी ठीक 6 अंकों का होना चाहिए।" : "OTP must be exactly 6 digits." });
+      if (forgotOtpRef.current) forgotOtpRef.current.focus();
+      return;
+    }
+    if (forgotOtp !== DEMO_OTP) {
+      setErrors({ forgotOtp: language === "hi" ? `अमान्य ओटीपी। डेमो ओटीपी दर्ज करें: ${DEMO_OTP}` : `Invalid OTP. Enter demo OTP: ${DEMO_OTP}` });
+      if (forgotOtpRef.current) forgotOtpRef.current.focus();
+      return;
+    }
+
+    const matching = registeredFarmers.find(
+      f => f.mobile && f.mobile.trim() === forgotMobile.trim()
+    );
+
+    if (!matching) {
+      setErrors({ forgotOtp: t("noFarmerFoundWithMobile") || "No farmer account found for this mobile number." });
+      return;
+    }
+
+    setErrors({});
+    setRecoveredFarmer(matching);
+    setFarmerFlowStep('forgot_success');
+
+    addToast({
+      type: "success",
+      title: language === "hi" ? "ओटीपी सत्यापित" : "OTP Verified",
+      message: t("otpVerifiedSuccess") || "OTP verified successfully."
+    });
+    addToast({
+      type: "success",
+      title: language === "hi" ? "आईडी बरामद" : "ID Recovered",
+      message: t("farmerIdRecoveredSuccess") || "Farmer ID recovered successfully."
+    });
+  };
+
+  const handleBackToLoginFromForgot = (recovered = null) => {
+    setErrors({});
+    if (recovered && recovered.id) {
+      setFarmerId(recovered.id);
+      setMobileNumber(recovered.mobile || forgotMobile);
+    }
+    setFarmerFlowStep('login_init');
+    setTimeout(() => {
+      if (loginFarmerIdRef.current) loginFarmerIdRef.current.focus();
+    }, 50);
   };
 
   const handleOperatorLogin = (e) => {
@@ -787,7 +894,17 @@ export const LandingPage = () => {
                       {errors.mobile && <p className="text-xs text-red-600 font-semibold mt-1">{errors.mobile}</p>}
                     </div>
 
-                    <button type="submit" className="w-full py-3.5 mt-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold shadow-md transition-colors">
+                    <div className="flex justify-end pt-1">
+                      <button
+                        type="button"
+                        onClick={handleOpenForgotFarmerId}
+                        className="cursor-pointer text-xs font-bold text-emerald-700 hover:text-emerald-800 hover:underline"
+                      >
+                        {t("forgotFarmerId") || "Forgot Farmer ID?"}
+                      </button>
+                    </div>
+
+                    <button type="submit" className="w-full py-3.5 mt-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold shadow-md transition-colors">
                       Send OTP
                     </button>
                   </form>
@@ -840,6 +957,180 @@ export const LandingPage = () => {
                       Login to Dashboard
                     </button>
                   </form>
+                )}
+
+                {/* FORGOT FARMER ID STEP 1: ENTER REGISTERED MOBILE */}
+                {farmerFlowStep === 'forgot_init' && (
+                  <form onSubmit={handleForgotInit} className="space-y-4 animate-in fade-in duration-300" noValidate>
+                    <div className="mb-6">
+                      <h3 className="text-xl font-bold text-slate-900">
+                        {t("forgotFarmerId") || "Forgot Farmer ID?"}
+                      </h3>
+                      <p className="text-xs text-slate-500 mt-1">
+                        {t("forgotFarmerIdDesc") || "Recover your KisanSetu Farmer ID using your registered mobile number."}
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">
+                        {t("registeredMobile") || "Registered Mobile Number"}
+                      </label>
+                      <input 
+                        ref={forgotMobileRef}
+                        type="tel" 
+                        inputMode="numeric"
+                        maxLength={10}
+                        placeholder="10 Digit Mobile" 
+                        value={forgotMobile} 
+                        onChange={e => { 
+                          const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+                          setForgotMobile(val); 
+                          clearError('forgotMobile'); 
+                        }} 
+                        className={`w-full rounded-xl p-3 text-sm focus:ring-2 focus:ring-emerald-500 outline-none border transition-colors font-mono ${
+                          errors.forgotMobile ? 'border-red-500 ring-1 ring-red-500 bg-red-50/30' : 'bg-slate-50 border-slate-200'
+                        }`} 
+                      />
+                      {errors.forgotMobile && (
+                        <p className="text-xs text-red-600 font-semibold mt-1 flex items-center gap-1">
+                          <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                          <span>{errors.forgotMobile}</span>
+                        </p>
+                      )}
+                    </div>
+
+                    <button 
+                      type="submit" 
+                      className="cursor-pointer w-full py-3.5 mt-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold shadow-md transition-colors"
+                    >
+                      {t("sendOtp") || "Send OTP"}
+                    </button>
+
+                    <button 
+                      type="button" 
+                      onClick={() => handleBackToLoginFromForgot(null)} 
+                      className="cursor-pointer w-full py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-xs transition-colors flex items-center justify-center gap-1.5"
+                    >
+                      <ArrowLeft className="w-3.5 h-3.5" />
+                      <span>{t("backToLogin") || "Back to Login"}</span>
+                    </button>
+                  </form>
+                )}
+
+                {/* FORGOT FARMER ID STEP 2: VERIFY OTP */}
+                {farmerFlowStep === 'forgot_otp' && (
+                  <form onSubmit={handleForgotVerifyOTP} className="space-y-4 animate-in fade-in duration-300" noValidate>
+                    <div className="mb-6">
+                      <h3 className="text-xl font-bold text-slate-900">
+                        {t("verifyOtp") || "Verify OTP"}
+                      </h3>
+                      <p className="text-xs text-slate-500 mt-1">
+                        {t("otpSentToMobile") || "OTP sent to registered mobile"} ******{forgotMobile.slice(-4)}
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 mb-1">
+                        6-Digit OTP
+                      </label>
+                      <input 
+                        ref={forgotOtpRef}
+                        type="text" 
+                        inputMode="numeric"
+                        maxLength={6}
+                        placeholder="_ _ _ _ _ _" 
+                        value={forgotOtp} 
+                        onChange={e => { 
+                          const raw = e.target.value;
+                          if (raw.length > 6) {
+                            setErrors({ forgotOtp: "OTP must be exactly 6 digits." });
+                            setForgotOtp(raw.slice(0, 6));
+                            return;
+                          }
+                          const val = raw.replace(/\D/g, '');
+                          setForgotOtp(val); 
+                          clearError('forgotOtp'); 
+                        }} 
+                        className={`w-full rounded-xl p-3 text-center tracking-[1em] text-lg font-mono focus:ring-2 focus:ring-emerald-500 outline-none border transition-colors ${
+                          errors.forgotOtp ? 'border-red-500 ring-1 ring-red-500 bg-red-50/30' : 'bg-slate-50 border-slate-200'
+                        }`} 
+                      />
+                      {errors.forgotOtp && (
+                        <p className="text-xs text-red-600 font-semibold mt-1 text-center">
+                          {errors.forgotOtp}
+                        </p>
+                      )}
+                      <p className="text-[11px] text-emerald-700 font-semibold mt-1.5 text-center">
+                        {t("enterOtpDemoHint") || "Demo OTP: 123456"}
+                      </p>
+                    </div>
+
+                    <button 
+                      type="submit" 
+                      className="cursor-pointer w-full py-3.5 mt-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-md transition-colors"
+                    >
+                      {t("verifyOtp") || "Verify OTP"}
+                    </button>
+
+                    <button 
+                      type="button" 
+                      onClick={() => handleBackToLoginFromForgot(null)} 
+                      className="cursor-pointer w-full py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-xs transition-colors flex items-center justify-center gap-1.5"
+                    >
+                      <ArrowLeft className="w-3.5 h-3.5" />
+                      <span>{t("backToLogin") || "Back to Login"}</span>
+                    </button>
+                  </form>
+                )}
+
+                {/* FORGOT FARMER ID STEP 3 & 4: DISPLAY RECOVERED FARMER ID */}
+                {farmerFlowStep === 'forgot_success' && recoveredFarmer && (
+                  <div className="space-y-6 animate-in fade-in duration-300">
+                    <div className="text-center">
+                      <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-3 shadow-inner">
+                        <CheckCircle2 className="w-8 h-8 text-emerald-600" />
+                      </div>
+                      <h3 className="text-xl font-extrabold text-slate-900">
+                        {t("yourFarmerId") || "Your Farmer ID"}
+                      </h3>
+                      <p className="text-xs text-slate-500 mt-1">
+                        {t("useThisIdToLogin") || "Use this Farmer ID along with your registered mobile number to log in."}
+                      </p>
+                    </div>
+
+                    <div className="p-6 bg-slate-900 text-white rounded-2xl border border-slate-800 shadow-xl space-y-4">
+                      <div className="text-center py-2 bg-slate-950/50 rounded-xl border border-slate-800">
+                        <span className="text-[10px] text-slate-400 uppercase font-bold tracking-widest block mb-1">
+                          {t("yourFarmerId") || "YOUR FARMER ID"}
+                        </span>
+                        <span className="text-3xl font-black font-mono tracking-widest text-emerald-400">
+                          {recoveredFarmer.id}
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4 pt-3 border-t border-slate-800 text-xs">
+                        <div>
+                          <p className="text-[10px] uppercase font-bold text-slate-400">Name</p>
+                          <p className="text-sm font-bold text-slate-200">{recoveredFarmer.name}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] uppercase font-bold text-slate-400">Mobile</p>
+                          <p className="text-sm font-mono text-slate-200">
+                            ******{recoveredFarmer.mobile ? recoveredFarmer.mobile.slice(-4) : ""}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <button 
+                      type="button"
+                      onClick={() => handleBackToLoginFromForgot(recoveredFarmer)} 
+                      className="cursor-pointer w-full py-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold shadow-md transition-colors flex items-center justify-center gap-2"
+                    >
+                      <ArrowLeft className="w-4 h-4" />
+                      <span>{t("backToLogin") || "Back to Login"}</span>
+                    </button>
+                  </div>
                 )}
               </>
             )}
